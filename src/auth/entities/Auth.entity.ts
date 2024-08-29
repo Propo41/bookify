@@ -7,7 +7,7 @@ export class Auth {
   id?: number;
 
   @Column()
-  userId?: number;
+  userId?: string;
 
   @OneToOne(() => User)
   @JoinColumn({ name: 'userId' })

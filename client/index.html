@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Calendar OAuth2.0</title>
+</head>
+
+<body>
+    <h1>Google Calendar OAuth 2.0 Integration</h1>
+    <button id="login-button">Sign in with Google</button>
+
+    <script>
+        const CLIENT_ID = '1043931677993-j15eelb1golb8544ehi2meeru35q3fo4.apps.googleusercontent.com';
+        const REDIRECT_URI = window.location.origin;
+        console.log(REDIRECT_URI)
+        const BACKEND_ENDPOINT = 'http://localhost:3000/oauth2callback';
+
+        document.getElementById('login-button').addEventListener('click', () => {
+            // scopes: https://developers.google.com/oauthplayground/
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline`;
+            window.location.href = authUrl;
+        });
+
+        // This script will run when the page loads after the redirect from Google
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            console.log(code);
+
+            if (code) {
+                // Send the authorization code to your backend
+                fetch(BACKEND_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Access Token:', data.access_token);
+                        // Here you can redirect the user or perform other actions
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        };
+    </script>
+</body>
+
+</html>

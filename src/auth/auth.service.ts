@@ -1,13 +1,19 @@
-import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
-import { User } from './entities';
+import { ForbiddenException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
+import { Auth, User } from './entities';
 import { google } from 'googleapis';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { LoginResponse } from './dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(Auth)
+    private authRepository: Repository<Auth>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
   ) {}
 
@@ -15,33 +21,31 @@ export class AuthService {
     const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, 'http://localhost:8000');
 
     const { tokens } = await oauth2Client.getToken(code);
-    // {
-    //   access_token: "",
-    //   scope: "https://www.googleapis.com/auth/calendar",p
-    //   token_type: "Bearer",
-    //   expiry_date: 1724919967711,
-    // }
-    // save tokens to database
     oauth2Client.setCredentials(tokens);
-
     const oauth2 = google.oauth2({
       auth: oauth2Client,
       version: 'v2',
     });
 
-    const userInfo = await oauth2.userinfo.get();
-    // {
-    //   id: "118396694939616033579",
-    //   email: "ali.ahnaf@cefalo.com",
-    //   verified_email: true,
-    //   name: "Ali Ahnaf",
-    //   given_name: "Ali",
-    //   family_name: "Ahnaf",
-    //   picture: "https://lh3.googleusercontent.com/a/ACg8ocJhx6Bwsd-7UqQ01FcHxVoaFijO9kTqaJGNg4d8K-x4XCBOPxzn=s96-c",
-    //   hd: "cefalo.com",
-    // }
+    const { data } = await oauth2.userinfo.get();
 
-    console.log(userInfo.data);
+    if (data.hd !== 'cefalo.com') {
+      throw new ForbiddenException('Only emails associated with cefalo are allowed.');
+    }
+
+    const user = await this.usersRepository.save({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+    });
+
+    await this.authRepository.save({
+      userId: user.id,
+      accessToken: tokens.access_token,
+      scope: tokens.scope,
+      expiryDate: tokens.expiry_date,
+      tokenType: tokens.token_type,
+    });
 
     const jwt = await this.createJwt();
     return { jwt };
