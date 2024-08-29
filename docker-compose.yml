@@ -1,0 +1,16 @@
+version: '3'
+services:
+  db:
+    image: mysql:latest
+    container_name: cefalo_calender_db
+    restart: "no"
+    ports:
+      - '3307:3306'
+    volumes:
+      - cefalo_calender_db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+
+volumes:
+  cefalo_calender_db:
