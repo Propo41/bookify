@@ -1,3 +1,4 @@
+import { OAuth2Client } from 'google-auth-library';
 import { Inject, Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
@@ -40,8 +41,18 @@ export class CalenderService {
     console.log(result);
   }
 
-  listRooms(): string {
-    throw new NotImplementedException('');
+  async listRooms(client: OAuth2Client): Promise<any[]> {
+    const calendar = google.calendar({ version: 'v3', auth: client });
+    const result = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    const events = result.data.items;
+    return events;
   }
 
   listEvents(): string {

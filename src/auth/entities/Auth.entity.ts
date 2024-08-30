@@ -11,10 +11,13 @@ export class Auth {
   @Column()
   scope?: string;
 
+  @Column({ type: 'text' })
+  idToken?: string;
+
   @Column()
   tokenType?: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   expiryDate?: number;
 
   @CreateDateColumn()

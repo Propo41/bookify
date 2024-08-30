@@ -41,11 +41,12 @@ export class AuthService {
       scope: tokens.scope,
       expiryDate: tokens.expiry_date,
       tokenType: tokens.token_type,
+      idToken: tokens.id_token,
     };
 
     const existingUser = await this.getUser(data.id);
     if (existingUser) {
-      const jwt = await this.createJwt(existingUser.id, existingUser.name);
+      const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
       await this.authRepository.update({ id: existingUser.authId }, authPayload);
 
       return {
@@ -61,13 +62,13 @@ export class AuthService {
       authId: auth.id,
     });
 
-    const jwt = await this.createJwt(user.id, user.name);
+    const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
     return { accessToken: jwt };
   }
 
-  async createJwt(id: string, name: string) {
-    const payload: IJwtPayload = { sub: id, name: name };
-    const jwt = await this.jwtService.signAsync(payload);
+  async createJwt(id: string, name: string, oAuthExpiry: number) {
+    const payload: IJwtPayload = { sub: id, name: name, expiresIn: oAuthExpiry };
+    const jwt = await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry * 2 });
     return jwt;
   }
 

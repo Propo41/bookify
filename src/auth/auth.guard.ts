@@ -31,13 +31,14 @@ export class AuthGuard implements CanActivate {
 
       // TODO: move this to a middleware
       const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
-      const { accessToken, scope, tokenType, expiryDate } = user.auth;
+      const { accessToken, scope, tokenType, expiryDate, idToken } = user.auth;
 
       oauth2Client.setCredentials({
         access_token: accessToken,
         scope: scope,
         token_type: tokenType,
         expiry_date: expiryDate,
+        id_token: idToken,
       });
 
       request['user'] = user;

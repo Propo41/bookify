@@ -1,8 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Get, NotImplementedException, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginResponse } from './dto';
 import { AuthGuard } from './auth.guard';
+import { _OAuth2Client } from './decorators';
 
 @Controller()
 export class AuthController {
@@ -14,8 +15,8 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Get()
-  async logout(@Body('oauth2Client') oauth2Client: OAuth2Client): Promise<boolean> {
-    return await this.authService.logout(oauth2Client);
+  @Post('/logout')
+  async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
+    return await this.authService.logout(client);
   }
 }

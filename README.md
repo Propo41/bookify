@@ -1,6 +1,8 @@
 
 # Get started
 
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTgzOTY2OTQ5Mzk2MTYwMzM1NzkiLCJuYW1lIjoiQWxpIEFobmFmIiwiaWF0IjoxNzI1MDE4ODE4fQ.bI_emA4VOpAlR8WhT3HO2f9t1AyYoqrP9dRWZdci9M4"
+
 1. Place the `.env.development` file or `.env` file in the root dir
 2. [optional] Place the `dump.sql` file in the root dir if you want to create the database for the first time using docker container 
 4. Run the app using: `npm run start:dev`
