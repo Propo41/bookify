@@ -1,11 +1,71 @@
 
 # Get started
-
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTgzOTY2OTQ5Mzk2MTYwMzM1NzkiLCJuYW1lIjoiQWxpIEFobmFmIiwiaWF0IjoxNzI1MDE4ODE4fQ.bI_emA4VOpAlR8WhT3HO2f9t1AyYoqrP9dRWZdci9M4"
-
 1. Place the `.env.development` file or `.env` file in the root dir
-2. [optional] Place the `dump.sql` file in the root dir if you want to create the database for the first time using docker container 
+2. place the `rooms.ts` file in `src/config` which contains the room specific infos
+3. [optional] Place the `dump.sql` file in the root dir if you want to create the database for the first time using docker container 
 4. Run the app using: `npm run start:dev`
+
+
+## How it works
+
+### List available rooms
+
+```bash
+rooms <min-seat-count> <start-time> <duration>
+
+# e.g: 
+# rooms 1  -> shows list of available roo
+```
+
+### Book room
+
+```bash
+book <min-seat-count> <start-time> <duration> <floor?>
+
+# e.g:
+# book 1 3:30pm 30m f2  -> finds the closest available room on f2 with a min room capactiy of 1.
+```
+
+### Update room
+
+```bash
+rooms --booked
+
+room --id=1 duration=+30m
+```
+
+
+### Delete room
+
+```bash
+
+rooms --booked
+unbook --id=1 
+```
+
+
+```
+https://developers.google.com/calendar/api/v3/reference/freebusy/query?apix_params=%7B%22resource%22%3A%7B%22timeMin%22%3A%222024-08-27T00%3A00%3A00%2B02%3A00%22%2C%22timeMax%22%3A%222024-09-27T23%3A59%3A59%2B02%3A00%22%2C%22items%22%3A%5B%7B%22id%22%3A%22Ada%20Bit%2010%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22c_1888flqi3ecr4gb0k9armpk8k9ics%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22RESOURCE_ID_3%40resource.calendar.google.com%22%7D%5D%7D%7D 
+
+in the playground paste this request: 
+
+{
+  "timeMin": "2024-08-27T00:00:00+02:00",
+  "timeMax": "2024-09-27T23:59:59+02:00",
+  "timeZone": "Asia/Dhaka",
+  "items": [
+    {
+      "id": "Ada Bit 10@resource.calendar.google.com"
+    },
+    {
+      "id": "c_1888flqi3ecr4gb0k9armpk8k9ics@resource.calendar.google.com"
+    },
+    {
+      "id": "RESOURCE_ID_3@resource.calendar.google.com"
+    }
+  ]
+}
+```
 
 ## Commands
 

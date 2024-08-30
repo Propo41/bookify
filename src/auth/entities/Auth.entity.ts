@@ -8,6 +8,9 @@ export class Auth {
   @Column({ type: 'text' })
   accessToken?: string;
 
+  @Column({ type: 'text' })
+  refreshToken?: string;
+
   @Column()
   scope?: string;
 

@@ -42,6 +42,7 @@ export class AuthService {
       expiryDate: tokens.expiry_date,
       tokenType: tokens.token_type,
       idToken: tokens.id_token,
+      refreshToken: tokens.refresh_token,
     };
 
     const existingUser = await this.getUser(data.id);
