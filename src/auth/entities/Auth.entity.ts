@@ -1,17 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { User } from './User.entity';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'Auth' })
 export class Auth {
   @PrimaryGeneratedColumn()
   id?: number;
-
-  @Column()
-  userId?: string;
-
-  @OneToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
 
   @Column({ type: 'text' })
   accessToken?: string;

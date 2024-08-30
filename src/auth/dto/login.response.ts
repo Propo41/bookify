@@ -1,3 +1,3 @@
 export interface LoginResponse {
-  jwt?: string;
+  accessToken?: string;
 }

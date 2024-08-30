@@ -1,11 +1,13 @@
-import { ForbiddenException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { Auth, User } from './entities';
 import { google } from 'googleapis';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
-import { LoginResponse } from './dto';
+import { IJwtPayload, LoginResponse } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
@@ -15,10 +17,11 @@ export class AuthService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+    private jwtService: JwtService,
   ) {}
 
   async login(code: string): Promise<LoginResponse> {
-    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, 'http://localhost:8000');
+    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
 
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
@@ -33,43 +36,78 @@ export class AuthService {
       throw new ForbiddenException('Only emails associated with cefalo are allowed.');
     }
 
-    const user = await this.usersRepository.save({
-      id: data.id,
-      name: data.name,
-      email: data.email,
-    });
-
-    await this.authRepository.save({
-      userId: user.id,
+    const authPayload: Auth = {
       accessToken: tokens.access_token,
       scope: tokens.scope,
       expiryDate: tokens.expiry_date,
       tokenType: tokens.token_type,
+    };
+
+    const existingUser = await this.getUser(data.id);
+    if (existingUser) {
+      const jwt = await this.createJwt(existingUser.id, existingUser.name);
+      await this.authRepository.update({ id: existingUser.authId }, authPayload);
+
+      return {
+        accessToken: jwt,
+      };
+    }
+
+    const auth = await this.authRepository.save(authPayload);
+    const user = await this.usersRepository.save({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      authId: auth.id,
     });
 
-    const jwt = await this.createJwt();
-    return { jwt };
+    const jwt = await this.createJwt(user.id, user.name);
+    return { accessToken: jwt };
   }
 
-  async createJwt() {
-    return 'jwtstring';
+  async createJwt(id: string, name: string) {
+    const payload: IJwtPayload = { sub: id, name: name };
+    const jwt = await this.jwtService.signAsync(payload);
+    return jwt;
   }
 
-  logout(): string {
-    throw new NotImplementedException('');
+  async getUser(id: string): Promise<User> {
+    const existingUser = await this.usersRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        auth: true,
+      },
+    });
+
+    return existingUser;
   }
 
-  revokeToken(): string {
-    throw new NotImplementedException('');
+  async logout(oauth2Client: OAuth2Client): Promise<boolean> {
+    try {
+      await oauth2Client.revokeCredentials();
+      return true;
+    } catch (error) {
+      console.error('Error revoking token:', error);
+      return false;
+    }
   }
 
-  refreshToken(): string {
-    throw new NotImplementedException('');
-  }
+  async refreshToken(user: User, oauth2Client: OAuth2Client): Promise<boolean> {
+    const { token } = await oauth2Client.getAccessToken();
+    if (token) {
+      await this.authRepository.update(
+        { id: user.authId },
+        {
+          accessToken: token,
+          expiryDate: oauth2Client.credentials.expiry_date,
+        },
+      );
 
-  getUser(): User {
-    throw new NotImplementedException('');
+      return true;
+    } else {
+      throw new ConflictException('Failed to refresh token');
+    }
   }
-
-  async getOauthClient(): Promise<void> {}
 }
