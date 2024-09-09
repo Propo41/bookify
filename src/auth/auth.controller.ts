@@ -10,8 +10,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/oauth2callback')
-  oAuthCallback(@Body('code') code: string): Promise<LoginResponse> {
-    return this.authService.login(code);
+  async oAuthCallback(@Body('code') code: string): Promise<LoginResponse> {
+    return await this.authService.login(code);
   }
 
   @UseGuards(AuthGuard)

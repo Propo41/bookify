@@ -1,7 +1,8 @@
+import { OAuth2Client } from 'google-auth-library';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import appConfig from 'src/config/env/app.config';
+import appConfig from '../config/env/app.config';
 import { Request } from 'express';
 import { IJwtPayload } from './dto';
 import { AuthService } from './auth.service';
@@ -19,6 +20,8 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+    let oauth2Client: OAuth2Client;
+
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -29,10 +32,10 @@ export class AuthGuard implements CanActivate {
       });
 
       let user = await this.authService.getUser(payload.sub);
-      let oauth2Client = this.createOauthClient(user);
+      oauth2Client = this.createOauthClient(user);
 
       const currentTime = new Date().getTime();
-      if (currentTime > payload.expiresIn) {
+      if (currentTime > user.auth.expiryDate) {
         this.authService.refreshToken(user, oauth2Client);
 
         user = await this.authService.getUser(payload.sub);
@@ -41,7 +44,9 @@ export class AuthGuard implements CanActivate {
 
       request['user'] = user;
       request['oauth2Client'] = oauth2Client;
-    } catch {
+    } catch (err) {
+      console.error(err);
+      await this.authService.logout(oauth2Client);
       throw new UnauthorizedException();
     }
 

@@ -13,7 +13,7 @@ ConfigModule.forRoot({
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   ...dbConfiguration(),
-  type: 'mysql',
+  type: 'sqlite',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   migrations: ['dist/**/migrations/*{.js,.ts}'],
 };

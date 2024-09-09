@@ -1,7 +1,7 @@
-import { ConflictException, ForbiddenException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, NotImplementedException } from '@nestjs/common';
 import { Auth, User } from './entities';
 import { google } from 'googleapis';
-import appConfig from 'src/config/env/app.config';
+import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload, LoginResponse } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +18,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     private jwtService: JwtService,
+    private logger: Logger,
   ) {}
 
   async login(code: string): Promise<LoginResponse> {
@@ -32,10 +33,6 @@ export class AuthService {
 
     const { data } = await oauth2.userinfo.get();
 
-    if (data.hd !== 'cefalo.com') {
-      throw new ForbiddenException('Only emails associated with cefalo are allowed.');
-    }
-
     const authPayload: Auth = {
       accessToken: tokens.access_token,
       scope: tokens.scope,
@@ -45,26 +42,38 @@ export class AuthService {
       refreshToken: tokens.refresh_token,
     };
 
-    const existingUser = await this.getUser(data.id);
-    if (existingUser) {
-      const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
-      await this.authRepository.update({ id: existingUser.authId }, authPayload);
+    try {
+      const existingUser = await this.getUser(data.id);
+      if (existingUser) {
+        const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
+        await this.authRepository.update({ id: existingUser.authId }, authPayload);
 
-      return {
-        accessToken: jwt,
-      };
+        return {
+          accessToken: jwt,
+        };
+      }
+
+      const auth = await this.authRepository.save(authPayload);
+      const user = await this.usersRepository.save({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        authId: auth.id,
+      });
+
+      const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
+      return { accessToken: jwt };
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.message);
+
+      if (error.message.includes('refreshToken')) {
+        await this.logout(oauth2Client);
+        throw new ConflictException('Something went wrong');
+      }
+
+      throw new InternalServerErrorException('Something went wrong');
     }
-
-    const auth = await this.authRepository.save(authPayload);
-    const user = await this.usersRepository.save({
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      authId: auth.id,
-    });
-
-    const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
-    return { accessToken: jwt };
   }
 
   async createJwt(id: string, name: string, oAuthExpiry: number) {

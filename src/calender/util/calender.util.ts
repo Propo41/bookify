@@ -12,3 +12,12 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
 
   return true;
 }
+
+export function parseLocation(location: string) {
+  if (!location) {
+    return undefined;
+  }
+
+  const parsedLocation = location.split(',');
+  return parsedLocation.length > 0 ? parsedLocation[0] : undefined;
+}

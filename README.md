@@ -1,37 +1,44 @@
+![image](https://github.com/user-attachments/assets/c624fbc6-5673-4c85-ae4a-74d298b73089)
 
 # Get started
 1. Place the `.env.development` file or `.env` file in the root dir
-2. place the `rooms.ts` file in `src/config` which contains the room specific infos
-3. [optional] Place the `dump.sql` file in the root dir if you want to create the database for the first time using docker container 
+2. To obtain the list of meeting spaces that are allocated for your organization, use the [Google directory API](https://developers.google.com/admin-sdk/directory/reference/rest/v1/resources.calendars/list?apix_params=%7B%22customer%22%3A%22my_customer%22%2C%22maxResults%22%3A20%7D) to obtain the list and format them according to `src/calender/interfaces/room.interface.ts`. Finally place the file as `rooms.ts` file in `src/config`. 
+3. Run `npm run migration:run` to create the migrations
 4. Run the app using: `npm run start:dev`
+5. Run the client using `npm run start:client`
 
-
-## How it works
 
 ### List available rooms
 
 ```bash
-rooms <min-seat-count> <start-time> <duration>
-
-# e.g: 
-# rooms 1  -> shows list of available roo
+curl 
+  --location --globoff '{{baseUrl}}/rooms' \
+  --header 'Authorization: Bearer <token>'
 ```
 
 ### Book room
 
 ```bash
-book <min-seat-count> <start-time> <duration> <floor?>
+curl 
+  --location --globoff '{{baseUrl}}/room' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer <token>' \
+  --data '{
+      "startTime": "2024-08-31T10:30:00+06:00",
+      "duration": 30,
+      "seats": 1,
+      "floor": 1,
+      "createConference": true,
+      "title": "Quick meeting API",
+      "attendees": []
+    }'
 
-# e.g:
-# book 1 3:30pm 30m f2  -> finds the closest available room on f2 with a min room capactiy of 1.
 ```
 
 ### Update room
 
 ```bash
-rooms --booked
-
-room --id=1 duration=+30m
+# todo
 ```
 
 
@@ -39,53 +46,58 @@ room --id=1 duration=+30m
 
 ```bash
 
-rooms --booked
-unbook --id=1 
+curl 
+  --location --globoff --request DELETE '{{baseUrl}}/room' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer <token>' \
+  --data '{
+    "eventId": "4r4bddp2bfkgg1tic1vh84sit8"
+}'
+
 ```
 
+## Todo
 
+- add some sort of mutex or a buffer to prevent race conditions
+
+
+## Github actions
+
+The following env secrets needs to be configured in the github repository: 
+
+```bash
+APP_PORT=
+AZURE_WEBAPP_PUBLISH_PROFILE=
+ROOMS=
+SQLITE_DB=
+TYPEORM_CLI=
 ```
-https://developers.google.com/calendar/api/v3/reference/freebusy/query?apix_params=%7B%22resource%22%3A%7B%22timeMin%22%3A%222024-08-27T00%3A00%3A00%2B02%3A00%22%2C%22timeMax%22%3A%222024-09-27T23%3A59%3A59%2B02%3A00%22%2C%22items%22%3A%5B%7B%22id%22%3A%22Ada%20Bit%2010%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22c_1888flqi3ecr4gb0k9armpk8k9ics%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22RESOURCE_ID_3%40resource.calendar.google.com%22%7D%5D%7D%7D 
 
-in the playground paste this request: 
+## Deployment
 
-{
-  "timeMin": "2024-08-27T00:00:00+02:00",
-  "timeMax": "2024-09-27T23:59:59+02:00",
-  "timeZone": "Asia/Dhaka",
-  "items": [
-    {
-      "id": "Ada Bit 10@resource.calendar.google.com"
-    },
-    {
-      "id": "c_1888flqi3ecr4gb0k9armpk8k9ics@resource.calendar.google.com"
-    },
-    {
-      "id": "RESOURCE_ID_3@resource.calendar.google.com"
-    }
-  ]
-}
+Make sure to create the following environment secrets in the Azure App service:
+
+```bash
+APP_PORT=
+AZURE_WEBAPP_PUBLISH_PROFILE=
+JWT_SECRET=
+OAUTH_CLIENT_ID=
+OAUTH_CLIENT_SECRET=
+OAUTH_REDIRECT_URL=
+SQLITE_DB=
+TYPEORM_CLI=
+APP_DOMAIN=
+```
+
+### Sqlite file restore & backup
+
+From the Azure portal, head over to SSH and copy the sqlite file from `/home/site/wwwroot/bookify.sqlite` to `/home/bookify.sqlite`.
+
+To backup the file, you can use an FTP client such as FileZilla. Head over to the App Service's Deployment Center and ensure FTP is enabled. Note the `FTP Hostname`, `Username`, and `Password`.
+
 ```
 
 ## Commands
-
-```bash
-npm run start:database
-```
-
-# Database setup
-
-## Starting from scratch
-
-A database dump file is required. Paste the dump file (`dump.sql`) in the root directory and run the following commands to create a docker container and initialize the database with the dump file.
-
-```bash
-npm run start:database
-```
-
-## Note
-
-Make sure you have the `.env` file. Not the `.env.development`, as the docker env variables are loaded from `.env` by default.
 
 ### Entering docker container's mysql
 
@@ -94,27 +106,7 @@ docker exec -it <containerid> sh # to enter a container's bash
 mysql -uroot -proot # to enter mysql
 ```
 
-### MySql workbench
-When connecting the database with a workbench, make sure to turn the following values (if required): 
-
-- allowPublicKeyRetrieval=true
-- useSSL=false
-
-More: https://stackoverflow.com/a/50438872 
-
-## Importing database dump for existing container
-
-Assuming you have the dump file `dump.sql` in the root dir, the following steps must be followed:
-
-Run steps (1-3) if you are running it with docker container:
-
-1. Find the docker container id using `docker ps` 
-2. Copy the dump file into the docker container: `docker cp dump.sql <container_id>:/dump.sql`
-3. Enter into the docker container's shell: `docker exec -it <container_id> /bin/bash`
-4. Run this command: `mysql -u<user_name> -p<password> oj_db < dump.sql` where `user_name`=root and `password`=root
-
-
-## Migrations
+### Migrations
 
 Once you get into production you'll need to synchronize model changes into the database. Typically, it is unsafe to use `synchronize: true` for schema synchronization on production once you get data in your database. Here is where migrations come to help.
 
@@ -180,3 +172,14 @@ TypeORM is able to automatically generate migration files with schema changes yo
 npm run migration:generate
 ```
 You don't need to write the queries on your own. The rule of thumb for generating migrations is that you generate them after **each** change you made to your models. 
+
+
+## Reference
+
+- [Google Free busy API](https://developers.google.com/calendar/api/v3/reference/freebusy/query?apix_params=%7B%22resource%22%3A%7B%22timeMin%22%3A%222024-08-27T00%3A00%3A00%2B02%3A00%22%2C%22timeMax%22%3A%222024-09-27T23%3A59%3A59%2B02%3A00%22%2C%22items%22%3A%5B%7B%22id%22%3A%22Ada%20Bit%2010%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22c_1888flqi3ecr4gb0k9armpk8k9ics%40resource.calendar.google.com%22%7D%2C%7B%22id%22%3A%22RESOURCE_ID_3%40resource.calendar.google.com%22%7D%5D%7D%7D )
+
+- [Resources API](https://developers.google.com/admin-sdk/directory/reference/rest/v1/resources.calendars/list?apix_params=%7B%22customer%22%3A%22my_customer%22%2C%22maxResults%22%3A20%7D)
+
+- [Hosting on Azure App Service](https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-nodejs-to-azure-app-service)
+
+- [Azure file system](https://github.com/projectkudu/kudu/wiki/Understanding-the-Azure-App-Service-file-system)

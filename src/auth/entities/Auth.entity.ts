@@ -8,7 +8,7 @@ export class Auth {
   @Column({ type: 'text' })
   accessToken?: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   refreshToken?: string;
 
   @Column()

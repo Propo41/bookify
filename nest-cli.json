@@ -3,6 +3,16 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": [
+      {
+        "include": "../logs/**/*",
+        "outDir": "dist/logs"
+      },
+      {
+        "include": "../bookify_db.sqlite",
+        "outDir": "dist/bookify_db.sqlite"
+      }
+    ]
   }
 }

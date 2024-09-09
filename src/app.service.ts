@@ -1,8 +1,10 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
-
+import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   getHello(): string {
-    throw new NotImplementedException('xxx');
+    return `<pre>
+      Hello from the other side.
+      APP_DOMAIN:  ${process.env.APP_DOMAIN} \n
+    </pre>`;
   }
 }
