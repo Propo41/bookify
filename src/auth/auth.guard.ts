@@ -36,7 +36,7 @@ export class AuthGuard implements CanActivate {
 
       const currentTime = new Date().getTime();
       if (currentTime > user.auth.expiryDate) {
-        this.authService.refreshToken(user, oauth2Client);
+        await this.authService.refreshToken(user, oauth2Client);
 
         user = await this.authService.getUser(payload.sub);
         oauth2Client = this.createOauthClient(user);

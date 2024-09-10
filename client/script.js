@@ -1,3 +1,5 @@
+'use strict';
+
 let duration = 15;
 let seatCount = 1;
 let floor = 1;
@@ -38,6 +40,12 @@ async function logout() {
   await makeRequest('/logout', 'POST');
   removeToken();
   window.location.reload();
+}
+
+// returns timeZone formatted as "Asia/Dhaka", etc
+function getTimeZoneString() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return timeZone;
 }
 
 function populateTimeOptions() {
@@ -133,6 +141,7 @@ async function bookRoom() {
     duration: parseInt(duration),
     seats: parseInt(seats),
     floor: parseInt(floor),
+    timeZone: getTimeZoneString(),
   });
 
   if (res.error) {
@@ -143,9 +152,15 @@ async function bookRoom() {
   createRoomAlert(res.room, convertToLocaleTime(res.start), convertToLocaleTime(res.end), res.summary, 'info');
 }
 
-async function makeRequest(path, method, body) {
+async function makeRequest(path, method, body, params) {
   try {
-    const res = await fetch(`${BACKEND_ENDPOINT}${path}`, {
+    let url = `${BACKEND_ENDPOINT}${path}`;
+    if (params) {
+      const queryParams = new URLSearchParams(params).toString();
+      url += `?${queryParams}`;
+    }
+
+    const res = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -158,6 +173,11 @@ async function makeRequest(path, method, body) {
 
     if (res.status === 429) {
       createMyEventsAlert(res.statusText, 'danger');
+      return null;
+    }
+
+    if (res.status === 401) {
+      await logout();
       return null;
     }
 
@@ -323,8 +343,11 @@ const populateEvents = async () => {
   const myEventsLoading = document.getElementById('my_events_loading');
   myEventsLoading.style.display = 'block';
 
-  const res = await makeRequest('/rooms', 'GET');
-  console.log(res);
+  const res = await makeRequest('/rooms', 'GET', null, {
+    startTime: new Date().toISOString(),
+    endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+    timeZone: getTimeZoneString(),
+  });
 
   myEventsLoading.style.display = 'none';
 
@@ -387,7 +410,18 @@ async function removeEvent(id) {
   }
 }
 
-function convertToRFC3339(dateString, timeString, timeZoneOffset = '+06:00') {
+function getTimezoneOffset() {
+  const offsetInMinutes = new Date().getTimezoneOffset();
+  const sign = offsetInMinutes <= 0 ? '+' : '-';
+  const offsetInHours = Math.floor(Math.abs(offsetInMinutes) / 60);
+  const offsetInRemainingMinutes = Math.abs(offsetInMinutes) % 60;
+  const formattedOffset = `${sign}${String(offsetInHours).padStart(2, '0')}:${String(offsetInRemainingMinutes).padStart(2, '0')}`;
+
+  return formattedOffset;
+}
+
+function convertToRFC3339(dateString, timeString) {
+  const timeZoneOffset = getTimezoneOffset();
   const date = new Date(`${dateString} ${timeString}`);
 
   const [offsetSign, offsetHours, offsetMinutes] = timeZoneOffset.match(/([+-])(\d{2}):(\d{2})/).slice(1);

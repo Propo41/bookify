@@ -22,6 +22,7 @@ export class CalenderService {
     startTime: string,
     endTime: string,
     seats: number,
+    timeZone: string,
     createConference?: boolean,
     eventTitle?: string,
     floor?: number,
@@ -32,7 +33,7 @@ export class CalenderService {
     console.log('startTime', startTime);
     console.log('endTime', endTime);
 
-    const room = await this.getAvailableRoom(client, startTime, endTime, seats, floor);
+    const room = await this.getAvailableRoom(client, startTime, endTime, seats, timeZone, floor);
 
     if (!room) {
       throw new ConflictException('No room available within specified time range');
@@ -65,11 +66,9 @@ export class CalenderService {
       description: 'A quick meeting',
       start: {
         dateTime: startTime,
-        timeZone: 'Asia/Dhaka',
       },
       end: {
         dateTime: endTime,
-        timeZone: 'Asia/Dhaka',
       },
       attendees: [...attendeeList, { email: room.id }],
       colorId: '3',
@@ -101,7 +100,7 @@ export class CalenderService {
     };
   }
 
-  async getAvailableRoom(client: OAuth2Client, start: string, end: string, minSeats: number, floor?: number): Promise<Room> {
+  async getAvailableRoom(client: OAuth2Client, start: string, end: string, minSeats: number, timeZone: string, floor?: number): Promise<Room> {
     try {
       const calendar = google.calendar({ version: 'v3', auth: client });
       const filteredRoomIds = [];
@@ -115,10 +114,10 @@ export class CalenderService {
         requestBody: {
           timeMin: start,
           timeMax: end,
-          timeZone: 'Asia/Dhaka',
+          timeZone,
           items: filteredRoomIds.map((id) => {
             return {
-              id
+              id,
             };
           }),
         },
@@ -143,13 +142,13 @@ export class CalenderService {
     return null;
   }
 
-  async listRooms(client: OAuth2Client): Promise<RoomResponse[]> {
+  async listRooms(client: OAuth2Client, startTime: string, endTime: string, timeZone: string): Promise<RoomResponse[]> {
     const calendar = google.calendar({ version: 'v3', auth: client });
     const result = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: new Date().toISOString(),
-      timeMax: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(), // 12hrs
-      timeZone: 'Asia/Dhaka',
+      timeMin: startTime,
+      timeMax: endTime,
+      timeZone,
       maxResults: 20,
       singleEvents: true,
       orderBy: 'startTime',
@@ -179,7 +178,6 @@ export class CalenderService {
       requestBody: {
         end: {
           dateTime: end,
-          timeZone: 'Asia/Dhaka',
         },
       },
     });

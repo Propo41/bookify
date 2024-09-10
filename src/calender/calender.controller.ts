@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotImplementedException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client } from '../auth/decorators';
@@ -12,17 +12,23 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @Get('/rooms')
-  async listRooms(@_OAuth2Client() client: OAuth2Client): Promise<RoomResponse[]> {
-    return await this.calenderService.listRooms(client);
+  async listRooms(
+    @_OAuth2Client() client: OAuth2Client,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+    @Query('timeZone') timeZone: string,
+  ): Promise<RoomResponse[]> {
+    return await this.calenderService.listRooms(client, startTime, endTime, timeZone);
   }
 
   @UseGuards(AuthGuard)
   @Post('/room')
   async bookRoom(
     @_OAuth2Client() client: OAuth2Client,
-    @Body('startTime') startTime: string,
+    @Body('startTime') startTime: string, // A combined date-time value (formatted according to RFC3339A). Time zone offset is required
     @Body('duration') durationInMins: number,
     @Body('seats') seats: number,
+    @Body('timeZone') timeZone: string,
     @Body('createConference') createConference?: boolean,
     @Body('title') title?: string,
     @Body('floor') floor?: number,
@@ -33,7 +39,7 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + durationInMins);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, startTime, endTime, seats, createConference, title, floor, attendees);
+    const event = await this.calenderService.createEvent(client, startTime, endTime, seats, timeZone, createConference, title, floor, attendees);
     return event;
   }
 

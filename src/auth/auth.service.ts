@@ -97,15 +97,20 @@ export class AuthService {
 
   async logout(oauth2Client: OAuth2Client): Promise<boolean> {
     try {
-      await oauth2Client.revokeCredentials();
+      const res = await oauth2Client.revokeCredentials();
+      this.logger.log(`[logout]: revoke credentials success: ${res.data?.success}`);
       return true;
     } catch (error) {
-      console.error('Error revoking token:', error);
+      this.logger.error(`[logout]: Error revoking token: ${error}`);
       return false;
     }
   }
 
   async refreshToken(user: User, oauth2Client: OAuth2Client): Promise<boolean> {
+    if (!oauth2Client.credentials.refresh_token) {
+      throw new ConflictException('Failed to refresh token. No refresh token found. Log in again');
+    }
+
     const { token } = await oauth2Client.getAccessToken();
     if (token) {
       await this.authRepository.update(
