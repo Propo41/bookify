@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, NotImplementedException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotImplementedException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client } from '../auth/decorators';
@@ -44,11 +44,9 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch('/room')
-  async updateRoom(@_OAuth2Client() client: OAuth2Client): Promise<EventResponse | null> {
-    const eventId = '4r4bddp2bfkgg1ric1lh84rit8';
-    const end = '2024-08-31T10:30:00+06:00';
-    return await this.calenderService.updateEvent(client, eventId, end);
+  @Put('/room')
+  async updateRoom(@_OAuth2Client() client: OAuth2Client, @Body('eventId') eventId: string, @Body('roomId') roomId: string): Promise<EventResponse | null> {
+    return await this.calenderService.updateEvent(client, eventId, roomId);
   }
 
   @UseGuards(AuthGuard)

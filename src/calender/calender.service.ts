@@ -1,5 +1,13 @@
 import { OAuth2Client } from 'google-auth-library';
-import { ConflictException, ForbiddenException, Inject, Injectable, InternalServerErrorException, NotImplementedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  NotImplementedException,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
@@ -28,14 +36,8 @@ export class CalenderService {
     floor?: number,
     attendees?: string[],
   ): Promise<EventResponse | null> {
-    console.log('current server date', new Date().toISOString());
-
-    console.log('startTime', startTime);
-    console.log('endTime', endTime);
-
-    const room = await this.getAvailableRoom(client, startTime, endTime, seats, timeZone, floor);
-
-    if (!room) {
+    const rooms: Room[] = await this.getAvailableRooms(client, startTime, endTime, seats, timeZone, floor);
+    if (!rooms?.length) {
       throw new ConflictException('No room available within specified time range');
     }
 
@@ -60,9 +62,11 @@ export class CalenderService {
       };
     }
 
+    // room.seat should be as closer to user's preferred minSeat value
+    const pickedRoom = rooms[0];
     var event = {
       summary: eventTitle || 'Quick Meeting',
-      location: room.name,
+      location: pickedRoom.name,
       description: 'A quick meeting',
       start: {
         dateTime: startTime,
@@ -70,7 +74,7 @@ export class CalenderService {
       end: {
         dateTime: endTime,
       },
-      attendees: [...attendeeList, { email: room.id }],
+      attendees: [...attendeeList, { email: pickedRoom.id }],
       colorId: '3',
       ...conference,
     };
@@ -92,15 +96,18 @@ export class CalenderService {
 
     const formattedRoom = parseLocation(result.data.location);
     return {
+      eventId: result.data.id,
       summary: result.data.summary,
       meet: result.data.hangoutLink,
       start: result.data.start.dateTime,
       end: result.data.end.dateTime,
       room: formattedRoom,
-    };
+      roomId: pickedRoom.id,
+      availableRooms: rooms,
+    } as EventResponse;
   }
 
-  async getAvailableRoom(client: OAuth2Client, start: string, end: string, minSeats: number, timeZone: string, floor?: number): Promise<Room> {
+  async getAvailableRooms(client: OAuth2Client, start: string, end: string, minSeats: number, timeZone: string, floor?: number): Promise<Room[]> {
     try {
       const calendar = google.calendar({ version: 'v3', auth: client });
       const filteredRoomIds = [];
@@ -110,7 +117,7 @@ export class CalenderService {
         }
       }
 
-      const availableRooms = await calendar.freebusy.query({
+      const roomsFreeBusy = await calendar.freebusy.query({
         requestBody: {
           timeMin: start,
           timeMax: end,
@@ -123,13 +130,19 @@ export class CalenderService {
         },
       });
 
-      const calenders = availableRooms.data.calendars;
+      const calenders = roomsFreeBusy.data.calendars;
+      const availableRooms: Room[] = [];
+      let room: Room = null;
+
       for (const roomId of Object.keys(calenders)) {
         const isAvailable = isRoomAvailable(calenders[roomId].busy, new Date(start), new Date(end));
         if (isAvailable) {
-          return rooms.find((room) => room.id === roomId);
+          room = rooms.find((room) => room.id === roomId);
+          availableRooms.push(room);
         }
       }
+
+      return availableRooms;
     } catch (error) {
       console.error(error);
 
@@ -168,17 +181,27 @@ export class CalenderService {
     return events;
   }
 
-  async updateEvent(client: OAuth2Client, id: string, end: string): Promise<EventResponse | null> {
-    throw new NotImplementedException('Not implemented yet');
-
+  async updateEvent(client: OAuth2Client, eventId: string, roomId: string): Promise<EventResponse | null> {
     const calendar = google.calendar({ version: 'v3', auth: client });
-    const result = await calendar.events.patch({
-      eventId: id,
+    const { data } = await calendar.events.get({
+      eventId: eventId,
+      calendarId: 'primary',
+    });
+
+    const room = rooms.find((room) => room.id === roomId);
+    if (!room) {
+      throw new NotFoundException('Room not found.');
+    }
+
+    // remove the previous room id from the list
+    const filteredAttendees = data.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
+    const result = await calendar.events.update({
+      eventId: eventId,
       calendarId: 'primary',
       requestBody: {
-        end: {
-          dateTime: end,
-        },
+        ...data,
+        location: room.name,
+        attendees: [...filteredAttendees, { email: roomId }],
       },
     });
 

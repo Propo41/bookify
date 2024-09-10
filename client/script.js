@@ -3,6 +3,7 @@
 let duration = 15;
 let seatCount = 1;
 let floor = 1;
+let currentEvent = {};
 
 const CLIENT_ID = '1043931677993-j15eelb1golb8544ehi2meeru35q3fo4.apps.googleusercontent.com';
 const REDIRECT_URI = window.location.origin;
@@ -26,12 +27,12 @@ async function openPage(pageName, elmnt) {
   }
 }
 
+function toMinutesSinceMidnight(hours, minutes) {
+  return hours * 60 + minutes;
+}
+
 function populateTimeOptions() {
   const startTimeSelect = document.getElementById('startTime');
-
-  function toMinutesSinceMidnight(hours, minutes) {
-    return hours * 60 + minutes;
-  }
 
   const now = new Date();
   let currentHours = now.getHours();
@@ -60,6 +61,24 @@ function populateTimeOptions() {
         timeOption.selected = true;
       }
     }
+  }
+}
+
+function populateRoomOptions(availableRooms, roomId) {
+  const roomOptionsSelect = document.getElementById('roomOptions');
+  roomOptionsSelect.innerHTML = '';
+
+  for (const room of availableRooms) {
+    const option = document.createElement('option');
+    option.value = room.name + ' | S: ' + room.seats;
+    option.text = room.name + ' | S: ' + room.seats;
+    option.id = room.id;
+
+    if (room.id === roomId) {
+      option.selected = true;
+    }
+
+    roomOptionsSelect.appendChild(option);
   }
 }
 
@@ -157,7 +176,7 @@ async function logout() {
 
 async function bookRoom() {
   console.log('Booking room');
-
+  const bookBtn = document.getElementById('book_btn');
   const spinner = bookBtn.querySelector('.spinner-border');
   bookBtn.disabled = true;
   spinner.style.display = 'inline-block';
@@ -183,14 +202,67 @@ async function bookRoom() {
   });
 
   if (res.error) {
-    createErrorAlert(res.message);
+    createErrorAlert(res.message, 'liveAlertPlaceholder');
     return;
   }
 
+  currentEvent.eventId = res.eventId;
+  currentEvent.roomId = res.roomId;
+  populateRoomOptions(res.availableRooms || [], res.roomId);
   createRoomAlert(res.room, convertToLocaleTime(res.start), convertToLocaleTime(res.end), res.summary, 'info');
 
   bookBtn.disabled = false;
   spinner.style.display = 'none';
+}
+
+function disableButton(id) {
+  const btn = document.getElementById(id);
+  btn.disabled = true;
+}
+
+function enableButton(id) {
+  const btn = document.getElementById(id);
+  btn.disabled = false;
+}
+
+async function changeRoom() {
+  const roomOptionsSelect = document.getElementById('roomOptions');
+  const selectedOption = roomOptionsSelect.options[roomOptionsSelect.selectedIndex];
+  const selectedRoomId = selectedOption.id;
+
+  if (selectedRoomId === currentEvent.roomId) {
+    createErrorAlert('You have already booked this room', 'changeRoomModalErrorAlert');
+    return;
+  }
+
+  disableButton('changeRoomModalCancelBtn');
+  disableButton('changeRoomModalSaveBtn');
+
+  const res = await makeRequest('/room', 'PUT', {
+    eventId: currentEvent.eventId,
+    roomId: selectedRoomId,
+  });
+
+  if (res.error) {
+    createErrorAlert(res.message, 'changeRoomModalErrorAlert');
+    return;
+  }
+
+  enableButton('changeRoomModalCancelBtn');
+  enableButton('changeRoomModalSaveBtn');
+
+  const roomDiv = document.getElementById('event_alert_room');
+  roomDiv.innerHTML = `<b>Room: </b>${res.room}`;
+
+  const editBtn = document.getElementById('event_alert_edit_icon');
+  editBtn.style.display = 'none';
+
+  // dismiss the modal
+  document.querySelector('[data-bs-dismiss="modal"]').click();
+
+  var myModalEl = document.getElementById('changeRoomModal');
+  var modal = bootstrap.Modal.getInstance(myModalEl);
+  modal.hide();
 }
 
 function toggleVisibility(id) {
@@ -250,7 +322,12 @@ const createRoomAlert = (room, start, end, summary, type) => {
   wrapper.innerHTML = [
     `<div style="text-align: left;" class="alert alert-${type} custom-alert-text alert-dismissible" role="alert">`,
     `   <div><b>Summary: </b>${summary}</div>`,
-    `   <div><b>Room: </b>${room}</div>`,
+    `  <div style="display: flex;">
+          <div id="event_alert_room"><b>Room: </b>${room}</div>
+          <a id="event_alert_edit_icon" class="icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0); align-items: stretch; margin-left: 5px;" data-bs-toggle="modal" data-bs-target="#changeRoomModal">
+            <i class="bi bi-pencil-fill"></i>
+          </a>
+       </div>`,
     `   <div><b>Start: </b>${start}</div>`,
     `   <div><b>End: </b>${end}</div>`,
     '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
@@ -260,8 +337,8 @@ const createRoomAlert = (room, start, end, summary, type) => {
   alertPlaceholder.append(wrapper);
 };
 
-const createErrorAlert = (message) => {
-  const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+const createErrorAlert = (message, elementId) => {
+  const alertPlaceholder = document.getElementById(elementId);
   alertPlaceholder.innerHTML = '';
 
   const wrapper = document.createElement('div');
@@ -330,12 +407,12 @@ const populateEvents = async () => {
                     <div class="container text-center mt-1">
                         <div class="row">
                             <div class="col-7 p-0" style="text-align: center;">
-                                <div class="my_events_field" style="background-color: #ffec99; padding-right: 10px">
+                                <div class="my_events_field" style="background-color: #e9e9e9; padding-right: 10px">
                                     <span id="event_time" class="event_name">${convertToLocaleTime(event.start)} - ${convertToLocaleTime(event.end)}</span>
                                 </div>
                             </div>
                             <div class="col-5 p-0">
-                                <div class="my_events_field" style="background-color: #a5d8ff;">
+                                <div class="my_events_field" style="background-color: #e9e9e9;">
                                     <span id="event_room" class="event_name">${event.room}</span>
                                 </div>
                             </div>

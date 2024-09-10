@@ -1,4 +1,5 @@
 import { BusyTimes } from '../interfaces/freebusy.interface';
+import { Room } from '../interfaces/room.interface';
 
 export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime: Date) {
   for (const timeSlot of busyTimes) {
@@ -15,7 +16,7 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
 
 export function parseLocation(location: string) {
   if (!location) {
-    return "N/A";
+    return 'N/A';
   }
 
   const parsedLocation = location.split(',');

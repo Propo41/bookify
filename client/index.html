@@ -8,15 +8,8 @@
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
         integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -38,13 +31,13 @@
                                     style="color: white;"></i></button>
                         </div>
                         <div class="col">
-                            <div class="start_time_container">
+                            <div class="dropdown_container">
                                 <select class="dropdown-button" id="startTime" name="startTime"></select>
                                 <label class="hint_text" for="startTime">*Start time</label>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="time-button" style="background-color: #a5d8ff;">
+                            <div class="time-button" style="background-color: #e9e9e9;">
                                 <button onclick="decrementDuration()" id="decrement">-</button>
                                 <span class="btn_text" id="duration">15m</span>
                                 <button onclick="incrementDuration()" id="increment">+</button>
@@ -60,8 +53,8 @@
                 <div class="container text-center" style="margin-top: 15px;">
                     <div class="row">
                         <div class="col">
-                            <div class="start_time_container">
-                                <div class="time-button" style="background-color: #ffec99;">
+                            <div class="dropdown_container">
+                                <div class="time-button" style="background-color: #e9e9e9;">
                                     <button onclick="decrementFloor()" id="floor_decrement">-</button>
                                     <span class="btn_text" id="floor_text">1</span>
                                     <button onclick="incrementFloor()" id="floor_increment">+</button>
@@ -70,7 +63,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="time-button" style="background-color: #b2f2bb;">
+                            <div class="time-button" style="background-color: #e9e9e9;">
                                 <button onclick="decrementSeatCount()" id="seat_decrement">-</button>
                                 <span class="btn_text" id="seat_text">1</span>
                                 <button onclick="incrementSeatCount()" id="seat_increment">+</button>
@@ -85,6 +78,35 @@
                     </button>
 
                     <div id="liveAlertPlaceholder" class="mt-4"></div>
+
+                    <!-- change room modal -->
+                    <div class="modal fade" id="changeRoomModal" tabindex="-1" aria-labelledby="changeRoomModal"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered change_room_modal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="changeRoomModalLabel">Choose a different room</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Dropdown in Modal -->
+                                    <div class="dropdown_container">
+                                        <select class="dropdown-button" id="roomOptions" name="roomOptions">
+                                        </select>
+                                    </div>
+
+                                    <div id="changeRoomModalErrorAlert" class="mt-4"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="changeRoomModalCancelBtn" type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button id="changeRoomModalSaveBtn" type="button" class="btn btn-primary"
+                                        id="saveButton" onclick="changeRoom()">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -121,6 +143,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
 
