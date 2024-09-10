@@ -19,4 +19,11 @@ export class AuthController {
   async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
     return await this.authService.logout(client);
   }
+
+  // test endpoint
+  @UseGuards(AuthGuard)
+  @Post('/resource')
+  async createResources(@_OAuth2Client() client: OAuth2Client): Promise<void> {
+    return await this.authService.createCalenderResources(client);
+  }
 }

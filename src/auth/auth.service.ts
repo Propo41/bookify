@@ -126,4 +126,18 @@ export class AuthService {
       throw new ConflictException('Failed to refresh token');
     }
   }
+
+  async getCalenderResources() {}
+
+  async createCalenderResources(oauth2Client: OAuth2Client) {
+    const service = google.admin({ version: 'directory_v1', auth: oauth2Client });
+    try {
+      const response = await service.resources.calendars.list({
+        customer: 'my_customer',
+      });
+      console.log('Resource Calendars:', response.data.items);
+    } catch (err) {
+      console.error('Error retrieving resource calendars:', err);
+    }
+  }
 }
