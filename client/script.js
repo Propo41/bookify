@@ -26,28 +26,6 @@ async function openPage(pageName, elmnt) {
   }
 }
 
-// Function to format time in 12-hour format with AM/PM
-function formatTime(hours, minutes) {
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // If hour is 0, it should be 12
-  minutes = minutes < 10 ? '0' + minutes : minutes;
-  return hours + ':' + minutes + ' ' + ampm;
-}
-
-async function logout() {
-  console.log('Logging out');
-  await makeRequest('/logout', 'POST');
-  removeToken();
-  window.location.reload();
-}
-
-// returns timeZone formatted as "Asia/Dhaka", etc
-function getTimeZoneString() {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return timeZone;
-}
-
 function populateTimeOptions() {
   const startTimeSelect = document.getElementById('startTime');
 
@@ -123,35 +101,6 @@ function incrementFloor() {
   document.getElementById('floor_text').textContent = floor;
 }
 
-async function bookRoom() {
-  const startTimeSelect = document.getElementById('startTime');
-  const startTime = startTimeSelect.value;
-
-  const date = new Date(Date.now()).toISOString().split('T')[0];
-  const formattedStartTime = convertToRFC3339(date, startTime);
-
-  console.log('formattedStartTime', formattedStartTime);
-
-  const duration = document.getElementById('duration').textContent;
-  const seats = document.getElementById('seat_text').textContent;
-  const floor = document.getElementById('floor_text').textContent;
-
-  const res = await makeRequest('/room', 'POST', {
-    startTime: formattedStartTime,
-    duration: parseInt(duration),
-    seats: parseInt(seats),
-    floor: parseInt(floor),
-    timeZone: getTimeZoneString(),
-  });
-
-  if (res.error) {
-    createErrorAlert(res.message);
-    return;
-  }
-
-  createRoomAlert(res.room, convertToLocaleTime(res.start), convertToLocaleTime(res.end), res.summary, 'info');
-}
-
 async function makeRequest(path, method, body, params) {
   try {
     let url = `${BACKEND_ENDPOINT}${path}`;
@@ -199,21 +148,50 @@ function login() {
   window.location.href = authUrl;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const bookBtn = document.getElementById('book_btn');
-  bookBtn.addEventListener('click', async () => {
-    console.log('Booking room');
+async function logout() {
+  console.log('Logging out');
+  await makeRequest('/logout', 'POST');
+  removeToken();
+  window.location.reload();
+}
 
-    const spinner = bookBtn.querySelector('.spinner-border');
-    bookBtn.disabled = true;
-    spinner.style.display = 'inline-block';
+async function bookRoom() {
+  console.log('Booking room');
 
-    await bookRoom();
+  const spinner = bookBtn.querySelector('.spinner-border');
+  bookBtn.disabled = true;
+  spinner.style.display = 'inline-block';
 
-    bookBtn.disabled = false;
-    spinner.style.display = 'none';
+  const startTimeSelect = document.getElementById('startTime');
+  const startTime = startTimeSelect.value;
+
+  const date = new Date(Date.now()).toISOString().split('T')[0];
+  const formattedStartTime = convertToRFC3339(date, startTime);
+
+  console.log('formattedStartTime', formattedStartTime);
+
+  const duration = document.getElementById('duration').textContent;
+  const seats = document.getElementById('seat_text').textContent;
+  const floor = document.getElementById('floor_text').textContent;
+
+  const res = await makeRequest('/room', 'POST', {
+    startTime: formattedStartTime,
+    duration: parseInt(duration),
+    seats: parseInt(seats),
+    floor: parseInt(floor),
+    timeZone: getTimeZoneString(),
   });
-});
+
+  if (res.error) {
+    createErrorAlert(res.message);
+    return;
+  }
+
+  createRoomAlert(res.room, convertToLocaleTime(res.start), convertToLocaleTime(res.end), res.summary, 'info');
+
+  bookBtn.disabled = false;
+  spinner.style.display = 'none';
+}
 
 function toggleVisibility(id) {
   const element = document.getElementById(id);
@@ -222,21 +200,6 @@ function toggleVisibility(id) {
   } else {
     element.style.display = 'none';
   }
-}
-
-function removeToken() {
-  window.localStorage.removeItem('access_token');
-}
-
-function getToken() {
-  const token = window.localStorage.getItem('access_token');
-  if (!token) return null;
-
-  if (token === 'undefined' || token.trim() === '') {
-    return null;
-  }
-
-  return token;
 }
 
 window.onload = async () => {
@@ -408,6 +371,37 @@ async function removeEvent(id) {
   if (eventElement) {
     eventElement.remove();
   }
+}
+
+// -------------------------------- utility ----------------------------------------------
+// Function to format time in 12-hour format with AM/PM
+function formatTime(hours, minutes) {
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // If hour is 0, it should be 12
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return hours + ':' + minutes + ' ' + ampm;
+}
+
+// returns timeZone formatted as "Asia/Dhaka", etc
+function getTimeZoneString() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return timeZone;
+}
+
+function removeToken() {
+  window.localStorage.removeItem('access_token');
+}
+
+function getToken() {
+  const token = window.localStorage.getItem('access_token');
+  if (!token) return null;
+
+  if (token === 'undefined' || token.trim() === '') {
+    return null;
+  }
+
+  return token;
 }
 
 function getTimezoneOffset() {
