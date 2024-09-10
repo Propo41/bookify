@@ -12,6 +12,18 @@ env:
   NODE_VERSION: '20.x'
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: 🗑️ Delete deployment
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: 'production'
+          onlyRemoveDeployments: true
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +65,9 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: 
+      - build
+      - cleanup
     environment:
       name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -70,3 +84,6 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+      - name: Get the deployment URL
+        run: echo "url=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
