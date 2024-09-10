@@ -15,9 +15,9 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
 
 export function parseLocation(location: string) {
   if (!location) {
-    return undefined;
+    return "N/A";
   }
 
   const parsedLocation = location.split(',');
-  return parsedLocation.length > 0 ? parsedLocation[0] : undefined;
+  return parsedLocation.length > 0 ? parsedLocation[0] : 'N/A';
 }
