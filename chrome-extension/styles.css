@@ -1,0 +1,248 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Set height of body and the document to 100% */
+body,
+html {
+  height: 600px;
+  margin: 0;
+  width: 412px;
+}
+
+/* Style tab links */
+.tablink {
+  background-color: #b2f2bb;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-size: 17px;
+  width: 50%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: larger;
+  color: #000;
+}
+
+/* Style the tab content (and add height:100% for full page content) */
+/* Style the tab content (and add height:100% for full page content) */
+.tabcontent {
+  color: white;
+  display: none;
+  padding: 100px 20px;
+  height: calc(100% - 50px); /* Adjust height to account for tab bar */
+  overflow: auto;
+}
+
+/* Style tab links container at the bottom */
+.tab-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #555;
+}
+
+.btn_text {
+  color: #000;
+}
+
+#book_room {
+  background-color: fff;
+}
+
+.dropdown_container {
+  display: flex;
+  flex-direction: column;
+}
+
+.duration_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.custom-alert-text {
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.time-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 15px;
+  border: 2px solid #000; /* Black border */
+  padding: 5px 10px;
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  width: 100%;
+  height: 50px;
+}
+
+.my_event_btn {
+  height: 100%;
+  width: 50%;
+  align-items: center;
+  display: flex !important;
+  justify-content: center;
+  margin-left: 3px;
+}
+
+.my_events_field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 15px;
+  border: 2px solid #000; /* Black border */
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  width: 98%;
+  height: 50px;
+}
+
+.my_events_loading {
+  display: none;
+  color: #000;
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.time-button span {
+  padding: 0 10px;
+  font-weight: bold;
+}
+
+.time-button button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.time-button button:focus {
+  outline: none;
+}
+
+/* Basic dropdown styling */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-button {
+  background-color: #e9e9e9; /* Light blue color */
+  color: black;
+  padding: 10px 20px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 2px solid black;
+  border-radius: 15px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  height: 50px;
+}
+
+.book_btn {
+  width: 100%;
+  margin-top: 15px;
+  height: 70px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  font-style: normal;
+  border: 2px solid black;
+  background-color: #8dd1ff;
+  border-radius: 15px;
+}
+
+.book_btn:active {
+  border-width: 1px;
+  background-color: #69c3ff;
+}
+
+.book_btn:disabled {
+  border: 2px solid black;
+  background-color: #c3e7ff;
+}
+
+.hint_text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700;
+  font-style: normal;
+  font-size: large;
+  color: #868e96;
+}
+
+.title_text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 30px;
+  color: #000;
+}
+
+.head_bar {
+  background-color: #ffec99;
+  height: 75px;
+  position: absolute;
+  display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  border: 1.5px solid black;
+}
+
+.login_page {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login_btn {
+  height: 60px;
+  width: 200px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  font-style: normal;
+  border: 2px solid black;
+  background-color: #ffc9c9;
+  border-radius: 15px;
+}
+
+.login_btn:active {
+  height: 60px;
+  width: 200px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-weight: 700 !important;
+  font-style: normal;
+  border: 2px solid black;
+  background-color: #ffb0b0;
+  border-radius: 15px;
+}
+
+.change_room_modal {
+  color: #383838;
+  /* max-width: 350px; */
+  /* display: inline-flex !important; */
+}

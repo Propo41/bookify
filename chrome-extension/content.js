@@ -6,8 +6,8 @@ let floor = 1; // Make floors a dropdown with user's own organization's floors w
 let currentEvent = {};
 
 const CLIENT_ID = '1043931677993-j15eelb1golb8544ehi2meeru35q3fo4.apps.googleusercontent.com';
-const REDIRECT_URI = window.location.origin;
-const BACKEND_ENDPOINT = REDIRECT_URI;
+const REDIRECT_URI = 'https://jiijkeodpcceikjkoedemgmjomhdjjpf.chromiumapp.org';
+const BACKEND_ENDPOINT = 'http://localhost:3000';
 const SCOPES = [
   'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
   'https://www.googleapis.com/auth/calendar',
@@ -134,11 +134,12 @@ async function makeRequest(path, method, body, params) {
       url += `?${queryParams}`;
     }
 
+    const token = await getToken();
     const res = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body || undefined),
     });
@@ -171,13 +172,70 @@ function login() {
   console.log('login clicked');
   const scopes = SCOPES.join(' ').trim();
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scopes}&access_type=offline`;
-  window.location.href = authUrl;
+
+  chrome.identity.launchWebAuthFlow(
+    {
+      url: authUrl,
+      interactive: true,
+    },
+    function (redirectUrl) {
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+      } else {
+        console.log('Redirect URL:', redirectUrl);
+        handleOauthRedirect(redirectUrl);
+      }
+    },
+  );
+}
+
+async function handleOauthRedirect(redirectUrl) {
+  const url = new URL(redirectUrl);
+
+  const code = url.searchParams.get('code');
+  console.log(code);
+
+  if (code) {
+    try {
+      const res = await makeRequest('/oauth2callback', 'POST', { code });
+      console.log('Access Token:', res.accessToken);
+      if (res?.accessToken) {
+        await setToken(res.accessToken);
+      }
+
+      window.location.reload();
+      return;
+    } catch (error) {
+      console.error('Error:', error);
+      window.location.reload();
+      return;
+    }
+  }
+
+  const token = await getToken();
+
+  if (token) {
+    const loginPage = document.getElementById('loginPage');
+    loginPage.style.display = 'none';
+
+    const homePage = document.getElementById('homePage');
+    homePage.style.display = 'block';
+
+    document.getElementById('defaultOpen').click();
+    populateTimeOptions();
+  } else {
+    const loginPage = document.getElementById('loginPage');
+    loginPage.style.display = 'block';
+
+    const homePage = document.getElementById('homePage');
+    homePage.style.display = 'none';
+  }
 }
 
 async function logout() {
   console.log('Logging out');
   // await makeRequest('/logout', 'POST');
-  removeToken();
+  await removeToken();
   window.location.reload();
 }
 
@@ -282,26 +340,7 @@ function toggleVisibility(id) {
 }
 
 window.onload = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-
-  if (code) {
-    try {
-      const res = await makeRequest('/oauth2callback', 'POST', { code });
-      console.log('Access Token:', res.accessToken);
-      if (res?.accessToken) {
-        window.localStorage.setItem('access_token', res.accessToken);
-      }
-      window.location.href = '/';
-      return;
-    } catch (error) {
-      console.error('Error:', error);
-      window.location.href = '/';
-      return;
-    }
-  }
-
-  const token = getToken();
+  const token = await getToken();
 
   if (token) {
     const loginPage = document.getElementById('loginPage');
@@ -473,12 +512,19 @@ function getTimeZoneString() {
   return timeZone;
 }
 
-function removeToken() {
-  window.localStorage.removeItem('access_token');
+async function removeToken() {
+  await chrome.storage.sync.remove('access_token');
 }
 
-function getToken() {
-  const token = window.localStorage.getItem('access_token');
+async function setToken(token) {
+  await chrome.storage.sync.set({ access_token: token });
+}
+
+async function getToken() {
+  const item = await chrome.storage.sync.get('access_token');
+  console.log('token from storage api: ', item['access_token']);
+  const token = item['access_token'];
+
   if (!token) return null;
 
   if (token === 'undefined' || token.trim() === '') {
