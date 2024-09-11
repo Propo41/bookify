@@ -1,5 +1,14 @@
-import { ConflictException, ForbiddenException, Inject, Injectable, InternalServerErrorException, Logger, NotImplementedException } from '@nestjs/common';
-import { Auth, User } from './entities';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotImplementedException,
+} from '@nestjs/common';
+import { Auth, ConferenceRoom, User } from './entities';
 import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
@@ -16,6 +25,8 @@ export class AuthService {
     private authRepository: Repository<Auth>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(ConferenceRoom)
+    private conferenceRoomsRepository: Repository<ConferenceRoom>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     private jwtService: JwtService,
     private logger: Logger,
@@ -53,18 +64,23 @@ export class AuthService {
         };
       }
 
+      const domain = data.email.split('@')[1];
+      if (!(await this.isCalenderResourceExist(domain))) {
+        await this.createCalenderResources(oauth2Client, domain);
+      }
+
       const auth = await this.authRepository.save(authPayload);
       const user = await this.usersRepository.save({
         id: data.id,
         name: data.name,
         email: data.email,
         authId: auth.id,
+        domain,
       });
 
       const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
       return { accessToken: jwt };
     } catch (error) {
-      console.log(error.message);
       this.logger.error(error.message);
 
       if (error.message.includes('refreshToken')) {
@@ -124,6 +140,56 @@ export class AuthService {
       return true;
     } else {
       throw new ConflictException('Failed to refresh token');
+    }
+  }
+
+  async getCalenderResources(domain: string) {
+    const resources = await this.conferenceRoomsRepository.find({
+      where: {
+        domain,
+      },
+      order: {
+        seats: 'ASC',
+      },
+    });
+
+    return resources;
+  }
+
+  async isCalenderResourceExist(domain: string) {
+    return await this.conferenceRoomsRepository.exists({ where: { domain } });
+  }
+
+  async createCalenderResources(oauth2Client: OAuth2Client, domain: string) {
+    try {
+      const service = google.admin({ version: 'directory_v1', auth: oauth2Client });
+      // https://developers.google.com/admin-sdk/directory/reference/rest/v1/resources.calendars/list]
+      const options = { customer: 'my_customer' };
+      const res = await service.resources.calendars.list(options);
+
+      if (res.status !== 200) {
+        throw new BadRequestException("Couldn't obtain directory resources");
+      }
+
+      const rooms: ConferenceRoom[] = [];
+      const { items: resources } = res.data;
+      for (const resource of resources) {
+        rooms.push({
+          id: resource.resourceId,
+          email: resource.resourceEmail,
+          description: resource.userVisibleDescription,
+          domain: domain,
+          floor: resource.floorName, // in the format of F3 or F1, whatever the organization assigns
+          name: resource.resourceName,
+          seats: resource.capacity,
+        });
+      }
+
+      await this.conferenceRoomsRepository.save(rooms);
+      this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
+    } catch (err) {
+      this.logger.error(`Couldn't obtain directory resources`);
+      throw new InternalServerErrorException("Couldn't obtain directory resources");
     }
   }
 }

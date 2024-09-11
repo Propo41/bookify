@@ -19,6 +19,9 @@ export class User {
   @Column({ nullable: false })
   name?: string;
 
+  @Column()
+  domain?: string;
+
   @CreateDateColumn()
   createdAt?: Date;
 

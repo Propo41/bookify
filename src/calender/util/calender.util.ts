@@ -1,5 +1,4 @@
 import { BusyTimes } from '../interfaces/freebusy.interface';
-import { Room } from '../interfaces/room.interface';
 
 export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime: Date) {
   for (const timeSlot of busyTimes) {
