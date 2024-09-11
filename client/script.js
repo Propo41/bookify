@@ -2,12 +2,18 @@
 
 let duration = 15;
 let seatCount = 1;
-let floor = 1;
+let floor = 1; // Make floors a dropdown with user's own organization's floors which are strings in the format F1, FF2 etc
 let currentEvent = {};
 
 const CLIENT_ID = '1043931677993-j15eelb1golb8544ehi2meeru35q3fo4.apps.googleusercontent.com';
 const REDIRECT_URI = window.location.origin;
 const BACKEND_ENDPOINT = REDIRECT_URI;
+const SCOPES = [
+  'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
+  'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+];
 
 async function openPage(pageName, elmnt) {
   var i, tabcontent, tablinks;
@@ -64,7 +70,7 @@ function populateTimeOptions() {
   }
 }
 
-function populateRoomOptions(availableRooms, roomId) {
+function populateRoomOptions(availableRooms, roomEmail) {
   const roomOptionsSelect = document.getElementById('roomOptions');
   roomOptionsSelect.innerHTML = '';
 
@@ -72,9 +78,9 @@ function populateRoomOptions(availableRooms, roomId) {
     const option = document.createElement('option');
     option.value = room.name + ' | S: ' + room.seats;
     option.text = room.name + ' | S: ' + room.seats;
-    option.id = room.id;
+    option.id = room.email;
 
-    if (room.id === roomId) {
+    if (room.email === roomEmail) {
       option.selected = true;
     }
 
@@ -163,7 +169,8 @@ async function makeRequest(path, method, body, params) {
 
 function login() {
   console.log('login clicked');
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile&access_type=offline`;
+  const scopes = SCOPES.join(" ").trim();
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scopes}&access_type=offline`;
   window.location.href = authUrl;
 }
 
@@ -197,7 +204,7 @@ async function bookRoom() {
     startTime: formattedStartTime,
     duration: parseInt(duration),
     seats: parseInt(seats),
-    floor: parseInt(floor),
+    floor: `F${floor}`,
     timeZone: getTimeZoneString(),
   });
 
@@ -207,8 +214,8 @@ async function bookRoom() {
   }
 
   currentEvent.eventId = res.eventId;
-  currentEvent.roomId = res.roomId;
-  populateRoomOptions(res.availableRooms || [], res.roomId);
+  currentEvent.roomId = res.email;
+  populateRoomOptions(res.availableRooms || [], res.email);
   createRoomAlert(res.room, convertToLocaleTime(res.start), convertToLocaleTime(res.end), res.summary, 'info');
 
   bookBtn.disabled = false;

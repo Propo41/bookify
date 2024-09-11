@@ -1,8 +1,8 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, NotImplementedException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { _OAuth2Client } from '../auth/decorators';
+import { _OAuth2Client, _User } from '../auth/decorators';
 import { EventResponse, RoomResponse } from './dto';
 import { DeleteResponse } from './dto/delete.response';
 
@@ -25,13 +25,14 @@ export class CalenderController {
   @Post('/room')
   async bookRoom(
     @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
     @Body('startTime') startTime: string, // A combined date-time value (formatted according to RFC3339A). Time zone offset is required
     @Body('duration') durationInMins: number,
     @Body('seats') seats: number,
     @Body('timeZone') timeZone: string,
     @Body('createConference') createConference?: boolean,
     @Body('title') title?: string,
-    @Body('floor') floor?: number,
+    @Body('floor') floor?: string,
     @Body('attendees') attendees?: string[],
   ): Promise<EventResponse | null> {
     // end time
@@ -39,14 +40,19 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + durationInMins);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, startTime, endTime, seats, timeZone, createConference, title, floor, attendees);
+    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, seats, timeZone, createConference, title, floor, attendees);
     return event;
   }
 
   @UseGuards(AuthGuard)
   @Put('/room')
-  async updateRoom(@_OAuth2Client() client: OAuth2Client, @Body('eventId') eventId: string, @Body('roomId') roomId: string): Promise<EventResponse | null> {
-    return await this.calenderService.updateEvent(client, eventId, roomId);
+  async updateRoom(
+    @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
+    @Body('eventId') eventId: string,
+    @Body('roomId') roomId: string,
+  ): Promise<EventResponse | null> {
+    return await this.calenderService.updateEvent(client, domain, eventId, roomId);
   }
 
   @UseGuards(AuthGuard)

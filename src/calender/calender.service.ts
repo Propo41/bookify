@@ -5,10 +5,9 @@ import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { EventResponse, RoomResponse } from './dto';
 import { isRoomAvailable, parseLocation } from './util/calender.util';
-import { Room } from './interfaces/room.interface';
 import { AuthService } from '../auth/auth.service';
-import { rooms } from '../config/rooms';
 import { DeleteResponse } from './dto/delete.response';
+import { ConferenceRoom } from '../auth/entities';
 
 @Injectable()
 export class CalenderService {
@@ -19,16 +18,17 @@ export class CalenderService {
 
   async createEvent(
     client: OAuth2Client,
+    domain: string,
     startTime: string,
     endTime: string,
     seats: number,
     timeZone: string,
     createConference?: boolean,
     eventTitle?: string,
-    floor?: number,
+    floor?: string,
     attendees?: string[],
   ): Promise<EventResponse | null> {
-    const rooms: Room[] = await this.getAvailableRooms(client, startTime, endTime, seats, timeZone, floor);
+    const rooms: ConferenceRoom[] = await this.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
     if (!rooms?.length) {
       throw new ConflictException('No room available within specified time range');
     }
@@ -66,7 +66,7 @@ export class CalenderService {
       end: {
         dateTime: endTime,
       },
-      attendees: [...attendeeList, { email: pickedRoom.id }],
+      attendees: [...attendeeList, { email: pickedRoom.email }],
       colorId: '3',
       ...conference,
     };
@@ -99,13 +99,23 @@ export class CalenderService {
     } as EventResponse;
   }
 
-  async getAvailableRooms(client: OAuth2Client, start: string, end: string, minSeats: number, timeZone: string, floor?: number): Promise<Room[]> {
+  async getAvailableRooms(
+    client: OAuth2Client,
+    domain: string,
+    start: string,
+    end: string,
+    minSeats: number,
+    timeZone: string,
+    floor?: string,
+  ): Promise<ConferenceRoom[]> {
     try {
       const calendar = google.calendar({ version: 'v3', auth: client });
-      const filteredRoomIds = [];
+      const filteredRoomEmails = [];
+      const rooms = await this.authService.getCalenderResources(domain);
+
       for (const room of rooms) {
         if (room.seats >= minSeats && room.floor === floor) {
-          filteredRoomIds.push(room.id);
+          filteredRoomEmails.push(room.email);
         }
       }
 
@@ -114,22 +124,22 @@ export class CalenderService {
           timeMin: start,
           timeMax: end,
           timeZone,
-          items: filteredRoomIds.map((id) => {
+          items: filteredRoomEmails.map((email) => {
             return {
-              id,
+              id: email,
             };
           }),
         },
       });
 
       const calenders = roomsFreeBusy.data.calendars;
-      const availableRooms: Room[] = [];
-      let room: Room = null;
+      const availableRooms: ConferenceRoom[] = [];
+      let room: ConferenceRoom = null;
 
-      for (const roomId of Object.keys(calenders)) {
-        const isAvailable = isRoomAvailable(calenders[roomId].busy, new Date(start), new Date(end));
+      for (const roomEmail of Object.keys(calenders)) {
+        const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
         if (isAvailable) {
-          room = rooms.find((room) => room.id === roomId);
+          room = rooms.find((room) => room.email === roomEmail);
           availableRooms.push(room);
         }
       }
@@ -173,14 +183,15 @@ export class CalenderService {
     return events;
   }
 
-  async updateEvent(client: OAuth2Client, eventId: string, roomId: string): Promise<EventResponse | null> {
+  async updateEvent(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<EventResponse | null> {
     const calendar = google.calendar({ version: 'v3', auth: client });
     const { data } = await calendar.events.get({
       eventId: eventId,
       calendarId: 'primary',
     });
 
-    const room = rooms.find((room) => room.id === roomId);
+    const rooms: ConferenceRoom[] = await this.authService.getCalenderResources(domain);
+    const room = rooms.find((room) => room.email === roomEmail);
     if (!room) {
       throw new NotFoundException('Room not found.');
     }
@@ -193,7 +204,7 @@ export class CalenderService {
       requestBody: {
         ...data,
         location: room.name,
-        attendees: [...filteredAttendees, { email: roomId }],
+        attendees: [...filteredAttendees, { email: roomEmail }],
       },
     });
 

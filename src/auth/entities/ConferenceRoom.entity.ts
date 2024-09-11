@@ -6,7 +6,13 @@ export class ConferenceRoom {
   id?: string;
 
   @Column()
+  domain?: string;
+
+  @Column()
   name?: string;
+
+  @Column({ type: 'text', unique: true })
+  email?: string;
 
   @Column()
   seats?: number;
@@ -15,7 +21,7 @@ export class ConferenceRoom {
   description?: string;
 
   @Column()
-  floor?: number;
+  floor?: string;
 
   @CreateDateColumn()
   createdAt?: Date;
