@@ -5,9 +5,8 @@
 /* Set height of body and the document to 100% */
 body,
 html {
-  height: 600px;
+  height: 100%;
   margin: 0;
-  width: 500px;
 }
 
 /* Style tab links */

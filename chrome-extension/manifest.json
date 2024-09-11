@@ -9,6 +9,7 @@
         "default_title": "Bookify"
     },
     "permissions": [
-        "identity"
+        "identity",
+        "storage"
     ]
 }

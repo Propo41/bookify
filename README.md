@@ -1,10 +1,15 @@
 ![image](https://github.com/user-attachments/assets/c624fbc6-5673-4c85-ae4a-74d298b73089)
 
 # Get started
-1. Copy the `.env.example` file as `.env` file in the root dir and fill the required keys. Obtain the OAuth credentials by following this [guide](#hosting-yourself)
+1. Copy the `.env.example` file as `.env.development` file in the root dir and fill the required keys. Obtain the OAuth credentials by following this [guide](#hosting-yourself)
 2. Run `npm run migration:run` to create the migrations
 3. Run the app using: `npm run start:dev`
 
+## Chrome extension development
+
+1. Copy the `.env.example` file as `.env.development.chrome` file in the root dir and fill the required keys as mentioned earlier. <br> 
+Note: The REDIRECT_URL should be in the format `https://<extension-id>.chromiumapp.org` 
+2. Run `npm run start:chrome`
 
 # Use cases
 
@@ -106,3 +111,7 @@ mysql -uroot -proot # to enter mysql
 - [Hosting on Azure App Service](https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-nodejs-to-azure-app-service)
 
 - [Azure file system](https://github.com/projectkudu/kudu/wiki/Understanding-the-Azure-App-Service-file-system)
+
+- [Chrome extension guide](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world)
+
+- [Chrome extension Storage API](https://developer.chrome.com/docs/extensions/reference/api/storage)

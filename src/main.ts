@@ -18,10 +18,10 @@ async function bootstrap() {
   const env = config.get('app').environment;
 
   const whitelist = [config.get('app').appDomain];
-  
+
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || whitelist.indexOf(origin) !== -1) {
+      if (env === 'development' || !origin || whitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
         callback(new ForbiddenException('Not allowed by CORS'));
