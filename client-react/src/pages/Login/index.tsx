@@ -1,4 +1,4 @@
-import { Box, Button, Stack, styled, Typography, useColorScheme } from '@mui/material';
+import { Box, Button, Stack, styled, Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useState } from 'react';
 import { GoogleIcon } from '../../components/CustomIcons';
@@ -52,10 +52,16 @@ const RootContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const ExtensionView = () => {
-  return (
-    <Container>
-      <Box mt={4}>
+const Login = () => {
+  const navigate = useNavigate();
+
+  function onSignInClick(): void {
+    navigate(ROUTES.home);
+  }
+
+  const common = (
+    <>
+      <Box mt={isChromeExt ? 4 : 10}>
         <Typography component="h1" variant="h2" sx={{ width: '100%' }}>
           Bookify
         </Typography>
@@ -63,88 +69,50 @@ const ExtensionView = () => {
           One click to book them all
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-        <Button
-          type="submit"
-          sx={[
-            (theme) => ({
-              height: 70,
-              backgroundColor: theme.palette.common.white,
-              color: theme.palette.common.black,
-              fontSize: theme.typography.h6,
-              fontWeight: 700,
-              '& .MuiButton-endIcon': {
-                marginLeft: theme.spacing(20),
-              },
-            }),
-          ]}
-          fullWidth
-          variant="contained"
-          endIcon={<GoogleIcon />}
-        >
-          Sign in
-        </Button>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, height: isChromeExt ? 'auto' : '100vh' }}>
+        <Box sx={{ px: isChromeExt ? 0 : 5 }}>
+          <Button
+            type="submit"
+            sx={[
+              (theme) => ({
+                height: 70,
+                backgroundColor: theme.palette.common.white,
+                color: theme.palette.common.black,
+                fontSize: theme.typography.h6,
+                fontWeight: 700,
+                '& .MuiButton-endIcon': {
+                  marginLeft: theme.spacing(20),
+                },
+              }),
+            ]}
+            fullWidth
+            variant="contained"
+            endIcon={<GoogleIcon />}
+            onClick={onSignInClick}
+          >
+            Sign in
+          </Button>
+        </Box>
+        {!isChromeExt && (
+          <>
+            <Box sx={{ flexGrow: 1 }} />
+            <Box>
+              <Box component="img" sx={{}} alt="The house from the offer." src="./branding_asset.png" />
+            </Box>
+          </>
+        )}
       </Box>
-    </Container>
+    </>
   );
-};
 
-const Login = () => {
-  const [emailError, setEmailError] = useState(false);
-  const navigate = useNavigate();
-
-  if (isChromeExt) {
-    return <ExtensionView />;
+  if (!isChromeExt) {
+    return (
+      <RootContainer direction="column" justifyContent="space-between">
+        <Card variant="outlined">{common}</Card>
+      </RootContainer>
+    );
   }
-
-  function onSignInClick(): void {
-    navigate(ROUTES.home);
-  }
-
-  return (
-    <RootContainer direction="column" justifyContent="space-between">
-      <Card variant="outlined">
-        <Box mt={10}>
-          <Typography component="h1" variant="h2" sx={{ width: '100%' }}>
-            Bookify
-          </Typography>
-          <Typography variant="h5" sx={[(theme) => ({ color: theme.palette.text.secondary, fontWeight: 400, mt: 1 })]}>
-            One click to book them all
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, height: '100vh' }}>
-          <Box sx={{ px: 5 }}>
-            <Button
-              type="submit"
-              sx={[
-                (theme) => ({
-                  height: 70,
-                  backgroundColor: theme.palette.common.white,
-                  color: theme.palette.common.black,
-                  fontSize: theme.typography.h6,
-                  fontWeight: 700,
-                  '& .MuiButton-endIcon': {
-                    marginLeft: theme.spacing(20),
-                  },
-                }),
-              ]}
-              fullWidth
-              variant="contained"
-              endIcon={<GoogleIcon />}
-              onClick={onSignInClick}
-            >
-              Sign in
-            </Button>
-          </Box>
-
-          <Box sx={{ flexGrow: 1 }} />
-          <Box>
-            <Box component="img" sx={{}} alt="The house from the offer." src="./branding_asset.png" />
-          </Box>
-        </Box>
-      </Card>
-    </RootContainer>
-  );
+  return <Container>{common}</Container>;
 };
 
 export default Login;

@@ -1,22 +1,28 @@
-import { Box, Button, MenuItem, Select, SelectChangeEvent, SxProps, Theme, Typography } from '@mui/material';
-import { useState } from 'react';
+import { MenuItem, Select, SelectChangeEvent, SxProps, Theme, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 interface DropdownProps {
   sx?: SxProps<Theme>;
-  options?: any[];
+  options: any[];
 }
 
 export default function Dropdown({ sx, options }: DropdownProps) {
-  const [age, setAge] = useState((options && options[0]) || '');
+  const [option, setOption] = useState(options[0] || '');
   const height = '65px';
 
+  useEffect(() => {
+    if (options.length > 0) {
+      setOption(options[0]);
+    }
+  }, [options]);
+
   const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value);
+    setOption(event.target.value);
   };
 
   return (
     <Select
-      value={age}
+      value={option}
       onChange={handleChange}
       fullWidth
       sx={[
