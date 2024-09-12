@@ -13,7 +13,7 @@
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:chrome": "cross-env NODE_ENV=development dotenv -e .env.development.chrome -- nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:client": "cd client && npx http-server -p 8000 -a localhost",
+    "start:client": "cd client-react && npm run start",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:run": "npm run build && (npm run typeorm migration:run -- -d ./src/config/orm.config.ts)",
     "migration:generate": "npm run build && (npm run typeorm -- -d ./src/config/orm.config.ts migration:generate ./src/migrations/migration)",
