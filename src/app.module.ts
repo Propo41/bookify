@@ -28,7 +28,7 @@ import { join } from 'path';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 5,
+        limit: process.env.NODE_ENV === 'development' ? 5000 : 20,
       },
     ]),
     AuthModule,

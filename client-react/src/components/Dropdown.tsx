@@ -2,39 +2,44 @@ import { MenuItem, Select, SelectChangeEvent, SxProps, Theme, Typography } from 
 import { useEffect, useState } from 'react';
 
 interface DropdownProps {
+  id: string;
   sx?: SxProps<Theme>;
-  options: any[];
+  options?: DropdownOption[];
+  value?: string;
+  disabled?: boolean;
+  onChange: (id: string, value: string) => void;
 }
 
-export default function Dropdown({ sx, options }: DropdownProps) {
-  const [option, setOption] = useState(options[0] || '');
+export interface DropdownOption {
+  text: string;
+  value: string; // the main value used for api calls
+}
+
+export default function Dropdown({ sx, id, disabled, value, options, onChange }: DropdownProps) {
   const height = '65px';
 
-  useEffect(() => {
-    if (options.length > 0) {
-      setOption(options[0]);
-    }
-  }, [options]);
-
   const handleChange = (event: SelectChangeEvent) => {
-    setOption(event.target.value);
+    onChange(id, event.target.value);
   };
 
   return (
     <Select
-      value={option}
+      value={value}
       onChange={handleChange}
       fullWidth
+      disabled={disabled || false}
       sx={[
+        // @ts-ignore
         (theme) => ({
-          height,
+          height: height,
           backgroundColor: theme.palette.grey[100],
+          ...sx,
         }),
       ]}
     >
       {options?.map((option) => (
-        <MenuItem value={option} key={option}>
-          <Typography variant="subtitle1">{option}</Typography>
+        <MenuItem value={option.value} key={option.value}>
+          <Typography variant="subtitle1">{option.text}</Typography>
         </MenuItem>
       ))}
     </Select>

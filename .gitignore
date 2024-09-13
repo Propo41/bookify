@@ -38,9 +38,10 @@ lerna-debug.log*
 *.sqlite
 
 # dotenv environment variable files
-.env
-.env.development
-.env.development.chrome
+**/.env
+**/.env.development
+**/.env.chrome
+**/.env.development.chrome
 .env.test.local
 .env.production.local
 .env.local

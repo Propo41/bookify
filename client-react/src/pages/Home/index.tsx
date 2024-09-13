@@ -1,4 +1,23 @@
-import { BottomNavigation, BottomNavigationAction, Box, IconButton, Paper, Stack, styled, Typography } from '@mui/material';
+import {
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Stack,
+  styled,
+  TextField,
+  Typography,
+} from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,14 +27,50 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import TimeAdjuster from '../../components/TimeAdjuster';
 import Grid from '@mui/material/Grid2';
-import Dropdown from '../../components/Dropdown';
+import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import toast from 'react-hot-toast';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
-import { populateTimeOptions } from '../../helpers/utility';
+import { convertToLocaleTime, convertToRFC3339, getTimeZoneString, populateTimeOptions } from '../../helpers/utility';
+import { logout, makeRequest } from '../../helpers/api';
+import toast from 'react-hot-toast';
+import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
+import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import { ConferenceRoom, EventResponse, RoomResponse } from '../../helpers/types';
+import { isMobile } from 'react-device-detect';
+import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 
-const isChromeExt = false;
+const isChromeExt = process.env.REACT_APP_ENVIRONMENT === 'chrome';
+const roomChangeTimeFrame = 2;
+const cacheService: CacheService = CacheServiceFactory.getCacheService();
+
+interface Event {
+  room?: string;
+  eventId?: string;
+  start?: string;
+  end?: string;
+  summary?: string;
+  availableRooms?: DropdownOption[];
+  roomEmail?: string;
+  seats?: number;
+  isEditable?: boolean;
+  createdAt?: number;
+}
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  boxShadow: 'none',
+  '&:hover': {
+    boxShadow: 'none',
+  },
+  '&:active': {
+    boxShadow: 'none',
+  },
+  '&:focus': {
+    boxShadow: 'none',
+  },
+}));
 
 const TopBar = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.grey[100],
@@ -75,6 +130,10 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const TopNavigationBar = ({ title }: { title: string }) => {
+  const onLogoutClick = async () => {
+    await logout();
+  };
+
   return (
     <TopBar>
       <Box>
@@ -83,6 +142,7 @@ const TopNavigationBar = ({ title }: { title: string }) => {
 
       <IconButton
         aria-label="logout"
+        onClick={onLogoutClick}
         size="medium"
         sx={[
           (theme) => ({
@@ -103,24 +163,158 @@ const TopNavigationBar = ({ title }: { title: string }) => {
   );
 };
 
+const createDropdownOptions = (options: string[]) => {
+  return (options || []).map((option) => ({ value: option, text: option }));
+};
+
 const BookRoomView = () => {
   const [loading, setLoading] = useState(false);
-  const [timeOptions, setTimeOptions] = useState<string[]>([]);
+  const [changeRoomLoading, setChangeRoomLoading] = useState(false);
+  const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
+  const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editRoom, setEditRoom] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState<Event>({});
+  const [requestedRoom, setRequestedRoom] = useState('');
+
+  const [formData, setFormData] = useState({
+    startTime: '',
+    duration: 15,
+    seats: 1,
+    floor: '',
+  });
 
   useEffect(() => {
-    const { options, selected } = populateTimeOptions();
-    setTimeOptions(options);
+    const options = populateTimeOptions();
+    setTimeOptions(createDropdownOptions(options));
+
+    const init = async (floors: string[]) => {
+      setFloorOptions(createDropdownOptions(floors));
+
+      const floor = await cacheService.getFromCache('floor');
+      setFormData({
+        ...formData,
+        startTime: options[0],
+        floor: floor || floors[0],
+      });
+    };
+
+    cacheService.getFromCache('floors').then((floors) => {
+      if (floors) {
+        init(JSON.parse(floors));
+      } else {
+        makeRequest('/floors', 'GET').then(async (floors) => {
+          await cacheService.saveToCache('floors', JSON.stringify(floors));
+          init(floors);
+        });
+      }
+    });
   }, []);
 
-  function handleClick() {
-    setLoading(!loading);
+  const handleInputChange = (id: string, value: string | number) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+
+  const handleRoomChange = (id: string, value: string) => {
+    setRequestedRoom(value);
+  };
+
+  const onChangeRoomClick = async () => {
+    if (currentEvent.roomEmail === requestedRoom) {
+      toast.error('You have already booked this room');
+      return;
+    }
+
+    if (currentEvent.createdAt) {
+      console.log(Date.now() - currentEvent.createdAt);
+    }
+
+    if (currentEvent.createdAt && Date.now() - currentEvent.createdAt > roomChangeTimeFrame * 60 * 1000) {
+      toast.error('Not possible to change the room at the moment');
+      return;
+    }
+
+    setChangeRoomLoading(true);
+
+    const res = await makeRequest('/room', 'PUT', {
+      eventId: currentEvent.eventId,
+      roomId: requestedRoom,
+      requestedAt: new Date(),
+    });
+
+    console.log(res);
+
+    if (res.error) {
+      toast.error(res.message);
+      setChangeRoomLoading(false);
+      return;
+    }
+
+    setCurrentEvent({
+      ...currentEvent,
+      room: res.room,
+      seats: res.seats,
+      isEditable: false,
+    });
+
+    setChangeRoomLoading(false);
+    toast.success('Room changed!');
+  };
+
+  async function onBookClick() {
+    setLoading(true);
+    const { startTime, duration, floor, seats } = formData;
+
+    const date = new Date(Date.now()).toISOString().split('T')[0];
+    const formattedStartTime = convertToRFC3339(date, startTime);
+
+    console.log('formattedStartTime', formattedStartTime);
+
+    const res = await makeRequest('/room', 'POST', {
+      startTime: formattedStartTime,
+      duration: duration,
+      seats: seats,
+      floor: floor,
+      timeZone: getTimeZoneString(),
+    });
+
+    if (res.error) {
+      toast.error(res.message);
+      return;
+    }
+
+    console.log('room booked: ', res);
+
+    const { room, eventId, start, end, summary, seats: _seats, roomEmail, availableRooms } = res;
+    setLoading(false);
+
+    setCurrentEvent({
+      isEditable: true,
+      eventId,
+      room,
+      start: convertToLocaleTime(start),
+      end: convertToLocaleTime(end),
+      summary,
+      roomEmail,
+      seats: _seats,
+      availableRooms: availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: r.name })),
+      createdAt: Date.now(),
+    });
+
+    setRequestedRoom(roomEmail);
+    setDialogOpen(true);
+
+    toast.success(`Room booked! You have ${roomChangeTimeFrame} minutes to change the room`);
   }
 
   return (
     <Box>
       <Grid container spacing={1} columns={16} px={2} mt={3}>
         <Grid size={8}>
-          <Dropdown options={timeOptions} />
+          <Dropdown id="startTime" options={timeOptions} value={formData.startTime} onChange={handleInputChange} />
           <Typography
             variant="subtitle1"
             sx={[
@@ -134,7 +328,13 @@ const BookRoomView = () => {
           </Typography>
         </Grid>
         <Grid size={8}>
-          <TimeAdjuster incrementBy={15} minAmount={15} decorator={'m'} />
+          <TimeAdjuster
+            incrementBy={15}
+            minAmount={15}
+            decorator={'m'}
+            value={formData.duration}
+            onChange={(newValue) => handleInputChange('duration', newValue)}
+          />
           <Typography
             variant="subtitle1"
             sx={[
@@ -151,7 +351,7 @@ const BookRoomView = () => {
 
       <Grid container spacing={1} columns={16} px={2} mt={2}>
         <Grid size={8}>
-          <TimeAdjuster incrementBy={1} minAmount={1} />
+          <TimeAdjuster incrementBy={1} minAmount={1} value={formData.seats} onChange={(newValue) => handleInputChange('seats', newValue)} />
           <Typography
             variant="subtitle1"
             sx={[
@@ -165,7 +365,7 @@ const BookRoomView = () => {
           </Typography>
         </Grid>
         <Grid size={8}>
-          <Dropdown options={['F1']} />
+          <Dropdown id="floor" value={formData.floor} options={floorOptions} onChange={handleInputChange} />
           <Typography
             variant="subtitle1"
             sx={[
@@ -188,7 +388,7 @@ const BookRoomView = () => {
       >
         <LoadingButton
           color="primary"
-          onClick={handleClick}
+          onClick={onBookClick}
           fullWidth
           loading={loading}
           loadingPosition="center"
@@ -203,24 +403,142 @@ const BookRoomView = () => {
         >
           <Typography variant="h6">Book</Typography>
         </LoadingButton>
+        {/* todo */}
+        {/* <Box mt={2}>
+          <Box display="flex" alignItems="center" flexWrap="wrap" sx={{ gap: '8px', padding: '10px', borderRadius: 1, backgroundColor: '#ECECEC', mt: 1 }}>
+            <TextField
+              variant="standard"
+              // value={inputValue}
+              // onChange={(e) => setInputValue(e.target.value)}
+              // onKeyDown={handleKeyDown}
+              placeholder="Enter title"
+              InputProps={{
+                disableUnderline: true,
+              }}
+              fullWidth
+              sx={{ flex: 1, py: 1, px: 1, fontWeight: 800, color: 'red' }}
+            />
+          </Box>
+
+          <ChipInput />
+
+          <Box>
+            <Checkbox defaultChecked />
+          </Box>
+        </Box> */}
       </Box>
+
+      <Dialog
+        PaperProps={{
+          sx: { width: '350px' },
+        }}
+        open={dialogOpen}
+        onClose={onChangeRoomClick}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
+          {'Room has been booked'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="subtitle1">
+            <b>Title: </b>
+            {currentEvent.summary || ''}
+          </Typography>
+
+          <Box display={'flex'} alignItems={'center'} mt={1}>
+            <Typography variant="subtitle1">
+              <b>Room: </b>
+            </Typography>
+            <Dropdown
+              id="room"
+              disabled={!editRoom}
+              value={requestedRoom}
+              sx={{ height: '28px', mx: 1 }}
+              options={currentEvent.availableRooms}
+              onChange={handleRoomChange}
+            />
+            <IconButton
+              disabled={!currentEvent.isEditable}
+              aria-label="edit-room"
+              sx={{ p: 1 }}
+              onClick={() => {
+                setEditRoom(!editRoom);
+              }}
+            >
+              {editRoom ? <CheckRoundedIcon /> : <ModeEditOutlineRoundedIcon />}
+            </IconButton>
+          </Box>
+
+          <Chip sx={{ mt: 2, fontSize: 16 }} icon={<AccessTimeFilledRoundedIcon />} label={currentEvent.start + ' - ' + currentEvent.end || ''} />
+          <Chip sx={{ mt: 2, fontSize: 16, ml: 1 }} icon={<PeopleRoundedIcon />} label={currentEvent.seats} />
+        </DialogContent>
+        <DialogActions>
+          <CustomButton disabled={changeRoomLoading || !currentEvent.isEditable} variant="text" color="error" disableElevation onClick={onChangeRoomClick}>
+            Change room
+          </CustomButton>
+          <CustomButton disabled={changeRoomLoading} onClick={() => setDialogOpen(false)}>
+            Dismiss
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
 
 const MyEventsView = () => {
-  const array = Array.from({ length: 2 }, (_, index) => `Item ${index + 1}`);
+  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<RoomResponse[]>([]);
+
+  useEffect(() => {
+    makeRequest('/rooms', 'GET', null, {
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+      timeZone: getTimeZoneString(),
+    }).then((res) => {
+      setLoading(false);
+
+      if (!res?.length) {
+        return;
+      }
+
+      setEvents(res);
+    });
+  }, []);
+
+  const onDeleteClick = async (id?: string) => {
+    setLoading(true);
+
+    const res = await makeRequest('/room', 'DELETE', { id });
+    setEvents(events.filter((e) => e.id !== id));
+
+    if (res) {
+      toast.success('Deleted event!');
+    }
+
+    setLoading(false);
+  };
 
   return (
     <Box>
-      {array.map((_, i) => (
+      {loading && <LinearProgress />}
+
+      {events.length === 0 && (
+        <Typography mt={3} variant="h6">
+          No events to show
+        </Typography>
+      )}
+      {events.map((event, i) => (
         <EventCard
           key={i}
+          event={event}
           sx={{
             mx: 2,
             mt: 2,
-            mb: i === array.length - 1 ? 3 : 0,
+            mb: i === events.length - 1 ? 3 : 0,
           }}
+          disabled={loading}
+          onDelete={onDeleteClick}
         />
       ))}
     </Box>
@@ -228,7 +546,64 @@ const MyEventsView = () => {
 };
 
 const SettingsView = () => {
-  return <Box mt={4}>Coming soon!</Box>;
+  const [formData, setFormData] = useState({
+    floor: '',
+  });
+  const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
+
+  useEffect(() => {
+    const init = (floors: string[]) => {
+      setFloorOptions(createDropdownOptions(floors));
+      cacheService.getFromCache('floor').then((floor) => {
+        setFormData({
+          ...formData,
+          floor: floor || floors[0],
+        });
+      });
+    };
+
+    cacheService.getFromCache('floors').then((floors) => {
+      if (floors) {
+        init(JSON.parse(floors));
+      }
+
+      if (!floors) {
+        makeRequest('/floors', 'GET').then(async (floors) => {
+          await cacheService.saveToCache('floors', JSON.stringify(floors));
+          init(floors);
+        });
+        return;
+      }
+    });
+  }, []);
+
+  const handleInputChange = (id: string, value: string | number) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+
+  const onSaveClick = async () => {
+    await cacheService.saveToCache('floor', formData.floor);
+  };
+
+  return (
+    <Box
+      mt={4}
+      mx={2}
+      sx={{
+        textAlign: 'left',
+      }}
+    >
+      <Typography variant="subtitle1">Select preferred floor</Typography>
+      <Dropdown sx={{ mt: 1, height: '60px' }} id="floor" value={formData.floor} options={floorOptions} onChange={handleInputChange} />
+
+      <CustomButton sx={{ py: 2, mt: 2 }} onClick={onSaveClick} fullWidth variant="contained">
+        Save
+      </CustomButton>
+    </Box>
+  );
 };
 
 const tabs = [
@@ -251,6 +626,14 @@ const Home = () => {
 
   const [value, setValue] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    cacheService.getFromCache('access_token').then((token) => {
+      if (!token) {
+        navigate('/sign-in');
+      }
+    });
+  }, []);
 
   const common = (
     <Box

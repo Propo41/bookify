@@ -14,11 +14,12 @@ export class CalenderController {
   @Get('/rooms')
   async listRooms(
     @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string,
     @Query('timeZone') timeZone: string,
   ): Promise<RoomResponse[]> {
-    return await this.calenderService.listRooms(client, startTime, endTime, timeZone);
+    return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
   }
 
   @UseGuards(AuthGuard)
@@ -59,5 +60,11 @@ export class CalenderController {
   @Delete('/room')
   async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Body('id') eventId: string): Promise<DeleteResponse> {
     return await this.calenderService.deleteEvent(client, eventId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/floors')
+  async listFloors(@_User('domain') domain: string): Promise<string[]> {
+    return await this.calenderService.listFloors(domain);
   }
 }

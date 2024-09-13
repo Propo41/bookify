@@ -15,8 +15,10 @@
     "@types/node": "^16.18.108",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "axios": "^1.7.7",
     "lodash": "^4.17.21",
     "react": "^18.3.1",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.26.2",
@@ -26,7 +28,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:chrome": "env-cmd -f .env.chrome react-scripts start",
     "build": "react-scripts build",
+    "build:chrome": "env-cmd -f .env.chrome react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -50,6 +54,8 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@types/lodash": "^4.17.7"
+    "@types/chrome": "^0.0.270",
+    "@types/lodash": "^4.17.7",
+    "cross-env": "^7.0.3"
   }
 }

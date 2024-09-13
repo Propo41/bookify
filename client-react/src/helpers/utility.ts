@@ -28,17 +28,14 @@ export function populateTimeOptions() {
     }
   }
 
-  return {
-    options: timeOptions,
-    selected: currentTime,
-  };
+  return timeOptions;
 }
 
-function toMinutesSinceMidnight(hours: number, minutes: number) {
+export function toMinutesSinceMidnight(hours: number, minutes: number) {
   return hours * 60 + minutes;
 }
 
-function formatTime(hours: number, minutes: number) {
+export function formatTime(hours: number, minutes: number) {
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12; // If hour is 0, it should be 12
@@ -47,27 +44,12 @@ function formatTime(hours: number, minutes: number) {
 }
 
 // returns timeZone formatted as "Asia/Dhaka", etc
-function getTimeZoneString() {
+export function getTimeZoneString() {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return timeZone;
 }
 
-function removeToken() {
-  window.localStorage.removeItem('access_token');
-}
-
-function getToken() {
-  const token = window.localStorage.getItem('access_token');
-  if (!token) return null;
-
-  if (token === 'undefined' || token.trim() === '') {
-    return null;
-  }
-
-  return token;
-}
-
-function getTimezoneOffset() {
+export function getTimezoneOffset() {
   const offsetInMinutes = new Date().getTimezoneOffset();
   const sign = offsetInMinutes <= 0 ? '+' : '-';
   const offsetInHours = Math.floor(Math.abs(offsetInMinutes) / 60);
@@ -77,7 +59,7 @@ function getTimezoneOffset() {
   return formattedOffset;
 }
 
-function convertToRFC3339(dateString: string, timeString: string) {
+export function convertToRFC3339(dateString: string, timeString: string) {
   const timeZoneOffset = getTimezoneOffset();
   const date = new Date(`${dateString} ${timeString}`);
 
@@ -93,7 +75,9 @@ function convertToRFC3339(dateString: string, timeString: string) {
   return `${isoDate}T${isoTime.split('.')[0]}${timeZoneOffset}`;
 }
 
-function convertToLocaleTime(dateStr: string) {
+export function convertToLocaleTime(dateStr?: string) {
+  if (!dateStr) return '-';
+
   const date = new Date(dateStr);
 
   const options: Intl.DateTimeFormatOptions = {
