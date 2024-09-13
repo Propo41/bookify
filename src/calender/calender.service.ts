@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, GoneException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
@@ -59,7 +59,7 @@ export class CalenderService {
     var event = {
       summary: eventTitle || 'Quick Meeting',
       location: pickedRoom.name,
-      description: 'A quick meeting',
+      description: 'A quick meeting created by Bookify',
       start: {
         dateTime: startTime,
       },
@@ -94,7 +94,9 @@ export class CalenderService {
       start: result.data.start.dateTime,
       end: result.data.end.dateTime,
       room: formattedRoom,
+      roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
+      seats: pickedRoom.seats,
       availableRooms: rooms,
     } as EventResponse;
   }
@@ -149,74 +151,91 @@ export class CalenderService {
       console.error(error);
 
       if (error?.code === 403) {
-        await this.authService.logout(client);
         throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
       }
-    }
 
-    return null;
+      await this.authService.logout(client);
+      throw new UnauthorizedException('Insufficient permissions provided. Please allow access to the calender api during login.');
+    }
   }
 
-  async listRooms(client: OAuth2Client, startTime: string, endTime: string, timeZone: string): Promise<RoomResponse[]> {
+  async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<RoomResponse[]> {
     const calendar = google.calendar({ version: 'v3', auth: client });
-    const result = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: startTime,
-      timeMax: endTime,
-      timeZone,
-      maxResults: 20,
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
+    try {
+      const result = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: startTime,
+        timeMax: endTime,
+        timeZone,
+        maxResults: 20,
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
 
-    const events = result.data.items.map((event) => {
-      return {
-        conference: event.hangoutLink,
-        room: parseLocation(event.location),
-        id: event.id,
-        title: event.summary,
-        start: event.start.dateTime,
-        end: event.end.dateTime,
-      } as RoomResponse;
-    });
+      const rooms = await this.authService.getCalenderResources(domain);
+      const events = result.data.items.map((event) => {
+        let room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
-    return events;
+        return {
+          conference: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
+          room: room.name,
+          id: event.id,
+          seats: room.seats,
+          floor: room.floor,
+          title: event.summary,
+          start: event.start.dateTime,
+          end: event.end.dateTime,
+        } as RoomResponse;
+      });
+
+      return events;
+    } catch (error) {
+      await this.authService.logout(client);
+      throw new UnauthorizedException('Please log in again');
+    }
   }
 
   async updateEvent(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<EventResponse | null> {
     const calendar = google.calendar({ version: 'v3', auth: client });
-    const { data } = await calendar.events.get({
-      eventId: eventId,
-      calendarId: 'primary',
-    });
+    try {
+      const { data } = await calendar.events.get({
+        eventId: eventId,
+        calendarId: 'primary',
+      });
 
-    const rooms: ConferenceRoom[] = await this.authService.getCalenderResources(domain);
-    const room = rooms.find((room) => room.email === roomEmail);
-    if (!room) {
-      throw new NotFoundException('Room not found.');
+      const rooms: ConferenceRoom[] = await this.authService.getCalenderResources(domain);
+      const room = rooms.find((room) => room.email === roomEmail);
+      if (!room) {
+        throw new NotFoundException('Room not found.');
+      }
+
+      // remove the previous room id from the list
+      const filteredAttendees = data.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
+      const result = await calendar.events.update({
+        eventId: eventId,
+        calendarId: 'primary',
+        requestBody: {
+          ...data,
+          location: room.name,
+          attendees: [...filteredAttendees, { email: roomEmail }],
+        },
+      });
+
+      console.log('Room has been updated', result.data);
+
+      return {
+        summary: result.data.summary,
+        meet: result.data.hangoutLink,
+        start: result.data.start.dateTime,
+        seats: room.seats,
+        end: result.data.end.dateTime,
+        room: parseLocation(result.data.location),
+      };
+    } catch (error) {
+      console.error(error);
+      await this.authService.logout(client);
+      throw new UnauthorizedException('Please log in again');
     }
-
-    // remove the previous room id from the list
-    const filteredAttendees = data.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
-    const result = await calendar.events.update({
-      eventId: eventId,
-      calendarId: 'primary',
-      requestBody: {
-        ...data,
-        location: room.name,
-        attendees: [...filteredAttendees, { email: roomEmail }],
-      },
-    });
-
-    console.log('Room has been updated', result.data);
-
-    return {
-      summary: result.data.summary,
-      meet: result.data.hangoutLink,
-      start: result.data.start.dateTime,
-      end: result.data.end.dateTime,
-      room: parseLocation(result.data.location),
-    };
   }
 
   async deleteEvent(client: OAuth2Client, id: string): Promise<DeleteResponse> {
@@ -233,9 +252,16 @@ export class CalenderService {
       if (error?.code === 403) {
         await this.authService.logout(client);
         throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
+      } else if (error.code === 410) {
+        throw new GoneException('Event has already been deleted');
       }
 
-      throw new ConflictException('Could not delete the event.');
+      throw new UnauthorizedException('Please log in again');
     }
+  }
+
+  async listFloors(domain: string): Promise<string[]> {
+    const floors = await this.authService.getFloorsByDomain(domain);
+    return floors;
   }
 }

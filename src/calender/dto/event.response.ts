@@ -6,6 +6,8 @@ export interface EventResponse {
   start?: string;
   end?: string;
   meet?: string;
+  roomEmail?: string;
   roomId?: string;
+  seats?: number;
   availableRooms?: ConferenceRoom[];
 }

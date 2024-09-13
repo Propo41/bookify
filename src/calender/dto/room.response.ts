@@ -5,4 +5,6 @@ export interface RoomResponse {
   title?: string;
   start?: string;
   end?: string;
+  seats?: number;
+  floor?: string;
 }

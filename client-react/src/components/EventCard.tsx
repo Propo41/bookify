@@ -2,27 +2,68 @@ import { Card, Typography, Chip, IconButton, Box, styled, Theme, SxProps, Divide
 import FaceIcon from '@mui/icons-material/Face';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
-
-const chips = ['asd', 'asdasd', 'asdass dasd', 'asdasd', 'asdasd', 'asdasdasd'];
+import React, { useEffect, useState } from 'react';
+import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import { convertToLocaleTime } from '../helpers/utility';
+import { RoomResponse } from '../helpers/types';
+import { makeRequest } from '../helpers/api';
+import toast from 'react-hot-toast';
 
 interface ChipData {
-  key: number;
+  icon: React.ReactElement;
   label: string;
+  color?: string;
 }
 
 interface EventCardProps {
   sx?: SxProps<Theme>;
+  event?: RoomResponse;
+  onDelete: (id?: string) => void;
+  disabled?: boolean;
 }
+
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
 }));
 
-const EventCard = ({ sx }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
+  const [chips, setChips] = useState<ChipData[]>([]);
+
+  useEffect(() => {
+    const _chips: ChipData[] = [
+      {
+        label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
+        icon: <AccessTimeFilledRoundedIcon />,
+        color: '#9BF679',
+      },
+      {
+        label: event?.seats + '' || '-',
+        icon: <PeopleRoundedIcon />,
+      },
+      {
+        label: event?.room || '-',
+        icon: <MeetingRoomRoundedIcon />,
+      },
+      {
+        label: event?.floor || '-',
+        icon: <StairsIcon />,
+      },
+    ];
+
+    if (event?.conference) {
+      _chips.push({
+        label: event.conference,
+        icon: <InsertLinkRoundedIcon />,
+      });
+    }
+
+    setChips(_chips);
+  }, [event]);
+
   return (
     <Card sx={{ borderRadius: 2, py: 1.5, px: 1.5, ...sx }}>
       <Typography
@@ -32,7 +73,7 @@ const EventCard = ({ sx }: EventCardProps) => {
           textAlign: 'left',
         }}
       >
-        Quick Meeting 1
+        {event?.title}
       </Typography>
 
       <Box
@@ -48,19 +89,14 @@ const EventCard = ({ sx }: EventCardProps) => {
         }}
       >
         {chips.map((chip, i) => {
-          let icon;
-
-          // if (chip.label === 'React') {
-          //   icon = <TagFacesIcon />;
-          // }
-
           return (
             <ListItem key={i} sx={{ mt: 0.4 }}>
               <Chip
-                icon={<FaceIcon />}
-                label={chip}
+                icon={chip.icon}
+                label={chip.label}
                 sx={{
                   fontSize: 14,
+                  backgroundColor: chip.color,
                 }}
               />
             </ListItem>
@@ -71,10 +107,10 @@ const EventCard = ({ sx }: EventCardProps) => {
       <Divider sx={{ my: 1 }} />
 
       <CardActions sx={{ p: 0, justifyContent: 'flex-end' }}>
-        <IconButton aria-label="edit" color={'primary'}>
+        {/* <IconButton disabled={disabled || false}  aria-label="edit" color={'primary'}>
           <EditRoundedIcon />
-        </IconButton>
-        <IconButton aria-label="delete" color={'error'}>
+        </IconButton> */}
+        <IconButton disabled={disabled || false} aria-label="delete" color={'error'} onClick={() => onDelete(event!.id)}>
           <DeleteForeverRoundedIcon />
         </IconButton>
       </CardActions>

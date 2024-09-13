@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { GoogleIcon } from '../../components/CustomIcons';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../config/routes';
+import { login } from '../../helpers/api';
 
-const isChromeExt = false;
+const isChromeExt = process.env.REACT_APP_ENVIRONMENT === 'chrome';
 
 const Container = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -53,10 +54,8 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Login = () => {
-  const navigate = useNavigate();
-
-  function onSignInClick(): void {
-    navigate(ROUTES.home);
+  async function onSignInClick(): Promise<void> {
+    login();
   }
 
   const common = (

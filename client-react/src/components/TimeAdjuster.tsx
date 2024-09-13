@@ -7,17 +7,18 @@ interface TimeAdjusterProps {
   incrementBy: number;
   minAmount: number;
   decorator?: string;
+  value: number;
+  onChange: (newValue: number) => void;
 }
-export default function TimeAdjuster({ sx, incrementBy: adjustBy, minAmount, decorator }: TimeAdjusterProps) {
-  const [time, setTime] = useState(minAmount);
+export default function TimeAdjuster({ sx, incrementBy: adjustBy, minAmount, decorator, value, onChange }: TimeAdjusterProps) {
   const height = '65px';
 
   const handleIncrease = () => {
-    setTime((prev) => prev + adjustBy);
+    onChange(value + adjustBy); // Pass updated value to parent
   };
 
   const handleDecrease = () => {
-    setTime((prev) => Math.max(prev - adjustBy, minAmount));
+    onChange(Math.max(value - adjustBy, minAmount)); // Pass updated value to parent
   };
 
   return (
@@ -62,7 +63,7 @@ export default function TimeAdjuster({ sx, incrementBy: adjustBy, minAmount, dec
           backgroundColor: '#ECECEC',
         }}
       >
-        {time}
+        {value}
         {decorator ?? ''}
       </Typography>
       <Button

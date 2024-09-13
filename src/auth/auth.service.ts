@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotImplementedException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
 import { google } from 'googleapis';
@@ -124,7 +125,7 @@ export class AuthService {
 
   async refreshToken(user: User, oauth2Client: OAuth2Client): Promise<boolean> {
     if (!oauth2Client.credentials.refresh_token) {
-      throw new ConflictException('Failed to refresh token. No refresh token found. Log in again');
+      throw new UnauthorizedException('Failed to refresh token. No refresh token found. Log in again');
     }
 
     const { token } = await oauth2Client.getAccessToken();
@@ -139,8 +140,19 @@ export class AuthService {
 
       return true;
     } else {
-      throw new ConflictException('Failed to refresh token');
+      throw new UnauthorizedException('Failed to refresh token');
     }
+  }
+
+  async getFloorsByDomain(domain: string): Promise<string[]> {
+    const result = await this.conferenceRoomsRepository
+      .createQueryBuilder('conferenceRoom')
+      .select('DISTINCT conferenceRoom.floor', 'floor')
+      .where('conferenceRoom.domain = :domain', { domain })
+      .orderBy('conferenceRoom.floor', 'ASC')
+      .getRawMany();
+
+    return result.map((row) => row.floor);
   }
 
   async getCalenderResources(domain: string) {
