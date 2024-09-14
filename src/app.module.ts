@@ -16,7 +16,8 @@ import { join } from 'path';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
+      rootPath: join(__dirname, '..', 'client', 'build'),
+      renderPath: '*', //  ensures all routes are redirected to index.html
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot({
@@ -28,7 +29,7 @@ import { join } from 'path';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: process.env.NODE_ENV === 'development' ? 5000 : 20,
+        limit: process.env.NODE_ENV === 'development' ? 1000 : 20,
       },
     ]),
     AuthModule,

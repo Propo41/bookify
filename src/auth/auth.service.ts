@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -33,8 +34,8 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string): Promise<LoginResponse> {
-    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+  async login(code: string, redirectUrl: string): Promise<LoginResponse> {
+    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
 
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
@@ -85,12 +86,18 @@ export class AuthService {
       this.logger.error(error.message);
 
       if (error.message.includes('refreshToken')) {
-        await this.logout(oauth2Client);
-        throw new ConflictException('Something went wrong');
+        await this.purgeAccess(oauth2Client);
+        throw new UnauthorizedException('Refresh token not found. Log in again');
+      } else if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException('Something went wrong');
       }
-
-      throw new InternalServerErrorException('Something went wrong');
     }
+  }
+
+  async purgeAccess(oauth2Client: OAuth2Client) {
+    await oauth2Client.revokeCredentials();
   }
 
   async createJwt(id: string, name: string, oAuthExpiry: number) {
@@ -114,8 +121,8 @@ export class AuthService {
 
   async logout(oauth2Client: OAuth2Client): Promise<boolean> {
     try {
-      const res = await oauth2Client.revokeCredentials();
-      this.logger.log(`[logout]: revoke credentials success: ${res.data?.success}`);
+      const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
+      this.logger.log(`[logout]: revoke token success: ${res.status === 200}`);
       return true;
     } catch (error) {
       this.logger.error(`[logout]: Error revoking token: ${error}`);
@@ -201,7 +208,7 @@ export class AuthService {
       this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
     } catch (err) {
       this.logger.error(`Couldn't obtain directory resources`);
-      throw new InternalServerErrorException("Couldn't obtain directory resources");
+      throw new NotFoundException("Couldn't obtain directory resources");
     }
   }
 }

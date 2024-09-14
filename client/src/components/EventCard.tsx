@@ -10,8 +10,6 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { convertToLocaleTime } from '../helpers/utility';
 import { RoomResponse } from '../helpers/types';
-import { makeRequest } from '../helpers/api';
-import toast from 'react-hot-toast';
 
 interface ChipData {
   icon: React.ReactElement;

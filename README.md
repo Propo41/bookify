@@ -9,7 +9,36 @@
 
 1. Copy the `.env.example` file as `.env.development.chrome` file in the root dir and fill the required keys as mentioned earlier. <br> 
 Note: The REDIRECT_URL should be in the format `https://<extension-id>.chromiumapp.org` 
-2. Run `npm run start:chrome`
+2. Run `npm run build:chrome`
+3. Go to Chrome extensions and load the `client/build` folder. Note the extension id.
+4. Edit the `REACT_APP_REDIRECT_URI` in the `.env.chrome` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
+5. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
+6. Run `npm run start:dev` to start the server.
+7. Start the extension
+
+## Commands 
+
+```bash
+npm run build:chrome # chrome production build 
+npm run build  # web production build
+
+npm run start:client # start react in dev mode
+
+npm run migration:generate # generates migration files with the code-first-approach based on code changes and current db tables
+npm run migration:run # runs all migration scripts in the migrations folder
+```
+
+## Notes
+
+<b>React-router URLs don't work when refreshing or writing manually</b>: This issue with React Router occurs because when using a client-side routing library like React Router, the server isn't aware of the routes you've defined in your React app. When you refresh or manually type a URL, the server tries to find a matching file, but it doesn't exist, since all routing is handled by React.
+
+Possible solutions:
+
+1. Use .htaccess (If Using Apache)
+2. Static File Hosting Solutions (like Netlify): add a `_redirects` file in your `public/` or `build/` folder:
+```
+/*    /index.html   200
+```
 
 # Use cases
 

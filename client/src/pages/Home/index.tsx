@@ -3,19 +3,16 @@ import {
   BottomNavigationAction,
   Box,
   Button,
-  Checkbox,
   Chip,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   IconButton,
   LinearProgress,
   Paper,
   Stack,
   styled,
-  TextField,
   Typography,
 } from '@mui/material';
 import MuiCard from '@mui/material/Card';
@@ -24,25 +21,26 @@ import { useNavigate } from 'react-router-dom';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import TimeAdjuster from '../../components/TimeAdjuster';
 import Grid from '@mui/material/Grid2';
 import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
-import { convertToLocaleTime, convertToRFC3339, getTimeZoneString, populateTimeOptions } from '../../helpers/utility';
-import { logout, makeRequest } from '../../helpers/api';
+import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions } from '../../helpers/utility';
+import { makeRequest } from '../../helpers/api';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import { ConferenceRoom, EventResponse, RoomResponse } from '../../helpers/types';
-import { isMobile } from 'react-device-detect';
+import { ConferenceRoom, RoomResponse } from '../../helpers/types';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
+import { secrets } from '../../config/secrets';
+import TopNavigationBar from './TopNavigationBar';
+import { ROUTES } from '../../config/routes';
 
-const isChromeExt = process.env.REACT_APP_ENVIRONMENT === 'chrome';
+const isChromeExt = secrets.appEnvironment === 'chrome';
 const roomChangeTimeFrame = 2;
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 
@@ -70,18 +68,6 @@ const CustomButton = styled(Button)(({ theme }) => ({
   '&:focus': {
     boxShadow: 'none',
   },
-}));
-
-const TopBar = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.grey[100],
-  paddingTop: theme.spacing(1.5),
-  paddingBottom: theme.spacing(1.5),
-  paddingRight: theme.spacing(2),
-  paddingLeft: theme.spacing(2),
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-end',
-  textAlign: 'left',
 }));
 
 const Container = styled(Box)(({ theme }) => ({
@@ -129,44 +115,6 @@ const RootContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const TopNavigationBar = ({ title }: { title: string }) => {
-  const onLogoutClick = async () => {
-    await logout();
-  };
-
-  return (
-    <TopBar>
-      <Box>
-        <Typography variant="h4">{title}</Typography>
-      </Box>
-
-      <IconButton
-        aria-label="logout"
-        onClick={onLogoutClick}
-        size="medium"
-        sx={[
-          (theme) => ({
-            bgcolor: theme.palette.primary.main,
-            borderRadius: 1,
-            color: theme.palette.common.white,
-            boxShadow: 'none',
-            '&:hover': {
-              boxShadow: 'none',
-              backgroundColor: theme.palette.primary.light,
-            },
-          }),
-        ]}
-      >
-        <ExitToAppRoundedIcon />
-      </IconButton>
-    </TopBar>
-  );
-};
-
-const createDropdownOptions = (options: string[]) => {
-  return (options || []).map((option) => ({ value: option, text: option }));
-};
-
 const BookRoomView = () => {
   const [loading, setLoading] = useState(false);
   const [changeRoomLoading, setChangeRoomLoading] = useState(false);
@@ -176,6 +124,7 @@ const BookRoomView = () => {
   const [editRoom, setEditRoom] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<Event>({});
   const [requestedRoom, setRequestedRoom] = useState('');
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     startTime: '',
@@ -199,13 +148,27 @@ const BookRoomView = () => {
       });
     };
 
-    cacheService.getFromCache('floors').then((floors) => {
+    cacheService.getFromCache('floors').then(async (floors) => {
+      console.log(floors);
+
       if (floors) {
-        init(JSON.parse(floors));
+        await init(JSON.parse(floors));
       } else {
-        makeRequest('/floors', 'GET').then(async (floors) => {
-          await cacheService.saveToCache('floors', JSON.stringify(floors));
-          init(floors);
+        makeRequest('/floors', 'GET').then(async (res) => {
+          const { data, redirect } = res;
+          if (redirect) {
+            toast.error("Couldn't complete request. Redirecting to login page");
+            setTimeout(() => {
+              navigate(ROUTES.signIn);
+            }, 2000);
+          }
+
+          if (data === null) {
+            return;
+          }
+
+          await cacheService.saveToCache('floors', JSON.stringify(data));
+          await init(data);
         });
       }
     });
@@ -239,24 +202,31 @@ const BookRoomView = () => {
 
     setChangeRoomLoading(true);
 
-    const res = await makeRequest('/room', 'PUT', {
+    const { data, redirect } = await makeRequest('/room', 'PUT', {
       eventId: currentEvent.eventId,
       roomId: requestedRoom,
       requestedAt: new Date(),
     });
 
-    console.log(res);
+    if (redirect) {
+      toast.error("Couldn't complete request. Redirecting to login page");
+      setTimeout(() => {
+        navigate(ROUTES.signIn);
+      }, 2000);
+    }
 
-    if (res.error) {
-      toast.error(res.message);
+    console.log(data);
+
+    if (data.error) {
+      toast.error(data.message);
       setChangeRoomLoading(false);
       return;
     }
 
     setCurrentEvent({
       ...currentEvent,
-      room: res.room,
-      seats: res.seats,
+      room: data.room,
+      seats: data.seats,
       isEditable: false,
     });
 
@@ -273,7 +243,7 @@ const BookRoomView = () => {
 
     console.log('formattedStartTime', formattedStartTime);
 
-    const res = await makeRequest('/room', 'POST', {
+    const { data, redirect } = await makeRequest('/room', 'POST', {
       startTime: formattedStartTime,
       duration: duration,
       seats: seats,
@@ -281,14 +251,21 @@ const BookRoomView = () => {
       timeZone: getTimeZoneString(),
     });
 
-    if (res.error) {
-      toast.error(res.message);
+    if (redirect) {
+      toast.error("Couldn't complete request. Redirecting to login page");
+      setTimeout(() => {
+        navigate(ROUTES.signIn);
+      }, 2000);
+    }
+
+    if (data.error) {
+      toast.error(data.message);
       return;
     }
 
-    console.log('room booked: ', res);
+    console.log('room booked: ', data);
 
-    const { room, eventId, start, end, summary, seats: _seats, roomEmail, availableRooms } = res;
+    const { room, eventId, start, end, summary, seats: _seats, roomEmail, availableRooms } = data;
     setLoading(false);
 
     setCurrentEvent({
@@ -300,7 +277,7 @@ const BookRoomView = () => {
       summary,
       roomEmail,
       seats: _seats,
-      availableRooms: availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: r.name })),
+      availableRooms: availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: `${r.name} (${r.seats})` })),
       createdAt: Date.now(),
     });
 
@@ -489,30 +466,45 @@ const BookRoomView = () => {
 const MyEventsView = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<RoomResponse[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     makeRequest('/rooms', 'GET', null, {
       startTime: new Date().toISOString(),
       endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
       timeZone: getTimeZoneString(),
-    }).then((res) => {
+    }).then(({ data, redirect }) => {
       setLoading(false);
 
-      if (!res?.length) {
+      if (redirect) {
+        toast.error("Couldn't complete request. Redirecting to login page");
+        setTimeout(() => {
+          navigate(ROUTES.signIn);
+        }, 2000);
+      }
+
+      if (!data?.length) {
         return;
       }
 
-      setEvents(res);
+      setEvents(data);
     });
   }, []);
 
   const onDeleteClick = async (id?: string) => {
     setLoading(true);
 
-    const res = await makeRequest('/room', 'DELETE', { id });
-    setEvents(events.filter((e) => e.id !== id));
+    const { data, redirect } = await makeRequest('/room', 'DELETE', { id });
 
-    if (res) {
+    if (redirect) {
+      toast.error("Couldn't complete request. Redirecting to login page");
+      setTimeout(() => {
+        navigate(ROUTES.signIn);
+      }, 2000);
+    }
+
+    if (data) {
+      setEvents(events.filter((e) => e.id !== id));
       toast.success('Deleted event!');
     }
 
@@ -550,6 +542,7 @@ const SettingsView = () => {
     floor: '',
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const init = (floors: string[]) => {
@@ -562,17 +555,25 @@ const SettingsView = () => {
       });
     };
 
-    cacheService.getFromCache('floors').then((floors) => {
+    cacheService.getFromCache('floors').then(async (floors) => {
       if (floors) {
         init(JSON.parse(floors));
       }
 
       if (!floors) {
-        makeRequest('/floors', 'GET').then(async (floors) => {
+        const { data, redirect } = await makeRequest('/floors', 'GET');
+
+        if (redirect) {
+          toast.error("Couldn't complete request. Redirecting to login page");
+          setTimeout(() => {
+            navigate(ROUTES.signIn);
+          }, 2000);
+        }
+
+        if (data) {
           await cacheService.saveToCache('floors', JSON.stringify(floors));
-          init(floors);
-        });
-        return;
+          init(data);
+        }
       }
     });
   }, []);
@@ -626,12 +627,16 @@ const Home = () => {
 
   const [value, setValue] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     cacheService.getFromCache('access_token').then((token) => {
       if (!token) {
-        navigate('/sign-in');
+        navigate(ROUTES.signIn);
+        return;
       }
+
+      setLoading(false);
     });
   }, []);
 
@@ -645,7 +650,8 @@ const Home = () => {
       }}
     >
       <TopNavigationBar title={tabs[value].title} />
-      {tabs[value].component}
+
+      {loading ? <LinearProgress /> : tabs[value].component}
 
       <Paper
         sx={{
