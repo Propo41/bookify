@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginResponse } from './dto';
 import { AuthGuard } from './auth.guard';
@@ -10,8 +10,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/oauth2callback')
-  async oAuthCallback(@Body('code') code: string): Promise<LoginResponse> {
-    return await this.authService.login(code);
+  async oAuthCallback(@Body('code') code: string, @Headers('x-redirect-url') redirectUrl: string): Promise<LoginResponse> {
+    return await this.authService.login(code, redirectUrl);
   }
 
   @UseGuards(AuthGuard)
@@ -23,6 +23,6 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('/resource/tesst')
   async createResources(@_OAuth2Client() client: OAuth2Client): Promise<void> {
-    return await this.authService.createCalenderResources(client, "cefalo.com");
+    return await this.authService.createCalenderResources(client, 'cefalo.com');
   }
 }

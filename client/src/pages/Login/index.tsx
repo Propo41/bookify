@@ -1,12 +1,16 @@
 import { Box, Button, Stack, styled, Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { GoogleIcon } from '../../components/CustomIcons';
 import { useNavigate } from 'react-router-dom';
+import { login, loginChrome } from '../../helpers/api';
+import { CacheService, CacheServiceFactory } from '../../helpers/cache';
+import { secrets } from '../../config/secrets';
 import { ROUTES } from '../../config/routes';
-import { login } from '../../helpers/api';
+import toast from 'react-hot-toast';
 
-const isChromeExt = process.env.REACT_APP_ENVIRONMENT === 'chrome';
+const isChromeExt = secrets.appEnvironment === 'chrome';
+const cacheService: CacheService = CacheServiceFactory.getCacheService();
 
 const Container = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -54,8 +58,27 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    cacheService.getFromCache('access_token').then((token) => {
+      if (token) {
+        navigate(ROUTES.home);
+      }
+    });
+  }, []);
+
   async function onSignInClick(): Promise<void> {
-    login();
+    if (secrets.appEnvironment === 'chrome') {
+      const res = await loginChrome();
+      if (res) {
+        navigate(ROUTES.home);
+      } else {
+        toast.error("Coudn't sign in user.");
+      }
+    } else {
+      await login();
+    }
   }
 
   const common = (

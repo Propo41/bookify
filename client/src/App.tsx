@@ -6,7 +6,10 @@ import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
 import { useEffect } from 'react';
 import { handleOAuthCallback } from './helpers/api';
+import { ROUTES } from './config/routes';
 
+// only used for the web version
+// for chrome extension, a different oauth flow is used using the chrome api
 function OAuth() {
   const navigate = useNavigate();
 
@@ -15,7 +18,9 @@ function OAuth() {
     const code = url.searchParams.get('code');
 
     if (code) {
-      handleOAuthCallback(code);
+      handleOAuthCallback(code).then(() => {
+        navigate(ROUTES.home);
+      });
     }
   }, [navigate]);
 

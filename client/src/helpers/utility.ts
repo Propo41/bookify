@@ -1,6 +1,5 @@
 export function populateTimeOptions() {
   const timeOptions = [];
-  let currentTime: number | null = null;
 
   const now = new Date();
   let currentHours = now.getHours();
@@ -21,10 +20,6 @@ export function populateTimeOptions() {
 
     if (optionTimeInMinutes >= currentTimeInMinutes) {
       timeOptions.push(formattedTime);
-
-      if (optionTimeInMinutes === currentTimeInMinutes) {
-        currentTime = currentTimeInMinutes;
-      }
     }
   }
 
@@ -88,3 +83,7 @@ export function convertToLocaleTime(dateStr?: string) {
 
   return date.toLocaleTimeString('en-US', options);
 }
+
+export const createDropdownOptions = (options: string[]) => {
+  return (options || []).map((option) => ({ value: option, text: option }));
+};

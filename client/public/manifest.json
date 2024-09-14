@@ -1,7 +1,7 @@
 {
-    "name": "bookify",
+    "name": "Bookify",
     "version": "1.0.0",
-    "description": "book meeting rooms with a single click",
+    "description": "Book meeting spaces with a simple click",
     "manifest_version": 3,
     "author": "Ali Ahnaf",
     "action": {

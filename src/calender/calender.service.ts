@@ -154,7 +154,7 @@ export class CalenderService {
         throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
       }
 
-      await this.authService.logout(client);
+      await this.authService.purgeAccess(client);
       throw new UnauthorizedException('Insufficient permissions provided. Please allow access to the calender api during login.');
     }
   }
@@ -190,7 +190,7 @@ export class CalenderService {
 
       return events;
     } catch (error) {
-      await this.authService.logout(client);
+      await this.authService.purgeAccess(client);
       throw new UnauthorizedException('Please log in again');
     }
   }
@@ -233,7 +233,7 @@ export class CalenderService {
       };
     } catch (error) {
       console.error(error);
-      await this.authService.logout(client);
+      await this.authService.purgeAccess(client);
       throw new UnauthorizedException('Please log in again');
     }
   }
@@ -250,7 +250,7 @@ export class CalenderService {
     } catch (error) {
       console.error(error);
       if (error?.code === 403) {
-        await this.authService.logout(client);
+        await this.authService.purgeAccess(client);
         throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
       } else if (error.code === 410) {
         throw new GoneException('Event has already been deleted');

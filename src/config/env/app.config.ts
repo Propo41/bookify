@@ -10,5 +10,4 @@ export default registerAs('app', () => ({
 
   oAuthClientSecret: process.env.OAUTH_CLIENT_SECRET,
   oAuthClientId: process.env.OAUTH_CLIENT_ID,
-  oAuthRedirectUrl: process.env.OAUTH_REDIRECT_URL,
 }));
