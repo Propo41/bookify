@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/c624fbc6-5673-4c85-ae4a-74d298b73089)
+![image](https://github.com/user-attachments/assets/b221690e-d7bf-43c1-b94c-5bbe3f88b593)
 
 # Get started
 1. Copy the `.env.example` file as `.env.development` file in the root dir and fill the required keys. Obtain the OAuth credentials by following this [guide](#hosting-yourself)
