@@ -129,7 +129,14 @@ mysql -uroot -proot # to enter mysql
 1. Create a Google cloud project or follow this [guide](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
 1. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview)
 2. Enable the [Calender API](https://console.cloud.google.com/flows/enableapi?apiid=calendar-json.googleapis.com)
+3. Submit app for production
 
+
+### Taking app to Production
+
+Verification requirements can be found [here](https://support.google.com/cloud/answer/13464321?sjid=11123215207226220395-AP)
+
+Note: The [following](https://support.google.com/cloud/answer/13464323/?sjid=11123215207226220395-AP#exemptions) apps do not need to go through the verification process.
 
 # Reference
 
