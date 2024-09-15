@@ -1,10 +1,19 @@
 import { OAuth2Client } from 'google-auth-library';
-import { ConflictException, ForbiddenException, GoneException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  GoneException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { EventResponse, RoomResponse } from './dto';
-import { isRoomAvailable, parseLocation } from './util/calender.util';
+import { isRoomAvailable, parseLocation, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { DeleteResponse } from './dto/delete.response';
 import { ConferenceRoom } from '../auth/entities';
@@ -33,11 +42,15 @@ export class CalenderService {
       throw new ConflictException('No room available within specified time range');
     }
 
-    let attendeeList = [];
+    const attendeeList = [];
     if (attendees?.length) {
-      attendeeList = attendees?.map((attendee) => {
-        return { email: attendee };
-      });
+      for (const attendee of attendees) {
+        if (validateEmail(attendee)) {
+          attendeeList.push({ email: attendee });
+        } else {
+          throw new BadRequestException('Invalid attendee email provided: ' + attendee);
+        }
+      }
     }
 
     let conference = {};
@@ -57,7 +70,7 @@ export class CalenderService {
     // room.seat should be as closer to user's preferred minSeat value
     const pickedRoom = rooms[0];
     var event = {
-      summary: eventTitle || 'Quick Meeting',
+      summary: eventTitle?.trim() || 'Quick Meeting | Bookify',
       location: pickedRoom.name,
       description: 'A quick meeting created by Bookify',
       start: {
