@@ -46,7 +46,6 @@ jobs:
           echo "OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}" >> .env
           echo "OAUTH_REDIRECT_URL=${{ secrets.OAUTH_REDIRECT_URL }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "${{ secrets.ROOMS }}" > ./src/config/rooms.ts
           
       - name: Install Client dependencies
         run:  cd client && npm install
