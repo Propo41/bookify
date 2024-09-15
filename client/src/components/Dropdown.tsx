@@ -1,9 +1,8 @@
-import { MenuItem, Select, SelectChangeEvent, SxProps, Theme, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 
 interface DropdownProps {
   id: string;
-  sx?: SxProps<Theme>;
+  sx?: any;
   options?: DropdownOption[];
   value?: string;
   disabled?: boolean;
@@ -29,7 +28,6 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange }:
       fullWidth
       disabled={disabled || false}
       sx={[
-        // @ts-ignore
         (theme) => ({
           height: height,
           backgroundColor: theme.palette.grey[100],

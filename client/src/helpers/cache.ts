@@ -9,7 +9,7 @@ export interface CacheService {
 
 class WebCacheService implements CacheService {
   getFromCache(key: string): Promise<string | null> {
-    return new Promise<string | null>((resolve, reject) => {
+    return new Promise<string | null>((resolve, _) => {
       const data = window.localStorage.getItem(key);
       if (!data) {
         resolve(null);
@@ -26,14 +26,14 @@ class WebCacheService implements CacheService {
   }
 
   removeFromCache(key: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _) => {
       window.localStorage.removeItem(key);
       resolve();
     });
   }
 
   saveToCache(key: string, val: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, _) => {
       window.localStorage.setItem(key, val);
       resolve();
     });

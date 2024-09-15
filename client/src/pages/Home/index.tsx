@@ -17,7 +17,6 @@ import {
   Paper,
   Stack,
   styled,
-  TextField,
   Typography,
 } from '@mui/material';
 import MuiCard from '@mui/material/Card';
@@ -394,7 +393,7 @@ const BookRoomView = () => {
           variant="contained"
           disableElevation
           sx={[
-            (theme) => ({
+            (_) => ({
               py: 2.5,
               boxShadow: 'none',
             }),

@@ -1,6 +1,4 @@
 import { Box, Button, SxProps, Theme, Typography } from '@mui/material';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 interface TimeAdjusterProps {
   sx?: SxProps<Theme>;

@@ -1,5 +1,3 @@
-import { Components, Theme } from '@mui/material';
-
 export default function Button() {
   return {
     MuiButton: {

@@ -1,7 +1,6 @@
 import toast from 'react-hot-toast';
 import { CacheService, CacheServiceFactory } from './cache';
 import { secrets } from '../config/secrets';
-import { baseUrl, ROUTES } from '../config/routes';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 
@@ -110,7 +109,7 @@ export async function login() {
 }
 
 async function handleChromeOauthFlow(authUrl: string) {
-  const redirectUrl = await new Promise<boolean>((resolve, reject) => {
+  const redirectUrl = await new Promise<boolean>((resolve, _) => {
     chrome.identity.launchWebAuthFlow(
       {
         url: authUrl,

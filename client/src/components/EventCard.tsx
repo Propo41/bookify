@@ -1,7 +1,5 @@
 import { Card, Typography, Chip, IconButton, Box, styled, Theme, SxProps, Divider, CardActions } from '@mui/material';
-import FaceIcon from '@mui/icons-material/Face';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
@@ -10,7 +8,6 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { convertToLocaleTime } from '../helpers/utility';
 import { RoomResponse } from '../helpers/types';
-import toast from 'react-hot-toast';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -59,7 +56,7 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
         label: event.conference,
         type: 'conference',
         icon: <InsertLinkRoundedIcon />,
-        color: '#99D2FF'
+        color: '#99D2FF',
       });
     }
 
