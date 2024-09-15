@@ -47,8 +47,14 @@ jobs:
           echo "OAUTH_REDIRECT_URL=${{ secrets.OAUTH_REDIRECT_URL }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "${{ secrets.ROOMS }}" > ./src/config/rooms.ts
+          
+      - name: Install Client dependencies
+        run:  cd client && npm install
+          
+      - name: Build Client dependencies
+        run: cd client && npm run build
 
-      - name: Install Dependencies
+      - name: Install Server Dependencies
         run: npm install
 
       - name: Run database migrations
