@@ -73,7 +73,7 @@ export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
         sx={[
           (theme) => ({
             flex: 1,
-            py: 1,
+            py: 0,
             px: 1,
             '& .MuiInputBase-input': {
               fontSize: theme.typography.subtitle2,
