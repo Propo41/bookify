@@ -10,11 +10,13 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { convertToLocaleTime } from '../helpers/utility';
 import { RoomResponse } from '../helpers/types';
+import toast from 'react-hot-toast';
 
 interface ChipData {
   icon: React.ReactElement;
   label: string;
   color?: string;
+  type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
 }
 
 interface EventCardProps {
@@ -55,7 +57,9 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
     if (event?.conference) {
       _chips.push({
         label: event.conference,
+        type: 'conference',
         icon: <InsertLinkRoundedIcon />,
+        color: '#99D2FF'
       });
     }
 
@@ -95,6 +99,12 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
                 sx={{
                   fontSize: 14,
                   backgroundColor: chip.color,
+                  cursor: chip.type === 'conference' ? 'pointer' : 'auto',
+                }}
+                onClick={() => {
+                  if (chip.type === 'conference') {
+                    window.open(`https://meet.google.com/${chip.label}`, '_blank');
+                  }
                 }}
               />
             </ListItem>

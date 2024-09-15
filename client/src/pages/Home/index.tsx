@@ -1,8 +1,12 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   BottomNavigation,
   BottomNavigationAction,
   Box,
   Button,
+  Checkbox,
   Chip,
   Dialog,
   DialogActions,
@@ -13,6 +17,7 @@ import {
   Paper,
   Stack,
   styled,
+  TextField,
   Typography,
 } from '@mui/material';
 import MuiCard from '@mui/material/Card';
@@ -39,6 +44,9 @@ import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
 import TopNavigationBar from './TopNavigationBar';
 import { ROUTES } from '../../config/routes';
+import ChipInput from '../../components/ChipInput';
+import StyledTextField from '../../components/StyledTextField';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
 const roomChangeTimeFrame = 2;
@@ -55,6 +63,16 @@ interface Event {
   seats?: number;
   isEditable?: boolean;
   createdAt?: number;
+}
+
+interface FormData {
+  startTime: string;
+  duration: number;
+  seats: number;
+  floor: string;
+  title?: string;
+  attendees?: string[];
+  conference?: boolean;
 }
 
 const CustomButton = styled(Button)(({ theme }) => ({
@@ -126,7 +144,7 @@ const BookRoomView = () => {
   const [requestedRoom, setRequestedRoom] = useState('');
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     startTime: '',
     duration: 15,
     seats: 1,
@@ -174,11 +192,13 @@ const BookRoomView = () => {
     });
   }, []);
 
-  const handleInputChange = (id: string, value: string | number) => {
+  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
     }));
+
+    console.log(formData);
   };
 
   const handleRoomChange = (id: string, value: string) => {
@@ -236,12 +256,10 @@ const BookRoomView = () => {
 
   async function onBookClick() {
     setLoading(true);
-    const { startTime, duration, floor, seats } = formData;
+    const { startTime, duration, floor, seats, conference, attendees, title } = formData;
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
-    console.log('formattedStartTime', formattedStartTime);
 
     const { data, redirect } = await makeRequest('/room', 'POST', {
       startTime: formattedStartTime,
@@ -249,6 +267,9 @@ const BookRoomView = () => {
       seats: seats,
       floor: floor,
       timeZone: getTimeZoneString(),
+      createConference: conference,
+      title,
+      attendees,
     });
 
     if (redirect) {
@@ -260,6 +281,7 @@ const BookRoomView = () => {
 
     if (data.error) {
       toast.error(data.message);
+      setLoading(false);
       return;
     }
 
@@ -380,29 +402,29 @@ const BookRoomView = () => {
         >
           <Typography variant="h6">Book</Typography>
         </LoadingButton>
-        {/* todo */}
-        {/* <Box mt={2}>
-          <Box display="flex" alignItems="center" flexWrap="wrap" sx={{ gap: '8px', padding: '10px', borderRadius: 1, backgroundColor: '#ECECEC', mt: 1 }}>
-            <TextField
-              variant="standard"
-              // value={inputValue}
-              // onChange={(e) => setInputValue(e.target.value)}
-              // onKeyDown={handleKeyDown}
-              placeholder="Enter title"
-              InputProps={{
-                disableUnderline: true,
-              }}
-              fullWidth
-              sx={{ flex: 1, py: 1, px: 1, fontWeight: 800, color: 'red' }}
-            />
-          </Box>
 
-          <ChipInput />
-
-          <Box>
-            <Checkbox defaultChecked />
-          </Box>
-        </Box> */}
+        <Box sx={{ mt: 2, pb: 2 }}>
+          <Accordion
+            sx={{
+              boxShadow: '0 0px 6px 0 rgba(0,0,0,0.0), 0 3px 10px 0 rgba(0,0,0,0.2)',
+            }}
+            disableGutters
+          >
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} sx={{ px: 1.5 }} aria-controls="panel2-content" id="panel2-header">
+              <Typography>More options</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ py: 0, my: 0, px: 1.5 }}>
+              <Box pb={0}>
+                <StyledTextField id="title" onChange={handleInputChange} />
+                <ChipInput id="attendees" onChange={handleInputChange} />
+                <Box display={'flex'} mt={1} pb={1} alignItems={'center'}>
+                  <Typography variant="subtitle2">Create online conference: </Typography>
+                  <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        </Box>
       </Box>
 
       <Dialog
