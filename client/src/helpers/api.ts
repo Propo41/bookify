@@ -12,14 +12,8 @@ export const SCOPES = [
 ];
 
 export async function handleOAuthCallback(code: string) {
-  const { data, status } = await makeRequest('/oauth2callback', 'POST', { code, redirectUrl: secrets.oAuthRedirectUrl }, null, false);
-
-  console.log('Access Token:', data.accessToken);
-  if (data?.accessToken) {
-    await cacheService.saveToCache('access_token', data.accessToken);
-  }
-
-  return status;
+  const res = await makeRequest('/oauth2callback', 'POST', { code, redirectUrl: secrets.oAuthRedirectUrl }, null, false);
+  return res;
 }
 
 interface IResponse {

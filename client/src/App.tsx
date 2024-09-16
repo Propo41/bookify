@@ -2,11 +2,12 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
 import { useEffect } from 'react';
 import { handleOAuthCallback } from './helpers/api';
 import { ROUTES } from './config/routes';
+import { CacheService, CacheServiceFactory } from './helpers/cache';
 
 // only used for the web version
 // for chrome extension, a different oauth flow is used using the chrome api
@@ -18,8 +19,19 @@ function OAuth() {
     const code = url.searchParams.get('code');
 
     if (code) {
-      handleOAuthCallback(code).then(() => {
-        navigate(ROUTES.home);
+      handleOAuthCallback(code).then(async ({ data, status }) => {
+        if (status !== 200) {
+          toast.error(data.message || 'Something went wrong');
+          navigate(ROUTES.home);
+
+          return;
+        }
+
+        console.log('Access Token:', data.accessToken);
+        if (data?.accessToken) {
+          const cacheService: CacheService = CacheServiceFactory.getCacheService();
+          await cacheService.saveToCache('access_token', data.accessToken);
+        }
       });
     }
   }, [navigate]);
