@@ -26,14 +26,16 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "lint": "eslint \"{src}/**/*.ts\" --fix",
-    "start:chrome": "env-cmd -f .env.chrome react-scripts start",
-    "build": "env-cmd -f .env react-scripts build",
-    "build:chrome": "env-cmd -f .env.chrome react-scripts build",
+    "env": "env-cmd -f ../.env",
+    "env:chrome": "env-cmd -f ../.env.chrome",
+    "start": "npm run env -- react-scripts start",
+    "start:chrome": "npm run env:chrome -- react-scripts start",
+    "build": "npm run env -- react-scripts build",
+    "build:chrome": "npm run env:chrome -- react-scripts build",
     "serve": "npx http-server build --port 3000",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint \"{src}/**/*.ts\" --fix"
   },
   "eslintConfig": {
     "extends": [

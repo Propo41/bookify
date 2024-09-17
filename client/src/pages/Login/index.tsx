@@ -95,10 +95,10 @@ const Login = () => {
     <>
       <Box mt={isChromeExt ? 4 : 10}>
         <Typography component="h1" variant="h2" sx={{ width: '100%' }}>
-          Bookify
+          {secrets.appTitle}
         </Typography>
         <Typography variant="h5" sx={[(theme) => ({ color: theme.palette.text.secondary, fontWeight: 400, mt: 1 })]}>
-          One click to book them all
+          {secrets.appSlogan}
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, height: isChromeExt ? 'auto' : '100vh' }}>
