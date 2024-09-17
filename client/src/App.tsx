@@ -2,7 +2,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
 import { useEffect } from 'react';
 import { handleOAuthCallback } from './helpers/api';
@@ -17,13 +17,17 @@ function OAuth() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
+    const error = url.searchParams.get('error');
+
+    if (error) {
+      navigate(ROUTES.signIn, { state: { errorMessage: error } });
+      return;
+    }
 
     if (code) {
       handleOAuthCallback(code).then(async ({ data, status }) => {
-        if (status !== 200) {
-          toast.error(data.message || 'Something went wrong');
-          navigate(ROUTES.home);
-
+        if (status !== 201 && status !== 200) {
+          navigate(ROUTES.signIn, { state: { errorMessage: data.message || 'Something went wrong' } });
           return;
         }
 
@@ -31,6 +35,7 @@ function OAuth() {
         if (data?.accessToken) {
           const cacheService: CacheService = CacheServiceFactory.getCacheService();
           await cacheService.saveToCache('access_token', data.accessToken);
+          navigate(ROUTES.home);
         }
       });
     }

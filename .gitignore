@@ -37,7 +37,10 @@ lerna-debug.log*
 
 *.sqlite
 
+**/build_web
+**/build_chrome
 **/build
+
 
 # dotenv environment variable files
 **/.env

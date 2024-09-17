@@ -91,6 +91,7 @@ export async function logout() {
 export async function loginChrome() {
   const scopes = SCOPES.join(' ').trim();
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${secrets.clientId}&redirect_uri=${secrets.oAuthRedirectUrl}&response_type=code&scope=${scopes}&access_type=offline`;
+  console.log('secrets.oAuthRedirectUrl', secrets.oAuthRedirectUrl);
 
   return handleChromeOauthFlow(authUrl);
 }
@@ -103,7 +104,7 @@ export async function login() {
 }
 
 async function handleChromeOauthFlow(authUrl: string) {
-  const redirectUrl = await new Promise<boolean>((resolve, _) => {
+  const res = await new Promise<IResponse>((resolve, _) => {
     chrome.identity.launchWebAuthFlow(
       {
         url: authUrl,
@@ -122,17 +123,37 @@ async function handleChromeOauthFlow(authUrl: string) {
 
           try {
             if (code) {
-              await handleOAuthCallback(code);
-              resolve(true);
+              const { data, status, errorMessage } = await handleOAuthCallback(code);
+              if (status !== 201 && status !== 200) {
+                resolve({
+                  errorMessage: errorMessage || data?.message || 'Something went wrong',
+                  redirect: true,
+                });
+                return;
+              }
+
+              console.log('Access Token:', data.accessToken);
+              resolve({
+                status,
+                data: data?.accessToken,
+              });
             }
           } catch (error: any) {
             console.error(error);
-            resolve(false);
+            resolve({
+              redirect: true,
+              errorMessage: error.message,
+            });
           }
+
+          resolve({
+            redirect: true,
+            errorMessage: 'Something went wrong',
+          });
         }
       },
     );
   });
 
-  return redirectUrl;
+  return res;
 }

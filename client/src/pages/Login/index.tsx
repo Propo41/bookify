@@ -2,7 +2,7 @@ import { Box, Button, Stack, styled, Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect } from 'react';
 import { GoogleIcon } from '../../components/CustomIcons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { login, loginChrome } from '../../helpers/api';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
@@ -59,6 +59,11 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 
 const Login = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const errorMessage = state?.errorMessage;
+  if (errorMessage) {
+    toast.error(errorMessage);
+  }
 
   useEffect(() => {
     cacheService.getFromCache('access_token').then((token) => {
@@ -70,11 +75,16 @@ const Login = () => {
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {
-      const res = await loginChrome();
-      if (res) {
+      const { redirect, data, errorMessage } = await loginChrome();
+
+      if (data) {
+        const cacheService: CacheService = CacheServiceFactory.getCacheService();
+        await cacheService.saveToCache('access_token', data);
         navigate(ROUTES.home);
       } else {
-        toast.error("Coudn't sign in user.");
+        if (redirect) {
+          navigate(ROUTES.signIn, { state: { errorMessage: errorMessage || "Couldn't sign in user" } });
+        }
       }
     } else {
       await login();

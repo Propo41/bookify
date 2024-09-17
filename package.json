@@ -8,10 +8,12 @@
   "scripts": {
     "build": "nest build",
     "build:chrome": "cd client && npm run build:chrome",
+    "build:web": "cd client && npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/main",
     "start:prod": "node dist/main",
     "start:dev": "(cd client && npm run build) && (cross-env NODE_ENV=development nest start --watch)",
+    "start:server": "cross-env NODE_ENV=development nest start --watch",
     "start:client": "cd client && npm run start",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:run": "npm run build && (npm run typeorm migration:run -- -d ./src/config/orm.config.ts)",
