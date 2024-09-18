@@ -140,7 +140,7 @@ const BookRoomView = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editRoom, setEditRoom] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<Event>({});
-  const [requestedRoom, setRequestedRoom] = useState('');
+  const [requestedRoom, setRequestedRoom] = useState(''); // room
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -242,6 +242,23 @@ const BookRoomView = () => {
       return;
     }
 
+    if (!data.status) {
+      const rooms: DropdownOption[] = data.availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: `${r.name} (${r.seats})` }));
+      if (currentEvent.roomEmail) {
+        rooms.push({ value: currentEvent.roomEmail, text: `${currentEvent.room} (${currentEvent.seats})` });
+        setRequestedRoom(currentEvent.roomEmail);
+      }
+
+      toast.error(data.statusMessage);
+      setCurrentEvent({
+        ...currentEvent,
+        availableRooms: rooms,
+      });
+
+      setChangeRoomLoading(false);
+      return;
+    }
+
     setCurrentEvent({
       ...currentEvent,
       room: data.room,
@@ -278,7 +295,7 @@ const BookRoomView = () => {
       }, 2000);
     }
 
-    if (data.error) {
+    if (data.statusCode && data.statusCode !== 201) {
       toast.error(data.message);
       setLoading(false);
       return;

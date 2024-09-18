@@ -97,7 +97,13 @@ export class AuthService {
   }
 
   async purgeAccess(oauth2Client: OAuth2Client) {
-    await oauth2Client.revokeCredentials();
+    try {
+      await oauth2Client.revokeCredentials();
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
   }
 
   async createJwt(id: string, name: string, oAuthExpiry: number) {
@@ -130,22 +136,20 @@ export class AuthService {
     }
   }
 
-  async refreshToken(user: User, oauth2Client: OAuth2Client): Promise<boolean> {
+  async refreshToken(user: User, oauth2Client: OAuth2Client) {
     if (!oauth2Client.credentials.refresh_token) {
       throw new UnauthorizedException('Failed to refresh token. No refresh token found. Log in again');
     }
 
     const { token } = await oauth2Client.getAccessToken();
     if (token) {
-      await this.authRepository.update(
-        { id: user.authId },
-        {
-          accessToken: token,
-          expiryDate: oauth2Client.credentials.expiry_date,
-        },
-      );
+      const updatePayload = {
+        accessToken: token,
+        expiryDate: oauth2Client.credentials.expiry_date,
+      };
 
-      return true;
+      await this.authRepository.update({ id: user.authId }, updatePayload);
+      return updatePayload;
     } else {
       throw new UnauthorizedException('Failed to refresh token');
     }

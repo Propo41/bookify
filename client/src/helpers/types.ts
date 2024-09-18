@@ -11,6 +11,8 @@ export interface ConferenceRoom {
 }
 
 export interface EventResponse {
+  status?: boolean;
+  statusMessage?: string;
   summary?: string;
   room?: string;
   start?: string;
