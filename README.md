@@ -3,10 +3,10 @@
     Bookify
     <br />
     <br />
-    <a href="https://github.com/user-attachments/assets/b221690e-d7bf-43c1-b94c-5bbe3f88b593">
-      <img src="https://github.com/user-attachments/assets/b221690e-d7bf-43c1-b94c-5bbe3f88b593" alt="Bookify" >
-      <img src="https://github.com/user-attachments/assets/b221690e-d7bf-43c1-b94c-5bbe3f88b593" alt="Bookify" >
-      <img src="https://github.com/user-attachments/assets/b221690e-d7bf-43c1-b94c-5bbe3f88b593" alt="Bookify" >
+    <a href="">
+      <img src="https://github.com/user-attachments/assets/617c3453-f99b-4a93-a9a8-770ecaffd581" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/49b984c9-fede-4c86-b166-c483e46fd6da" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/35c12a11-ab5b-4235-b3a5-6a31ce4a75c0" alt="Bookify" width="30%">
     </a>
   </h1>
 </div>
