@@ -1,9 +1,10 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Get, Headers, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Headers, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginResponse } from './dto';
 import { AuthGuard } from './auth.guard';
 import { _OAuth2Client } from './decorators';
+import { OAuthInterceptor } from './oauth.interceptor';
 
 @Controller()
 export class AuthController {
@@ -15,14 +16,9 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Post('/logout')
   async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
     return await this.authService.logout(client);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('/resource/tesst')
-  async createResources(@_OAuth2Client() client: OAuth2Client): Promise<void> {
-    return await this.authService.createCalenderResources(client, 'cefalo.com');
   }
 }

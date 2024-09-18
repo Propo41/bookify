@@ -222,6 +222,26 @@ export class CalenderService {
         throw new NotFoundException('Room not found.');
       }
 
+      // check if room is available
+      const availableRooms: ConferenceRoom[] = await this.getAvailableRooms(
+        client,
+        domain,
+        data.start.dateTime,
+        data.end.dateTime,
+        room.seats,
+        data.start.timeZone,
+        room.floor,
+      );
+
+      const isFree = !!availableRooms.find((room) => room.email === roomEmail);
+      if (!isFree) {
+        return {
+          status: false,
+          statusMessage: 'Selected room is not available at the moment',
+          availableRooms,
+        };
+      }
+
       // remove the previous room id from the list
       const filteredAttendees = data.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
       const result = await calendar.events.update({

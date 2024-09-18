@@ -1,16 +1,19 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { EventResponse, RoomResponse } from './dto';
 import { DeleteResponse } from './dto/delete.response';
+import { BookRoomDto } from './dto/book-room.dto';
+import { OAuthInterceptor } from 'src/auth/oauth.interceptor';
 
 @Controller()
 export class CalenderController {
   constructor(private readonly calenderService: CalenderService) {}
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Get('/rooms')
   async listRooms(
     @_OAuth2Client() client: OAuth2Client,
@@ -23,22 +26,14 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Post('/room')
-  async bookRoom(
-    @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
-    @Body('startTime') startTime: string, // A combined date-time value (formatted according to RFC3339A). Time zone offset is required
-    @Body('duration') durationInMins: number,
-    @Body('seats') seats: number,
-    @Body('timeZone') timeZone: string,
-    @Body('createConference') createConference?: boolean,
-    @Body('title') title?: string,
-    @Body('floor') floor?: string,
-    @Body('attendees') attendees?: string[],
-  ): Promise<EventResponse | null> {
+  async bookRoom(@_OAuth2Client() client: OAuth2Client, @_User('domain') domain: string, @Body() bookRoomDto: BookRoomDto): Promise<EventResponse | null> {
+    const { startTime, duration, seats, timeZone, createConference, title, floor, attendees } = bookRoomDto;
+
     // end time
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + durationInMins);
+    startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
     const event = await this.calenderService.createEvent(client, domain, startTime, endTime, seats, timeZone, createConference, title, floor, attendees);
@@ -46,6 +41,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Put('/room')
   async updateRoom(
     @_OAuth2Client() client: OAuth2Client,
@@ -57,6 +53,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Delete('/room')
   async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Body('id') eventId: string): Promise<DeleteResponse> {
     return await this.calenderService.deleteEvent(client, eventId);

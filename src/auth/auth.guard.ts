@@ -1,4 +1,3 @@
-import { OAuth2Client } from 'google-auth-library';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
@@ -6,8 +5,6 @@ import appConfig from '../config/env/app.config';
 import { Request } from 'express';
 import { IJwtPayload } from './dto';
 import { AuthService } from './auth.service';
-import { google } from 'googleapis';
-import { User } from './entities';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,7 +17,6 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    let oauth2Client: OAuth2Client;
 
     if (!token) {
       throw new UnauthorizedException();
@@ -31,20 +27,8 @@ export class AuthGuard implements CanActivate {
         secret: this.config.jwtSecret,
       });
 
-      const redirectUrl = request.headers['x-redirect-url'];
       let user = await this.authService.getUser(payload.sub);
-      oauth2Client = this.createOauthClient(user, redirectUrl);
-
-      const currentTime = new Date().getTime();
-      if (currentTime > user.auth.expiryDate) {
-        await this.authService.refreshToken(user, oauth2Client);
-
-        user = await this.authService.getUser(payload.sub);
-        oauth2Client = this.createOauthClient(user, redirectUrl);
-      }
-
       request['user'] = user;
-      request['oauth2Client'] = oauth2Client;
     } catch (err) {
       console.error(err);
 
@@ -52,7 +36,6 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException();
       }
 
-      await this.authService.purgeAccess(oauth2Client);
       throw new UnauthorizedException();
     }
 
@@ -62,22 +45,5 @@ export class AuthGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
-  }
-
-  // TODO: move this to a middleware
-  private createOauthClient(user: User, redirectUrl: string) {
-    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
-    const { accessToken, scope, tokenType, expiryDate, idToken, refreshToken } = user.auth;
-
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      scope: scope,
-      token_type: tokenType,
-      expiry_date: expiryDate,
-      id_token: idToken,
-      refresh_token: refreshToken,
-    });
-
-    return oauth2Client;
   }
 }

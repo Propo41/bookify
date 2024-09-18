@@ -54,7 +54,7 @@ export async function makeRequest(path: string, method: 'GET' | 'POST' | 'PUT' |
       toast.error(res.statusText);
       return {
         status: res.status,
-        errorMessage: 'Too many requests',
+        errorMessage: data.message || 'Too many requests',
       };
     }
 
@@ -62,14 +62,13 @@ export async function makeRequest(path: string, method: 'GET' | 'POST' | 'PUT' |
       await cacheService.removeFromCache('access_token');
       return {
         status: res.status,
-        errorMessage: res.statusText,
+        errorMessage: data.message || res.statusText,
         redirect: true,
       };
     }
 
     return {
       status: res.status,
-      errorMessage: '',
       data: data,
     };
   } catch (error) {
