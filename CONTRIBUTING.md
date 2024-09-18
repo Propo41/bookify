@@ -31,6 +31,7 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 1. Copy the `.env.example` file as `.env` file in the root dir and fill the required keys. Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)
 2. Run `npm run migration:run` to create the migrations
+3. If you have docker, run `npm run start:docker` to run the app in *production*.
 3. Run the app using: `npm run start:dev`
 
 ### Installation [chrome-extension]

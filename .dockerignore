@@ -1,0 +1,9 @@
+**/node_modules
+
+# Ignore build directories
+**/build_web
+**/build_chrome
+dist
+
+# Ignore other unnecessary files
+*.log

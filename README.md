@@ -95,7 +95,8 @@ During peak times, manually searching for a free room on Google Calendar is frus
 1. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
 2. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview)
 3. Copy the **Client ID**, **Client secret** from the OAuth 2.0 Client ID you created in step 1, and place it in the `.env` file.
-4. Add the **Authorized javascript origins** and the **Authorized redirect URIs**. 
+4. Add the **Authorized javascript origins** and the **Authorized redirect URIs** in your google cloud project. 
+5. Check out the [installation](CONTRIBUTING.md/#installation-web) section, to prepare the app for launching.
 5. Deploy your branch and your ready to start booking! 🎉
 6. Make sure to sync latest changes from the upstream repository.
 

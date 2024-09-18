@@ -1,0 +1,4 @@
+node_modules
+build_web
+build_chrome
+dist

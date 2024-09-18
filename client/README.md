@@ -2,7 +2,6 @@
 
 https://hygraph.com/blog/routing-in-react
 
-
 ## Available Scripts
 
 In the project directory, you can run:
