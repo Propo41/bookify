@@ -1,13 +1,36 @@
-import { Card, Typography, Chip, IconButton, Box, styled, Theme, SxProps, Divider, CardActions } from '@mui/material';
+import {
+  Card,
+  Typography,
+  Chip,
+  IconButton,
+  Box,
+  styled,
+  Theme,
+  SxProps,
+  Divider,
+  CardActions,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import React, { useEffect, useState } from 'react';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+
 import { convertToLocaleTime } from '../helpers/utility';
-import { RoomResponse } from '../helpers/types';
+import { FormData, RoomResponse } from '../helpers/types';
+import TimeAdjuster from './TimeAdjuster';
+import { makeRequest } from '../helpers/api';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../config/routes';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -21,7 +44,21 @@ interface EventCardProps {
   event?: RoomResponse;
   onDelete: (id?: string) => void;
   disabled?: boolean;
+  onEdit: () => void;
 }
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  boxShadow: 'none',
+  '&:hover': {
+    boxShadow: 'none',
+  },
+  '&:active': {
+    boxShadow: 'none',
+  },
+  '&:focus': {
+    boxShadow: 'none',
+  },
+}));
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -49,9 +86,17 @@ const createChips = (event: RoomResponse) => {
   ];
 };
 
-const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  type EditRoomFields = Pick<FormData, 'duration'>;
+  const [formData, setFormData] = useState<EditRoomFields>({
+    duration: 30,
+  });
 
   useEffect(() => {
     if (event) {
@@ -64,6 +109,14 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
       } else {
         setIsOngoingEvent(false);
       }
+
+      const duration = (endInMs - startInMs) / (1000 * 60);
+      setFormData((prev) => {
+        return {
+          ...prev,
+          duration,
+        };
+      });
 
       const _chips: ChipData[] = createChips(event);
 
@@ -79,6 +132,54 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
       setChips(_chips);
     }
   }, [event]);
+
+  const onEditRoomClick = async () => {
+    if (!event) return;
+
+    console.log('edit room:', formData);
+    setLoading(true);
+
+    const { data, redirect } = await makeRequest('/room', 'PUT', {
+      eventId: event.id,
+      duration: formData.duration,
+    });
+
+    if (redirect) {
+      toast.error("Couldn't complete request. Redirecting to login page");
+      setTimeout(() => {
+        navigate(ROUTES.signIn);
+      }, 2000);
+    }
+
+    if (data.error) {
+      toast.error(data.message);
+      setLoading(false);
+      setEditDialogOpen(false);
+      return;
+    }
+
+    if (!data.status) {
+      toast.error(data.statusMessage);
+      setLoading(false);
+      setEditDialogOpen(false);
+      return;
+    }
+
+    onEdit();
+    toast.success('Room has been updated');
+
+    setLoading(false);
+    setEditDialogOpen(false);
+  };
+
+  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+
+    console.log(formData);
+  };
 
   return (
     <Card sx={{ borderRadius: 2, py: 1.5, px: 1.5, ...sx }}>
@@ -144,13 +245,64 @@ const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
       <Divider sx={{ my: 1 }} />
 
       <CardActions sx={{ p: 0, justifyContent: 'flex-end' }}>
-        {/* <IconButton disabled={disabled || false}  aria-label="edit" color={'primary'}>
+        <IconButton disabled={disabled || false} aria-label="edit" color={'primary'} onClick={() => setEditDialogOpen(true)}>
           <EditRoundedIcon />
-        </IconButton> */}
+        </IconButton>
         <IconButton disabled={disabled || false} aria-label="delete" color={'error'} onClick={() => onDelete(event!.id)}>
           <DeleteForeverRoundedIcon />
         </IconButton>
       </CardActions>
+
+      {/* edit dialog*/}
+      <Dialog
+        PaperProps={{
+          sx: { width: '350px' },
+        }}
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
+          {'Edit event'}
+        </DialogTitle>
+        <DialogContent>
+          <Box
+            sx={{
+              textAlign: 'center',
+              mt: 2,
+              mb: 2,
+            }}
+          >
+            <TimeAdjuster
+              incrementBy={15}
+              minAmount={15}
+              decorator={'m'}
+              value={formData.duration}
+              onChange={(newValue) => handleInputChange('duration', newValue)}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[400],
+                  fontStyle: 'italic',
+                }),
+              ]}
+            >
+              Duration
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <CustomButton disabled={loading} onClick={() => setEditDialogOpen(false)}>
+            Dismiss
+          </CustomButton>
+          <CustomButton disabled={loading} variant="text" color="error" disableElevation onClick={onEditRoomClick}>
+            Save changes
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };

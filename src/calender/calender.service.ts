@@ -208,7 +208,7 @@ export class CalenderService {
     }
   }
 
-  async updateEvent(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<EventResponse | null> {
+  async updateEvent(client: OAuth2Client, domain: string, eventId: string, roomEmail: string, duration: number): Promise<EventResponse | null> {
     const calendar = google.calendar({ version: 'v3', auth: client });
     try {
       const { data } = await calendar.events.get({

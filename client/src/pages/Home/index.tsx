@@ -38,7 +38,7 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import { ConferenceRoom, RoomResponse } from '../../helpers/types';
+import { ConferenceRoom, FormData, RoomResponse } from '../../helpers/types';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
 import TopNavigationBar from './TopNavigationBar';
@@ -63,16 +63,6 @@ interface Event {
   seats?: number;
   isEditable?: boolean;
   createdAt?: number;
-}
-
-interface FormData {
-  startTime: string;
-  duration: number;
-  seats: number;
-  floor: string;
-  title?: string;
-  attendees?: string[];
-  conference?: boolean;
 }
 
 const CustomButton = styled(Button)(({ theme }) => ({
@@ -217,10 +207,6 @@ const BookRoomView = () => {
     if (currentEvent.roomEmail === requestedRoom) {
       toast.error('You have already booked this room');
       return;
-    }
-
-    if (currentEvent.createdAt) {
-      console.log(Date.now() - currentEvent.createdAt);
     }
 
     if (currentEvent.createdAt && Date.now() - currentEvent.createdAt > roomChangeTimeFrame * 60 * 1000) {
@@ -576,6 +562,7 @@ const MyEventsView = () => {
             mt: 2,
             mb: i === events.length - 1 ? 3 : 0,
           }}
+          onEdit={() => window.location.reload()} // todo: change the state without reloading
           disabled={loading}
           onDelete={onDeleteClick}
         />

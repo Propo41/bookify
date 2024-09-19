@@ -47,9 +47,10 @@ export class CalenderController {
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
     @Body('eventId') eventId: string,
-    @Body('roomId') roomId: string,
+    @Body('roomId') roomId?: string,
+    @Body('duration') duration?: number,
   ): Promise<EventResponse | null> {
-    return await this.calenderService.updateEvent(client, domain, eventId, roomId);
+    return await this.calenderService.updateEvent(client, domain, eventId, roomId, duration);
   }
 
   @UseGuards(AuthGuard)
