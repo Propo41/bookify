@@ -6,8 +6,9 @@ import { _OAuth2Client, _User } from '../auth/decorators';
 import { EventResponse, RoomResponse } from './dto';
 import { DeleteResponse } from './dto/delete.response';
 import { BookRoomDto } from './dto/book-room.dto';
-import { OAuthInterceptor } from 'src/auth/oauth.interceptor';
+import { OAuthInterceptor } from '../auth/oauth.interceptor';
 import { EventUpdateResponse } from './dto/event-update.response';
+import { ApiResponse } from '../dtos';
 
 @Controller()
 export class CalenderController {
@@ -58,12 +59,11 @@ export class CalenderController {
   @Put('/room/duration')
   async updateEventDuration(
     @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
     @Body('eventId') eventId: string,
     @Body('roomId') roomId?: string,
     @Body('duration') duration?: number, // in mins
-  ): Promise<EventUpdateResponse> {
-    return await this.calenderService.updateEventDuration(client, domain, eventId, roomId, duration);
+  ): Promise<ApiResponse<EventUpdateResponse>> {
+    return await this.calenderService.updateEventDuration(client, eventId, roomId, duration);
   }
 
   @UseGuards(AuthGuard)

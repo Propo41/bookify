@@ -18,6 +18,8 @@ import { AuthService } from '../auth/auth.service';
 import { DeleteResponse } from './dto/delete.response';
 import { ConferenceRoom } from '../auth/entities';
 import { EventUpdateResponse } from './dto/event-update.response';
+import { ApiResponse } from '../dtos';
+import to from 'await-to-js';
 
 @Injectable()
 export class CalenderService {
@@ -314,67 +316,83 @@ export class CalenderService {
     }
   }
 
-  async updateEventDuration(client: OAuth2Client, domain: string, eventId: string, roomId: string, duration: number): Promise<EventUpdateResponse> {
+  async updateEventDuration(client: OAuth2Client, eventId: string, roomId: string, duration: number): Promise<ApiResponse<EventUpdateResponse>> {
     const calendar = google.calendar({ version: 'v3', auth: client });
-    try {
-      const { data } = await calendar.events.get({
+
+    const [err, events] = await to(
+      calendar.events.get({
         eventId: eventId,
         calendarId: 'primary',
-      });
+      }),
+    );
 
-      const { start, end } = data;
+    if (err) {
+      throw new UnauthorizedException("Couldn't process request. Please try to login again.");
+    }
 
-      // start time
-      const startMs = new Date(start.dateTime).getTime();
+    const { start, end } = events.data;
 
-      // end time
-      const endMs = new Date(end.dateTime).getTime();
+    // start time
+    const startMs = new Date(start.dateTime).getTime();
 
-      const newDurationInMs = toMs(duration);
-      const eventDurationInMs = endMs - startMs;
+    // end time
+    const endMs = new Date(end.dateTime).getTime();
 
-      let newEnd: string;
+    const newDurationInMs = toMs(duration);
+    const eventDurationInMs = endMs - startMs;
 
-      if (newDurationInMs === eventDurationInMs) {
-        throw new BadRequestException('Duration has already been set to ' + duration + ' mins');
-      } else if (newDurationInMs < eventDurationInMs && newDurationInMs >= toMs(15)) {
-        newEnd = new Date(endMs - (eventDurationInMs - newDurationInMs)).toISOString();
-      } else {
-        const newStart = end.dateTime;
-        newEnd = new Date(endMs + (newDurationInMs - eventDurationInMs)).toISOString();
+    let newEnd: string;
 
-        // check if room is available within newStart and newEnd
-        const isAvailable = await this.isRoomAvailable(client, newStart, newEnd, roomId, start.timeZone);
-        if (!isAvailable) {
-          throw new ForbiddenException('Room is not available within time range');
-        }
+    if (newDurationInMs === eventDurationInMs) {
+      throw new BadRequestException('Duration has already been set to ' + duration + ' mins');
+    } else if (newDurationInMs < eventDurationInMs && newDurationInMs >= toMs(15)) {
+      newEnd = new Date(endMs - (eventDurationInMs - newDurationInMs)).toISOString();
+    } else {
+      const newStart = end.dateTime;
+      newEnd = new Date(endMs + (newDurationInMs - eventDurationInMs)).toISOString();
+
+      // check if room is available within newStart and newEnd
+      const [err, isAvailable] = await to(this.isRoomAvailable(client, newStart, newEnd, roomId, start.timeZone));
+      if (err) {
+        throw err;
       }
 
-      const res = await calendar.events.update({
+      if (!isAvailable) {
+        throw new ForbiddenException('Room is not available within time range');
+      }
+    }
+
+    // update the room
+    const [error, res] = await to(
+      calendar.events.update({
         eventId: eventId,
         calendarId: 'primary',
         requestBody: {
-          ...data,
+          ...events.data,
           end: {
             dateTime: newEnd,
             timeZone: end.timeZone,
           },
         },
-      });
+      }),
+    );
 
-      if (res.status !== 200) {
-        throw new ForbiddenException('Could not change event time');
-      }
+    if (error) {
+      throw new UnauthorizedException("Couldn't process request. Please try to login again.");
+    }
 
-      return {
+    if (res.status !== 200) {
+      throw new ForbiddenException('Could not change event time');
+    }
+
+    return {
+      data: {
         start: res.data.start.dateTime,
         end: res.data.end.dateTime,
-      };
-    } catch (error) {
-      console.error(error);
-      // await this.authService.purgeAccess(client);
-      // throw new UnauthorizedException('Please log in again');
-    }
+      },
+      status: 'success',
+      message: 'Room has been updated',
+    };
   }
 
   async deleteEvent(client: OAuth2Client, id: string): Promise<DeleteResponse> {
