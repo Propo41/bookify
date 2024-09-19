@@ -31,7 +31,6 @@ const TopNavigationBar = ({ title }: { title: string }) => {
       </Box>
 
       <IconButton
-        aria-label="logout"
         onClick={onLogoutClick}
         size="medium"
         sx={[

@@ -44,7 +44,7 @@ interface EventCardProps {
   event?: RoomResponse;
   onDelete: (id?: string) => void;
   disabled?: boolean;
-  onEdit: () => void;
+  onEdit: (id: string, data: any) => void;
 }
 
 const CustomButton = styled(Button)(({ theme }) => ({
@@ -139,9 +139,10 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
     console.log('edit room:', formData);
     setLoading(true);
 
-    const { data, redirect } = await makeRequest('/room', 'PUT', {
+    const { data, redirect } = await makeRequest('/room/duration', 'PUT', {
       eventId: event.id,
       duration: formData.duration,
+      roomId: event.roomEmail,
     });
 
     if (redirect) {
@@ -151,25 +152,19 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       }, 2000);
     }
 
-    if (data.error) {
+    if (data?.error) {
       toast.error(data.message);
       setLoading(false);
       setEditDialogOpen(false);
       return;
     }
 
-    if (!data.status) {
-      toast.error(data.statusMessage);
+    if (event.id) {
+      onEdit(event.id, data);
+
       setLoading(false);
       setEditDialogOpen(false);
-      return;
     }
-
-    onEdit();
-    toast.success('Room has been updated');
-
-    setLoading(false);
-    setEditDialogOpen(false);
   };
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
@@ -245,10 +240,10 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       <Divider sx={{ my: 1 }} />
 
       <CardActions sx={{ p: 0, justifyContent: 'flex-end' }}>
-        <IconButton disabled={disabled || false} aria-label="edit" color={'primary'} onClick={() => setEditDialogOpen(true)}>
+        <IconButton disabled={disabled || false} color={'primary'} onClick={() => setEditDialogOpen(true)}>
           <EditRoundedIcon />
         </IconButton>
-        <IconButton disabled={disabled || false} aria-label="delete" color={'error'} onClick={() => onDelete(event!.id)}>
+        <IconButton disabled={disabled || false} color={'error'} onClick={() => onDelete(event!.id)}>
           <DeleteForeverRoundedIcon />
         </IconButton>
       </CardActions>
@@ -260,8 +255,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         }}
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
           {'Edit event'}

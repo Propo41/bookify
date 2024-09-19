@@ -7,6 +7,7 @@ import { EventResponse, RoomResponse } from './dto';
 import { DeleteResponse } from './dto/delete.response';
 import { BookRoomDto } from './dto/book-room.dto';
 import { OAuthInterceptor } from 'src/auth/oauth.interceptor';
+import { EventUpdateResponse } from './dto/event-update.response';
 
 @Controller()
 export class CalenderController {
@@ -42,15 +43,27 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
-  @Put('/room')
-  async updateRoom(
+  @Put('/room/id')
+  async updateEventRoom(
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
     @Body('eventId') eventId: string,
     @Body('roomId') roomId?: string,
-    @Body('duration') duration?: number,
   ): Promise<EventResponse | null> {
-    return await this.calenderService.updateEvent(client, domain, eventId, roomId, duration);
+    return await this.calenderService.updateEventRoom(client, domain, eventId, roomId);
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
+  @Put('/room/duration')
+  async updateEventDuration(
+    @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
+    @Body('eventId') eventId: string,
+    @Body('roomId') roomId?: string,
+    @Body('duration') duration?: number, // in mins
+  ): Promise<EventUpdateResponse> {
+    return await this.calenderService.updateEventDuration(client, domain, eventId, roomId, duration);
   }
 
   @UseGuards(AuthGuard)
