@@ -27,53 +27,85 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
 }));
 
+const createChips = (event: RoomResponse) => {
+  return [
+    {
+      label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
+      icon: <AccessTimeFilledRoundedIcon />,
+      color: '#9BF679',
+    },
+    {
+      label: event?.seats + '' || '-',
+      icon: <PeopleRoundedIcon />,
+    },
+    {
+      label: event?.room || '-',
+      icon: <MeetingRoomRoundedIcon />,
+    },
+    {
+      label: event?.floor || '-',
+      icon: <StairsIcon />,
+    },
+  ];
+};
+
 const EventCard = ({ sx, event, onDelete, disabled }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
+  const [isOngoingEvent, setIsOngoingEvent] = useState(false);
 
   useEffect(() => {
-    const _chips: ChipData[] = [
-      {
-        label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
-        icon: <AccessTimeFilledRoundedIcon />,
-        color: '#9BF679',
-      },
-      {
-        label: event?.seats + '' || '-',
-        icon: <PeopleRoundedIcon />,
-      },
-      {
-        label: event?.room || '-',
-        icon: <MeetingRoomRoundedIcon />,
-      },
-      {
-        label: event?.floor || '-',
-        icon: <StairsIcon />,
-      },
-    ];
+    if (event) {
+      const startInMs = new Date(event.start!).getTime();
+      const endInMs = new Date(event.end!).getTime();
+      const currentTimeInMs = Date.now();
 
-    if (event?.conference) {
-      _chips.push({
-        label: event.conference,
-        type: 'conference',
-        icon: <InsertLinkRoundedIcon />,
-        color: '#99D2FF',
-      });
+      if (currentTimeInMs >= startInMs && currentTimeInMs <= endInMs) {
+        setIsOngoingEvent(true);
+      } else {
+        setIsOngoingEvent(false);
+      }
+
+      const _chips: ChipData[] = createChips(event);
+
+      if (event.conference) {
+        _chips.push({
+          label: event.conference,
+          type: 'conference',
+          icon: <InsertLinkRoundedIcon />,
+          color: '#99D2FF',
+        });
+      }
+
+      setChips(_chips);
     }
-
-    setChips(_chips);
   }, [event]);
 
   return (
     <Card sx={{ borderRadius: 2, py: 1.5, px: 1.5, ...sx }}>
-      <Typography
-        variant="h5"
-        component="div"
-        sx={{
-          textAlign: 'left',
-        }}
-      >
-        {event?.title}
-      </Typography>
+      <Box display={'flex'}>
+        <Typography
+          variant="h5"
+          component="div"
+          sx={{
+            textAlign: 'left',
+          }}
+        >
+          {event?.title}
+        </Typography>
+        <Box flexGrow={1} />
+        {isOngoingEvent && (
+          <Chip
+            label="Ongoing"
+            sx={[
+              (theme) => ({
+                borderRadius: 1,
+                backgroundColor: theme.palette.error.main,
+                color: theme.palette.common.white,
+              }),
+            ]}
+          />
+        )}
+      </Box>
 
       <Box
         component="ul"
