@@ -13,10 +13,11 @@ import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { EventResponse, RoomResponse } from './dto';
-import { isRoomAvailable, parseLocation, validateEmail } from './util/calender.util';
+import { isRoomAvailable, parseLocation, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { DeleteResponse } from './dto/delete.response';
 import { ConferenceRoom } from '../auth/entities';
+import { EventUpdateResponse } from './dto/event-update.response';
 
 @Injectable()
 export class CalenderService {
@@ -172,6 +173,47 @@ export class CalenderService {
     }
   }
 
+  async isRoomAvailable(client: OAuth2Client, start: string, end: string, roomEmail: string, timeZone?: string): Promise<boolean> {
+    try {
+      const calendar = google.calendar({ version: 'v3', auth: client });
+
+      const roomsFreeBusy = await calendar.freebusy.query({
+        requestBody: {
+          timeMin: start,
+          timeMax: end,
+          timeZone,
+          items: [{ id: roomEmail }],
+        },
+      });
+
+      const calenders = roomsFreeBusy.data.calendars;
+      const availableRooms: ConferenceRoom[] = [];
+      let room: ConferenceRoom = null;
+
+      for (const roomEmail of Object.keys(calenders)) {
+        const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
+        if (isAvailable) {
+          availableRooms.push(room);
+        }
+      }
+
+      if (availableRooms.length === 0) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      if (error?.code === 403) {
+        throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
+      }
+
+      await this.authService.purgeAccess(client);
+      throw new UnauthorizedException('Insufficient permissions provided. Please allow access to the calender api during login.');
+    }
+  }
+
   async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<RoomResponse[]> {
     const calendar = google.calendar({ version: 'v3', auth: client });
     try {
@@ -192,6 +234,7 @@ export class CalenderService {
         return {
           conference: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
           room: room.name,
+          roomEmail: room.email,
           id: event.id,
           seats: room.seats,
           floor: room.floor,
@@ -208,7 +251,7 @@ export class CalenderService {
     }
   }
 
-  async updateEvent(client: OAuth2Client, domain: string, eventId: string, roomEmail: string, duration: number): Promise<EventResponse | null> {
+  async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<EventResponse | null> {
     const calendar = google.calendar({ version: 'v3', auth: client });
     try {
       const { data } = await calendar.events.get({
@@ -268,6 +311,69 @@ export class CalenderService {
       console.error(error);
       await this.authService.purgeAccess(client);
       throw new UnauthorizedException('Please log in again');
+    }
+  }
+
+  async updateEventDuration(client: OAuth2Client, domain: string, eventId: string, roomId: string, duration: number): Promise<EventUpdateResponse> {
+    const calendar = google.calendar({ version: 'v3', auth: client });
+    try {
+      const { data } = await calendar.events.get({
+        eventId: eventId,
+        calendarId: 'primary',
+      });
+
+      const { start, end } = data;
+
+      // start time
+      const startMs = new Date(start.dateTime).getTime();
+
+      // end time
+      const endMs = new Date(end.dateTime).getTime();
+
+      const newDurationInMs = toMs(duration);
+      const eventDurationInMs = endMs - startMs;
+
+      let newEnd: string;
+
+      if (newDurationInMs === eventDurationInMs) {
+        throw new BadRequestException('Duration has already been set to ' + duration + ' mins');
+      } else if (newDurationInMs < eventDurationInMs && newDurationInMs >= toMs(15)) {
+        newEnd = new Date(endMs - (eventDurationInMs - newDurationInMs)).toISOString();
+      } else {
+        const newStart = end.dateTime;
+        newEnd = new Date(endMs + (newDurationInMs - eventDurationInMs)).toISOString();
+
+        // check if room is available within newStart and newEnd
+        const isAvailable = await this.isRoomAvailable(client, newStart, newEnd, roomId, start.timeZone);
+        if (!isAvailable) {
+          throw new ForbiddenException('Room is not available within time range');
+        }
+      }
+
+      const res = await calendar.events.update({
+        eventId: eventId,
+        calendarId: 'primary',
+        requestBody: {
+          ...data,
+          end: {
+            dateTime: newEnd,
+            timeZone: end.timeZone,
+          },
+        },
+      });
+
+      if (res.status !== 200) {
+        throw new ForbiddenException('Could not change event time');
+      }
+
+      return {
+        start: res.data.start.dateTime,
+        end: res.data.end.dateTime,
+      };
+    } catch (error) {
+      console.error(error);
+      // await this.authService.purgeAccess(client);
+      // throw new UnauthorizedException('Please log in again');
     }
   }
 

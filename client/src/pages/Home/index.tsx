@@ -216,7 +216,7 @@ const BookRoomView = () => {
 
     setChangeRoomLoading(true);
 
-    const { data, redirect } = await makeRequest('/room', 'PUT', {
+    const { data, redirect } = await makeRequest('/room/id', 'PUT', {
       eventId: currentEvent.eventId,
       roomId: requestedRoom,
       requestedAt: new Date(),
@@ -421,7 +421,7 @@ const BookRoomView = () => {
             }}
             disableGutters
           >
-            <AccordionSummary expandIcon={<ArrowDropDownIcon />} sx={{ px: 1.5 }} aria-controls="panel2-content" id="panel2-header">
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} sx={{ px: 1.5 }} id="panel2-header">
               <Typography>More options</Typography>
             </AccordionSummary>
             <AccordionDetails sx={{ py: 0, my: 0, px: 1.5 }}>
@@ -444,8 +444,6 @@ const BookRoomView = () => {
         }}
         open={dialogOpen}
         onClose={onChangeRoomClick}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
           {'Room has been booked'}
@@ -470,7 +468,6 @@ const BookRoomView = () => {
             />
             <IconButton
               disabled={!currentEvent.isEditable}
-              aria-label="edit-room"
               sx={{ p: 1 }}
               onClick={() => {
                 setEditRoom(!editRoom);
@@ -544,6 +541,17 @@ const MyEventsView = () => {
     setLoading(false);
   };
 
+  const onEdit = (id: string, data: any) => {
+    if (data) {
+      const { start, end } = data;
+      setEvents((prevEvents) => prevEvents.map((event) => (event.id === id ? { ...event, start, end } : event)));
+      toast.success('Room has been updated');
+    } else {
+      //todo: add proper message from backend
+      toast.error('Room was not updated');
+    }
+  };
+
   return (
     <Box>
       {loading && <LinearProgress />}
@@ -562,7 +570,7 @@ const MyEventsView = () => {
             mt: 2,
             mb: i === events.length - 1 ? 3 : 0,
           }}
-          onEdit={() => window.location.reload()} // todo: change the state without reloading
+          onEdit={onEdit} // todo: change the state without reloading
           disabled={loading}
           onDelete={onDeleteClick}
         />

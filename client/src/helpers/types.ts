@@ -44,4 +44,5 @@ export interface RoomResponse {
   end?: string;
   seats?: number;
   floor?: string;
+  roomEmail?: string;
 }
