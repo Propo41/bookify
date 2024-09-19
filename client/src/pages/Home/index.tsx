@@ -50,6 +50,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 const isChromeExt = secrets.appEnvironment === 'chrome';
 const roomChangeTimeFrame = 2;
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
+const commonDurations = ['15', '30', '60'];
 
 interface Event {
   room?: string;
@@ -145,7 +146,7 @@ const BookRoomView = () => {
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
-    duration: 15,
+    duration: parseInt(commonDurations[0]),
     seats: 1,
     floor: '',
   });
@@ -165,30 +166,38 @@ const BookRoomView = () => {
       });
     };
 
-    cacheService.getFromCache('floors').then(async (floors) => {
-      console.log(floors);
-
+    const initializeFormData = async () => {
+      // Fetch floors first
+      const floors = await cacheService.getFromCache('floors');
       if (floors) {
         await init(JSON.parse(floors));
       } else {
-        makeRequest('/floors', 'GET').then(async (res) => {
-          const { data, redirect } = res;
-          if (redirect) {
-            toast.error("Couldn't complete request. Redirecting to login page");
-            setTimeout(() => {
-              navigate(ROUTES.signIn);
-            }, 2000);
-          }
+        const { data, redirect } = await makeRequest('/floors', 'GET');
+        if (redirect) {
+          toast.error("Couldn't complete request. Redirecting to login page");
+          setTimeout(() => {
+            navigate(ROUTES.signIn);
+          }, 2000);
+        }
 
-          if (data === null) {
-            return;
-          }
+        if (data === null) {
+          return;
+        }
 
-          await cacheService.saveToCache('floors', JSON.stringify(data));
-          await init(data);
-        });
+        await cacheService.saveToCache('floors', JSON.stringify(data));
+        await init(data);
       }
-    });
+
+      const duration = await cacheService.getFromCache('duration');
+      if (duration) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          duration: parseInt(duration),
+        }));
+      }
+    };
+
+    initializeFormData();
   }, []);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
@@ -578,18 +587,25 @@ const MyEventsView = () => {
 const SettingsView = () => {
   const [formData, setFormData] = useState({
     floor: '',
+    duration: commonDurations[0],
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
+  const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    const init = (floors: string[]) => {
+    const init = async (floors: string[]) => {
       setFloorOptions(createDropdownOptions(floors));
-      cacheService.getFromCache('floor').then((floor) => {
-        setFormData({
-          ...formData,
-          floor: floor || floors[0],
-        });
+      setDurationOptions(createDropdownOptions(commonDurations));
+
+      const floor = await cacheService.getFromCache('floor');
+      const duration = await cacheService.getFromCache('duration');
+
+      setFormData({
+        ...formData,
+        floor: floor || floors[0],
+        duration: duration || commonDurations[0],
       });
     };
 
@@ -625,6 +641,7 @@ const SettingsView = () => {
 
   const onSaveClick = async () => {
     await cacheService.saveToCache('floor', formData.floor);
+    await cacheService.saveToCache('duration', formData.duration);
   };
 
   return (
@@ -635,10 +652,15 @@ const SettingsView = () => {
         textAlign: 'left',
       }}
     >
-      <Typography variant="subtitle1">Select preferred floor</Typography>
+      <Typography variant="subtitle1">Preferred floor</Typography>
       <Dropdown sx={{ mt: 1, height: '60px' }} id="floor" value={formData.floor} options={floorOptions} onChange={handleInputChange} />
 
-      <CustomButton sx={{ py: 2, mt: 2 }} onClick={onSaveClick} fullWidth variant="contained">
+      <Typography variant="subtitle1" mt={2}>
+        Preferred meeting duration
+      </Typography>
+      <Dropdown sx={{ mt: 1, height: '60px' }} id="duration" value={formData.duration} decorator="m" options={durationOptions} onChange={handleInputChange} />
+
+      <CustomButton sx={{ py: 2, mt: 3 }} onClick={onSaveClick} fullWidth variant="contained">
         Save
       </CustomButton>
     </Box>
