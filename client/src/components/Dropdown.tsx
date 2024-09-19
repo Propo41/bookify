@@ -7,6 +7,7 @@ interface DropdownProps {
   value?: string;
   disabled?: boolean;
   onChange: (id: string, value: string) => void;
+  decorator?: string;
 }
 
 export interface DropdownOption {
@@ -14,7 +15,7 @@ export interface DropdownOption {
   value: string; // the main value used for api calls
 }
 
-export default function Dropdown({ sx, id, disabled, value, options, onChange }: DropdownProps) {
+export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator }: DropdownProps) {
   const height = '65px';
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -37,7 +38,10 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange }:
     >
       {options?.map((option) => (
         <MenuItem value={option.value} key={option.value}>
-          <Typography variant="subtitle1">{option.text}</Typography>
+          <Typography variant="subtitle1">
+            {option.text}
+            {decorator}
+          </Typography>
         </MenuItem>
       ))}
     </Select>
