@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { ForbiddenException } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { winstonInstance } from './config/winston.config';
-import { HttpExceptionFilter } from './filters';
+import { HttpExceptionFilter } from './helpers';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
