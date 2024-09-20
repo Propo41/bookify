@@ -9,7 +9,12 @@ import {
   HttpException,
 } from '@nestjs/common';
 
-export class CalendarAPIErrorMapper {
+export class GoogleAPIErrorMapper {
+  /**
+   *
+   * @param err the GaxiosError error instance thrown from the google api requests
+   * @param callback an optional callback method to fire for special cases
+   */
   static handleError(err: GaxiosError, callback?: () => void): void {
     if (!err.response) {
       throw new InternalServerErrorException('Network error or no response received');
@@ -19,8 +24,9 @@ export class CalendarAPIErrorMapper {
 
     switch (status) {
       case 400:
-        throw new BadRequestException(`Bad Request: ${statusText}. Details: ${data?.error?.message || 'Invalid parameters or request body'}`);
+        throw new BadRequestException(`Bad Request: ${statusText}. Details: ${data?.error || 'Invalid parameters or request body'}`);
       case 401:
+        callback();
         throw new UnauthorizedException(`Unauthorized: ${statusText}. You might need to refresh your credentials.`);
       case 403:
         callback();
@@ -34,7 +40,7 @@ export class CalendarAPIErrorMapper {
       case 503:
         throw new ServiceUnavailableException(`Service Unavailable: ${statusText}. The server is currently unavailable.`);
       default:
-        throw new HttpException(`Error: ${statusText}. Details: ${data?.error?.message || 'An unknown error occurred'}`, status);
+        throw new HttpException(`Error: ${statusText}. Details: ${data?.error || 'An unknown error occurred'}`, status);
     }
   }
 }

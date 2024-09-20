@@ -49,23 +49,31 @@ export async function makeRequest(path: string, method: 'GET' | 'POST' | 'PUT' |
       body: JSON.stringify(body || undefined),
     });
 
-    const data = await res.json();
-    if (res.status === 429) {
-      toast.error(res.statusText);
-      return {
-        status: res.status,
-        errorMessage: data.message || 'Too many requests',
-      };
-    }
+    //  interface ApiResponse<T> {
+    //   status: StatusTypes;
+    //   statusCode?: HttpStatus;
+    //   message?: string;
+    //   data: T;
+    // }
 
-    if (res.status === 401) {
-      await cacheService.removeFromCache('access_token');
-      return {
-        status: res.status,
-        errorMessage: data.message || res.statusText,
-        redirect: true,
-      };
-    }
+    // data is of type ApiResponse
+    const data = await res.json();
+    // if (res.status === 429) {
+    //   toast.error(res.statusText);
+    //   return {
+    //     status: res.status,
+    //     errorMessage: data.message || 'Too many requests',
+    //   };
+    // }
+
+    // if (res.status === 401) {
+    //   await cacheService.removeFromCache('access_token');
+    //   return {
+    //     status: res.status,
+    //     errorMessage: data.message || res.statusText,
+    //     redirect: true,
+    //   };
+    // }
 
     return {
       status: res.status,

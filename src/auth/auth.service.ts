@@ -19,6 +19,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
+import to from 'await-to-js';
 
 @Injectable()
 export class AuthService {
@@ -97,13 +98,14 @@ export class AuthService {
   }
 
   async purgeAccess(oauth2Client: OAuth2Client) {
-    try {
-      await oauth2Client.revokeCredentials();
-      return true;
-    } catch (error) {
-      this.logger.error(error);
+    const [err, _] = await to(oauth2Client.revokeCredentials());
+
+    if (err) {
+      this.logger.error(err);
       return false;
     }
+
+    return true;
   }
 
   async createJwt(id: string, name: string, oAuthExpiry: number) {
