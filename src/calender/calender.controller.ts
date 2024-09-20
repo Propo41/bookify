@@ -23,14 +23,18 @@ export class CalenderController {
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string,
     @Query('timeZone') timeZone: string,
-  ): Promise<RoomResponse[]> {
+  ): Promise<ApiResponse<RoomResponse[]>> {
     return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
   }
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Post('/room')
-  async bookRoom(@_OAuth2Client() client: OAuth2Client, @_User('domain') domain: string, @Body() bookRoomDto: BookRoomDto): Promise<EventResponse | null> {
+  async bookRoom(
+    @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
+    @Body() bookRoomDto: BookRoomDto,
+  ): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, seats, timeZone, createConference, title, floor, attendees } = bookRoomDto;
 
     // end time
@@ -50,7 +54,7 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Body('eventId') eventId: string,
     @Body('roomId') roomId?: string,
-  ): Promise<EventResponse | null> {
+  ): Promise<ApiResponse<EventResponse>> {
     return await this.calenderService.updateEventRoom(client, domain, eventId, roomId);
   }
 
@@ -69,13 +73,13 @@ export class CalenderController {
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Delete('/room')
-  async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Body('id') eventId: string): Promise<DeleteResponse> {
+  async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Body('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
     return await this.calenderService.deleteEvent(client, eventId);
   }
 
   @UseGuards(AuthGuard)
   @Get('/floors')
-  async listFloors(@_User('domain') domain: string): Promise<string[]> {
+  async listFloors(@_User('domain') domain: string): Promise<ApiResponse<string[]>> {
     return await this.calenderService.listFloors(domain);
   }
 }

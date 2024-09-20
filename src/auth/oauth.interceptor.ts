@@ -22,14 +22,15 @@ export class OAuthInterceptor implements NestInterceptor {
 
     try {
       const currentTime = new Date().getTime();
-      if (currentTime > user.auth.expiryDate) {
-        const { accessToken, expiryDate } = await this.authService.refreshToken(user, oauth2Client);
+      // todo google automatically refreshes token if client contains refresh token?
+      // if (currentTime > user.auth.expiryDate) {
+      //   const { accessToken, expiryDate } = await this.authService.refreshToken(user, oauth2Client);
 
-        user.auth.accessToken = accessToken;
-        user.auth.expiryDate = expiryDate;
+      //   user.auth.accessToken = accessToken;
+      //   user.auth.expiryDate = expiryDate;
 
-        oauth2Client = this.createOauthClient(user, redirectUrl);
-      }
+      //   oauth2Client = this.createOauthClient(user, redirectUrl);
+      // }
 
       request['oauth2Client'] = oauth2Client;
     } catch (err) {
