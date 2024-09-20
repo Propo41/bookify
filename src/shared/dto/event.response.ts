@@ -9,6 +9,7 @@ export interface EventResponse {
   start?: string;
   end?: string;
   meet?: string;
+  floor?: string;
   roomEmail?: string;
   roomId?: string;
   seats?: number;

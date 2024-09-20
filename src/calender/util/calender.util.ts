@@ -1,3 +1,4 @@
+import { ConferenceRoom } from '../../auth/entities';
 import { BusyTimes } from '../interfaces/freebusy.interface';
 
 export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime: Date) {
@@ -13,13 +14,13 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
   return true;
 }
 
-export function parseLocation(location: string) {
-  if (!location) {
-    return 'N/A';
+export function extractRoomName(rooms: ConferenceRoom[], googleApiRoomName: string) {
+  const index = rooms.findIndex((room) => room.name.toLowerCase().includes(googleApiRoomName.toLowerCase()));
+  if (index !== -1) {
+    return rooms[index].name;
   }
 
-  const parsedLocation = location.split(',');
-  return parsedLocation.length > 0 ? parsedLocation[0] : 'N/A';
+  return null;
 }
 
 export const validateEmail = (email: string) => {
