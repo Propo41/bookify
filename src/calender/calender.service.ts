@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { google } from 'googleapis';
+import { google, calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { EventResponse, RoomResponse } from './dto';
 import { isRoomAvailable, parseLocation, toMs, validateEmail } from './util/calender.util';
@@ -20,6 +20,8 @@ import { ConferenceRoom } from '../auth/entities';
 import { EventUpdateResponse } from './dto/event-update.response';
 import { ApiResponse } from '../dtos';
 import to from 'await-to-js';
+import { GaxiosError, GaxiosResponse } from 'gaxios';
+import { CalendarAPIErrorMapper } from '../helpers/google-api-error.mapper';
 
 @Injectable()
 export class CalenderService {
@@ -176,44 +178,49 @@ export class CalenderService {
   }
 
   async isRoomAvailable(client: OAuth2Client, start: string, end: string, roomEmail: string, timeZone?: string): Promise<boolean> {
-    try {
-      const calendar = google.calendar({ version: 'v3', auth: client });
+    // console.error(error);
 
-      const roomsFreeBusy = await calendar.freebusy.query({
+    // if (error?.code === 403) {
+    //   throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
+    // }
+
+    // await this.authService.purgeAccess(client);
+    // throw new UnauthorizedException('Insufficient permissions provided. Please allow access to the calender api during login.');
+    const calendar = google.calendar({ version: 'v3', auth: client });
+
+    const [err, roomsFreeBusy]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$FreeBusyResponse>] = await to(
+      calendar.freebusy.query({
         requestBody: {
           timeMin: start,
           timeMax: end,
           timeZone,
           items: [{ id: roomEmail }],
         },
+      }),
+    );
+
+    if (err) {
+      CalendarAPIErrorMapper.handleError(err, async () => {
+        await this.authService.purgeAccess(client);
       });
-
-      const calenders = roomsFreeBusy.data.calendars;
-      const availableRooms: ConferenceRoom[] = [];
-      let room: ConferenceRoom = null;
-
-      for (const roomEmail of Object.keys(calenders)) {
-        const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
-        if (isAvailable) {
-          availableRooms.push(room);
-        }
-      }
-
-      if (availableRooms.length === 0) {
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error(error);
-
-      if (error?.code === 403) {
-        throw new ForbiddenException('Insufficient permissions provided. Please allow access to the calender api during login.');
-      }
-
-      await this.authService.purgeAccess(client);
-      throw new UnauthorizedException('Insufficient permissions provided. Please allow access to the calender api during login.');
     }
+
+    const calenders = roomsFreeBusy.data.calendars;
+    const availableRooms: ConferenceRoom[] = [];
+    let room: ConferenceRoom = null;
+
+    for (const roomEmail of Object.keys(calenders)) {
+      const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
+      if (isAvailable) {
+        availableRooms.push(room);
+      }
+    }
+
+    if (availableRooms.length === 0) {
+      return false;
+    }
+
+    return true;
   }
 
   async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<RoomResponse[]> {
