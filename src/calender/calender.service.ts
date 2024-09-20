@@ -3,13 +3,10 @@ import { BadRequestException, ConflictException, ForbiddenException, Inject, Inj
 import { ConfigType } from '@nestjs/config';
 import { google, calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
-import { EventResponse, RoomResponse } from './dto';
-import { isRoomAvailable, parseLocation, toMs, validateEmail } from './util/calender.util';
+import { extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
-import { DeleteResponse } from './dto/delete.response';
 import { ConferenceRoom } from '../auth/entities';
-import { EventUpdateResponse } from './dto/event-update.response';
-import { ApiResponse } from '../dtos';
+import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '../shared/dto';
 import to from 'await-to-js';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
@@ -101,16 +98,20 @@ export class CalenderService {
       throw new ConflictException("Couldn't book room. Please try again later.");
     }
 
+    const room = extractRoomName(rooms, result.data.location);
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
     console.log('Room has been booked', result.data);
 
-    const formattedRoom = parseLocation(result.data.location);
     const data: EventResponse = {
       eventId: result.data.id,
       summary: result.data.summary,
       meet: result.data.hangoutLink,
       start: result.data.start.dateTime,
       end: result.data.end.dateTime,
-      room: formattedRoom,
+      room: room,
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
@@ -188,9 +189,7 @@ export class CalenderService {
     );
 
     if (err) {
-      GoogleAPIErrorMapper.handleError(err, async () => {
-        await this.authService.purgeAccess(client);
-      });
+      GoogleAPIErrorMapper.handleError(err);
     }
 
     const calenders = roomsFreeBusy.data.calendars;
@@ -211,7 +210,7 @@ export class CalenderService {
     return true;
   }
 
-  async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<RoomResponse[]>> {
+  async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
     const calendar = google.calendar({ version: 'v3', auth: client });
 
     const [err, result]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Events>] = await to(
@@ -234,17 +233,19 @@ export class CalenderService {
     const events = result.data.items.map((event) => {
       let room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
-      return {
-        conference: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
+      const _event: EventResponse = {
+        meet: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
         room: room.name,
         roomEmail: room.email,
-        id: event.id,
+        eventId: event.id,
         seats: room.seats,
         floor: room.floor,
-        title: event.summary,
+        summary: event.summary,
         start: event.start.dateTime,
         end: event.end.dateTime,
-      } as RoomResponse;
+      };
+
+      return _event;
     });
 
     return createResponse(events);
@@ -301,13 +302,13 @@ export class CalenderService {
 
     console.log('Room has been updated', result.data);
 
+    const roomName = extractRoomName(rooms, result.data.location);
+    if (!roomName) {
+      throw new BadRequestException('Room not found');
+    }
     const data: EventResponse = {
-      summary: result.data.summary,
-      meet: result.data.hangoutLink,
-      start: result.data.start.dateTime,
       seats: room.seats,
-      end: result.data.end.dateTime,
-      room: parseLocation(result.data.location),
+      room: roomName,
     };
 
     return createResponse(data, 'Selected room is not available at the moment');
@@ -371,9 +372,7 @@ export class CalenderService {
     );
 
     if (error) {
-      GoogleAPIErrorMapper.handleError(error, async () => {
-        await this.authService.purgeAccess(client);
-      });
+      GoogleAPIErrorMapper.handleError(error);
     }
 
     if (res.status !== 200) {

@@ -1,17 +1,16 @@
+import { ApiResponse } from '../shared/dto/api.response';
 import {
   BadRequestException,
-  ConflictException,
-  ForbiddenException,
+  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
   NotFoundException,
-  NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
-import { google } from 'googleapis';
+import { admin_directory_v1, google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload, LoginResponse } from './dto';
@@ -20,6 +19,9 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
+import { createResponse } from '../helpers/payload.util';
+import { GaxiosError, GaxiosResponse } from 'gaxios';
+import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +37,7 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string, redirectUrl: string): Promise<LoginResponse> {
+  async login(code: string, redirectUrl: string): Promise<ApiResponse<LoginResponse>> {
     const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
 
     const { tokens } = await oauth2Client.getToken(code);
@@ -56,45 +58,32 @@ export class AuthService {
       refreshToken: tokens.refresh_token,
     };
 
-    try {
-      const existingUser = await this.getUser(data.id);
-      if (existingUser) {
-        const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
-        await this.authRepository.update({ id: existingUser.authId }, authPayload);
+    const existingUser = await this.getUser(data.id);
+    if (existingUser) {
+      const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
+      await this.authRepository.update({ id: existingUser.authId }, authPayload);
 
-        return {
-          accessToken: jwt,
-        };
-      }
-
-      const domain = data.email.split('@')[1];
-      if (!(await this.isCalenderResourceExist(domain))) {
-        await this.createCalenderResources(oauth2Client, domain);
-      }
-
-      const auth = await this.authRepository.save(authPayload);
-      const user = await this.usersRepository.save({
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        authId: auth.id,
-        domain,
-      });
-
-      const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
-      return { accessToken: jwt };
-    } catch (error) {
-      this.logger.error(error.message);
-
-      if (error.message.includes('refreshToken')) {
-        await this.purgeAccess(oauth2Client);
-        throw new UnauthorizedException('Refresh token not found. Log in again');
-      } else if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException('Something went wrong');
-      }
+      const res: LoginResponse = { accessToken: jwt };
+      return createResponse(res);
     }
+
+    const domain = data.email.split('@')[1];
+    if (!(await this.isCalenderResourceExist(domain))) {
+      await this.createCalenderResources(oauth2Client, domain);
+    }
+
+    const auth = await this.authRepository.save(authPayload);
+    const user = await this.usersRepository.save({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      authId: auth.id,
+      domain,
+    });
+
+    const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
+    const res: LoginResponse = { accessToken: jwt };
+    return createResponse(res);
   }
 
   async purgeAccess(oauth2Client: OAuth2Client) {
@@ -127,33 +116,14 @@ export class AuthService {
     return existingUser;
   }
 
-  async logout(oauth2Client: OAuth2Client): Promise<boolean> {
+  async logout(oauth2Client: OAuth2Client): Promise<ApiResponse<boolean>> {
     try {
       const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
       this.logger.log(`[logout]: revoke token success: ${res.status === 200}`);
-      return true;
+      return createResponse(true);
     } catch (error) {
       this.logger.error(`[logout]: Error revoking token: ${error}`);
-      return false;
-    }
-  }
-
-  async refreshToken(user: User, oauth2Client: OAuth2Client) {
-    if (!oauth2Client.credentials.refresh_token) {
-      throw new UnauthorizedException('Failed to refresh token. No refresh token found. Log in again');
-    }
-
-    const { token } = await oauth2Client.getAccessToken();
-    if (token) {
-      const updatePayload = {
-        accessToken: token,
-        expiryDate: oauth2Client.credentials.expiry_date,
-      };
-
-      await this.authRepository.update({ id: user.authId }, updatePayload);
-      return updatePayload;
-    } else {
-      throw new UnauthorizedException('Failed to refresh token');
+      return createResponse(false);
     }
   }
 
@@ -186,35 +156,38 @@ export class AuthService {
   }
 
   async createCalenderResources(oauth2Client: OAuth2Client, domain: string) {
-    try {
-      const service = google.admin({ version: 'directory_v1', auth: oauth2Client });
-      // https://developers.google.com/admin-sdk/directory/reference/rest/v1/resources.calendars/list]
-      const options = { customer: 'my_customer' };
-      const res = await service.resources.calendars.list(options);
+    const service = google.admin({ version: 'directory_v1', auth: oauth2Client });
+    const options = { customer: 'my_customer' };
 
-      if (res.status !== 200) {
-        throw new BadRequestException("Couldn't obtain directory resources");
-      }
+    const [err, res]: [GaxiosError, GaxiosResponse<admin_directory_v1.Schema$CalendarResources>] = await to(service.resources.calendars.list(options));
 
-      const rooms: ConferenceRoom[] = [];
-      const { items: resources } = res.data;
-      for (const resource of resources) {
-        rooms.push({
-          id: resource.resourceId,
-          email: resource.resourceEmail,
-          description: resource.userVisibleDescription,
-          domain: domain,
-          floor: resource.floorName, // in the format of F3 or F1, whatever the organization assigns
-          name: resource.resourceName,
-          seats: resource.capacity,
-        });
-      }
+    if (err) {
+      GoogleAPIErrorMapper.handleError(err, (status: HttpStatus) => {
+        if (status === HttpStatus.NOT_FOUND) {
+          throw new NotFoundException('No directory resources found. Are you using an organization account?');
+        }
+      });
+    }
 
-      await this.conferenceRoomsRepository.save(rooms);
-      this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
-    } catch (err) {
-      this.logger.error(`Couldn't obtain directory resources`);
+    if (res.status !== 200) {
       throw new NotFoundException("Couldn't obtain directory resources");
     }
+
+    const rooms: ConferenceRoom[] = [];
+    const { items: resources } = res.data;
+    for (const resource of resources) {
+      rooms.push({
+        id: resource.resourceId,
+        email: resource.resourceEmail,
+        description: resource.userVisibleDescription,
+        domain: domain,
+        floor: resource.floorName, // in the format of F3 or F1, whatever the organization assigns
+        name: resource.resourceName,
+        seats: resource.capacity,
+      });
+    }
+
+    await this.conferenceRoomsRepository.save(rooms);
+    this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
   }
 }

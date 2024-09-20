@@ -1,10 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import appConfig from '../config/env/app.config';
 import { Request } from 'express';
 import { IJwtPayload } from './dto';
 import { AuthService } from './auth.service';
+import to from 'await-to-js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,22 +23,19 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    try {
-      const payload: IJwtPayload = await this.jwtService.verifyAsync(token, {
+    const [err, payload]: [Error, IJwtPayload] = await to(
+      this.jwtService.verifyAsync(token, {
         secret: this.config.jwtSecret,
-      });
+      }),
+    );
 
-      let user = await this.authService.getUser(payload.sub);
-      request['user'] = user;
-    } catch (err) {
+    if (err) {
       console.error(err);
-
-      if (err instanceof JsonWebTokenError) {
-        throw new UnauthorizedException();
-      }
-
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid or expired token');
     }
+
+    let user = await this.authService.getUser(payload.sub);
+    request['user'] = user;
 
     return true;
   }

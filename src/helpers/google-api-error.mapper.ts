@@ -15,21 +15,23 @@ export class GoogleAPIErrorMapper {
    * @param err the GaxiosError error instance thrown from the google api requests
    * @param callback an optional callback method to fire for special cases
    */
-  static handleError(err: GaxiosError, callback?: () => void): void {
+  static handleError(err: GaxiosError, callback?: (status?: number) => void): void {
     if (!err.response) {
       throw new InternalServerErrorException('Network error or no response received');
     }
 
     const { status, statusText, data } = err.response;
 
+    if (callback) {
+      callback(status);
+    }
+
     switch (status) {
       case 400:
         throw new BadRequestException(`Bad Request: ${statusText}. Details: ${data?.error || 'Invalid parameters or request body'}`);
       case 401:
-        callback();
         throw new UnauthorizedException(`Unauthorized: ${statusText}. You might need to refresh your credentials.`);
       case 403:
-        callback();
         throw new ForbiddenException(`Forbidden: ${statusText}. Access is denied`);
       case 404:
         throw new NotFoundException(`Not Found: ${statusText}. Resource might not exist.`);

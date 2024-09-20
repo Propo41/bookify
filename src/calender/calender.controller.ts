@@ -3,12 +3,8 @@ import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards, UseIntercep
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
-import { EventResponse, RoomResponse } from './dto';
-import { DeleteResponse } from './dto/delete.response';
-import { BookRoomDto } from './dto/book-room.dto';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import { EventUpdateResponse } from './dto/event-update.response';
-import { ApiResponse } from '../dtos';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse } from '../shared/dto';
 
 @Controller()
 export class CalenderController {
@@ -23,7 +19,7 @@ export class CalenderController {
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string,
     @Query('timeZone') timeZone: string,
-  ): Promise<ApiResponse<RoomResponse[]>> {
+  ): Promise<ApiResponse<EventResponse[]>> {
     return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
   }
 
