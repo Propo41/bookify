@@ -16,11 +16,10 @@
     "start:docker": "docker-compose up --build",
     "start:server": "nest start --watch",
     "start:client": "cd client && npm run start",
-    "typeorm": "ts-node ./node_modules/typeorm/cli",
-    "migration:run": "npm run build && (npm run typeorm migration:run -- -d ./src/config/orm.config.ts)",
-    "migration:generate": "npm run build && (npm run typeorm -- -d ./src/config/orm.config.ts migration:generate ./src/migrations/migration)",
-    "migration:create": "npm run typeorm -- migration:create ./src/migrations/$npm_config_name",
-    "migration:revert": "npm run typeorm -- -d ./src/config/orm.config.ts migration:revert"
+    "migration:run": "npm run build && typeorm migration:run -d ./dist/config/orm.config.js",
+    "migration:generate": "npm run build && (typeorm -d ./dist/config/orm.config.js migration:generate ./src/migrations/migration)",
+    "migration:create": "typeorm migration:create ./src/migrations/migration/$npm_config_name",
+    "migration:revert": "typeorm -d ./dist/config/orm.config.js migration:revert"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
