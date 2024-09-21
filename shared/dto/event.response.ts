@@ -1,4 +1,4 @@
-import { ConferenceRoom } from '../../auth/entities';
+import { IConferenceRoom } from 'interfaces';
 
 export interface EventResponse {
   eventId?: string;
@@ -13,5 +13,5 @@ export interface EventResponse {
   roomEmail?: string;
   roomId?: string;
   seats?: number;
-  availableRooms?: ConferenceRoom[];
+  availableRooms?: IConferenceRoom[];
 }

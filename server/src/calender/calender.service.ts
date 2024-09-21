@@ -6,7 +6,7 @@ import appConfig from '../config/env/app.config';
 import { extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
-import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '../shared/dto';
+import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
 import to from 'await-to-js';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';

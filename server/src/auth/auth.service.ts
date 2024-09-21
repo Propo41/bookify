@@ -1,14 +1,5 @@
-import { ApiResponse } from '../shared/dto/api.response';
-import {
-  BadRequestException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ApiResponse } from '@bookify/shared';
+import { HttpStatus, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
 import { admin_directory_v1, google } from 'googleapis';
 import appConfig from '../config/env/app.config';

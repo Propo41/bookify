@@ -1,8 +1,11 @@
 {
-  "name": "client-react",
+  "name": "@bookify/client",
   "version": "0.1.0",
   "private": true,
+  "author": "Ali Ahnaf",
+  "license": "MIT",
   "dependencies": {
+    "@bookify/shared": "1.0.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
@@ -26,11 +29,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "env": "env-cmd -f ../.env",
-    "env:chrome": "env-cmd -f ../.env.chrome",
     "start": "npm run env -- react-scripts start",
     "start:chrome": "npm run env:chrome -- react-scripts start",
-    "build": "npm run env -- react-scripts build",
+    "build": "react-scripts build",
     "build:chrome": "npm run env:chrome -- react-scripts build",
     "serve": "npx http-server build --port 3000",
     "test": "react-scripts test",
@@ -61,7 +62,6 @@
     "@types/lodash": "^4.17.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",

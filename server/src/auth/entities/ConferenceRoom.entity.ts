@@ -1,7 +1,8 @@
+import { IConferenceRoom } from '@bookify/shared';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'ConferenceRooms' })
-export class ConferenceRoom {
+export class ConferenceRoom implements IConferenceRoom {
   @PrimaryColumn()
   id?: string;
 

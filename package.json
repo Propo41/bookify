@@ -1,68 +1,20 @@
 {
-  "name": "bookify",
+  "name": "@bookify/root",
   "version": "1.0.0",
   "description": "",
   "author": "Ali Ahnaf",
-  "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "nest build",
-    "build:chrome": "cd client && npm run build:chrome",
-    "build:web": "cd client && npm run build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/main",
-    "start:prod": "node dist/main",
-    "start:dev": "(cd client && npm run build) && nest start --watch",
-    "start:docker": "docker-compose up --build",
-    "start:server": "nest start --watch",
-    "start:client": "cd client && npm run start",
-    "typeorm": "ts-node ./node_modules/typeorm/cli",
-    "migration:run": "npm run build && (npm run typeorm migration:run -- -d ./src/config/orm.config.ts)",
-    "migration:generate": "npm run build && (npm run typeorm -- -d ./src/config/orm.config.ts migration:generate ./src/migrations/migration)",
-    "migration:create": "npm run typeorm -- migration:create ./src/migrations/$npm_config_name",
-    "migration:revert": "npm run typeorm -- -d ./src/config/orm.config.ts migration:revert"
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build --w shared",
+    "build:server": "npm run build --w server",
+    "start": "npm run start --w server",
+    "start:server": "npm run start:server --w server",
+    "start:client": "npm run start --w client"
   },
-  "dependencies": {
-    "@google-cloud/local-auth": "^3.0.1",
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/config": "^3.2.3",
-    "@nestjs/core": "^10.0.0",
-    "@nestjs/jwt": "^10.2.0",
-    "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/serve-static": "^4.0.2",
-    "@nestjs/throttler": "^6.2.1",
-    "@nestjs/typeorm": "^10.0.2",
-    "await-to-js": "^3.0.0",
-    "class-validator": "^0.14.1",
-    "cross-env": "^7.0.3",
-    "gaxios": "^6.7.1",
-    "googleapis": "^143.0.0",
-    "nest-winston": "^1.9.7",
-    "reflect-metadata": "^0.2.0",
-    "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.20",
-    "winston": "^3.14.2"
-  },
-  "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
-    "@nestjs/schematics": "^10.0.0",
-    "@types/express": "^4.17.17",
-    "@types/node": "^20.3.1",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "dotenv-cli": "^7.4.2",
-    "eslint": "^8.42.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "prettier": "^3.0.0",
-    "source-map-support": "^0.5.21",
-    "supertest": "^6.3.3",
-    "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "workspaces": [
+    "shared",
+    "client",
+    "server"
+  ]
 }
