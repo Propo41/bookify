@@ -27,10 +27,10 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { convertToLocaleTime } from '../helpers/utility';
 import { FormData, RoomResponse } from '../helpers/types';
 import TimeAdjuster from './TimeAdjuster';
-import { makeRequest } from '../helpers/api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
+import Api from '../api/api';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -134,33 +134,29 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   }, [event]);
 
   const onEditRoomClick = async () => {
-    if (!event) return;
+    if (!event?.id || !event?.roomEmail) return;
 
     console.log('edit room:', formData);
     setLoading(true);
 
-    const { data, redirect } = await makeRequest('/room/duration', 'PUT', {
-      eventId: event.id,
-      duration: formData.duration,
-      roomId: event.roomEmail,
-    });
+    const res = await new Api().updateRoomDuration(event.id, event.roomEmail, formData.duration);
 
-    if (redirect) {
+    if (res?.redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
       setTimeout(() => {
         navigate(ROUTES.signIn);
       }, 2000);
     }
 
-    if (data?.error) {
-      toast.error(data.message);
+    if (res?.status === 'error') {
+      res.message && toast.error(res.message);
       setLoading(false);
       setEditDialogOpen(false);
       return;
     }
 
     if (event.id) {
-      onEdit(event.id, data);
+      onEdit(event.id, res?.data);
 
       setLoading(false);
       setEditDialogOpen(false);

@@ -5,7 +5,8 @@ export {
   EventResponse,
   EventUpdateResponse,
   ErrorResponse,
-  StatusTypes
+  StatusTypes,
+  LoginResponse,
 } from './dto';
 
 export { IConferenceRoom } from './interfaces';

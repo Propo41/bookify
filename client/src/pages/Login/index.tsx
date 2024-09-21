@@ -3,14 +3,15 @@ import MuiCard from '@mui/material/Card';
 import { useEffect } from 'react';
 import { GoogleIcon } from '../../components/CustomIcons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { login, loginChrome } from '../../helpers/api';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
 import { ROUTES } from '../../config/routes';
 import toast from 'react-hot-toast';
+import Api from '../../api/api';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
+const api = new Api();
 
 const Container = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -60,13 +61,14 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 const Login = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const errorMessage = state?.errorMessage;
+  const errorMessage = state?.message;
+
   if (errorMessage) {
     toast.error(errorMessage);
   }
 
   useEffect(() => {
-    cacheService.getFromCache('access_token').then((token) => {
+    cacheService.get('access_token').then((token) => {
       if (token) {
         navigate(ROUTES.home);
       }
@@ -75,19 +77,19 @@ const Login = () => {
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {
-      const { redirect, data, errorMessage } = await loginChrome();
+      const { redirect, data, message } = await api.loginChrome();
 
       if (data) {
         const cacheService: CacheService = CacheServiceFactory.getCacheService();
-        await cacheService.saveToCache('access_token', data);
+        await cacheService.save('access_token', data);
         navigate(ROUTES.home);
       } else {
         if (redirect) {
-          navigate(ROUTES.signIn, { state: { errorMessage: errorMessage || "Couldn't sign in user" } });
+          navigate(ROUTES.signIn, { state: { errorMessage: message || "Couldn't sign in user" } });
         }
       }
     } else {
-      await login();
+      await api.login();
     }
   }
 

@@ -95,6 +95,9 @@ export const colorSchemes = {
         main: green[400],
         dark: green[800],
       },
+      common: {
+        black: gray[700],
+      },
       grey: {
         ...gray,
       },
@@ -145,7 +148,7 @@ export const colorSchemes = {
         dark: green[700],
       },
       common: {
-        black: gray[600],
+        black: gray[700],
       },
       grey: {
         ...gray,

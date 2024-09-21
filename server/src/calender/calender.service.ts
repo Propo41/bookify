@@ -251,7 +251,7 @@ export class CalenderService {
     return createResponse(events);
   }
 
-  async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<ApiResponse<EventResponse>> {
+  async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<ApiResponse<EventUpdateResponse>> {
     const calendar = google.calendar({ version: 'v3', auth: client });
 
     const [err, res]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Event>] = await to(

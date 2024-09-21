@@ -28,7 +28,7 @@ export class GoogleAPIErrorMapper {
 
     switch (status) {
       case 400:
-        throw new BadRequestException(`Bad Request: ${statusText}. Details: ${data?.error || 'Invalid parameters or request body'}`);
+        throw new BadRequestException(`Bad Request. Details: ${data?.error || 'Invalid parameters or request body'}`);
       case 401:
         throw new UnauthorizedException(`Unauthorized: ${statusText}. You might need to refresh your credentials.`);
       case 403:

@@ -2,13 +2,13 @@ import { secrets } from '../config/secrets';
 
 type CacheItems = 'access_token' | 'floor' | 'floors' | 'duration';
 export interface CacheService {
-  saveToCache(key: CacheItems, val: string): Promise<void>;
-  getFromCache(key: CacheItems): Promise<string | null>;
-  removeFromCache(key: CacheItems): Promise<void>;
+  save(key: CacheItems, val: string): Promise<void>;
+  get(key: CacheItems): Promise<string | null>;
+  remove(key: CacheItems): Promise<void>;
 }
 
 class WebCacheService implements CacheService {
-  getFromCache(key: string): Promise<string | null> {
+  get(key: string): Promise<string | null> {
     return new Promise<string | null>((resolve, _) => {
       const data = window.localStorage.getItem(key);
       if (!data) {
@@ -25,14 +25,14 @@ class WebCacheService implements CacheService {
     });
   }
 
-  removeFromCache(key: string): Promise<void> {
+  remove(key: string): Promise<void> {
     return new Promise<void>((resolve, _) => {
       window.localStorage.removeItem(key);
       resolve();
     });
   }
 
-  saveToCache(key: string, val: string): Promise<void> {
+  save(key: string, val: string): Promise<void> {
     return new Promise<void>((resolve, _) => {
       window.localStorage.setItem(key, val);
       resolve();
@@ -41,11 +41,11 @@ class WebCacheService implements CacheService {
 }
 
 class ChromeCacheService implements CacheService {
-  async saveToCache(key: string, val: string): Promise<void> {
+  async save(key: string, val: string): Promise<void> {
     await chrome.storage.sync.set({ [key]: val });
   }
 
-  async getFromCache(key: CacheItems): Promise<string | null> {
+  async get(key: CacheItems): Promise<string | null> {
     const item = await chrome.storage.sync.get(key);
     console.log('token from storage api: ', item[key]);
     const data = item[key];
@@ -61,7 +61,7 @@ class ChromeCacheService implements CacheService {
     return data;
   }
 
-  async removeFromCache(key: string): Promise<void> {
+  async remove(key: string): Promise<void> {
     await chrome.storage.sync.remove(key);
   }
 }
