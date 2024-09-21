@@ -1,8 +1,8 @@
 import { Box, IconButton, styled, Typography } from '@mui/material';
-import { logout } from '../../helpers/api';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../config/routes';
+import Api from '../../api/api';
 
 const TopBar = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.grey[100],
@@ -20,7 +20,7 @@ const TopNavigationBar = ({ title }: { title: string }) => {
   const navigate = useNavigate();
 
   const onLogoutClick = async () => {
-    await logout();
+    await new Api().logout();
     navigate(ROUTES.signIn);
   };
 

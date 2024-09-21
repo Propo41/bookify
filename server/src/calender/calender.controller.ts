@@ -50,7 +50,7 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Body('eventId') eventId: string,
     @Body('roomId') roomId?: string,
-  ): Promise<ApiResponse<EventResponse>> {
+  ): Promise<ApiResponse<EventUpdateResponse>> {
     return await this.calenderService.updateEventRoom(client, domain, eventId, roomId);
   }
 

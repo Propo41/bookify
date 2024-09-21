@@ -1,10 +1,11 @@
+import { LoginResponse } from '@bookify/shared';
 import { ApiResponse } from '@bookify/shared';
 import { HttpStatus, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
 import { admin_directory_v1, google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
-import { IJwtPayload, LoginResponse } from './dto';
+import { IJwtPayload } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -12,7 +13,8 @@ import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { createResponse } from '../helpers/payload.util';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
-import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
+import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
+import { OAuthTokenResponse } from './dto/oauth-token.response';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +33,13 @@ export class AuthService {
   async login(code: string, redirectUrl: string): Promise<ApiResponse<LoginResponse>> {
     const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
 
-    const { tokens } = await oauth2Client.getToken(code);
+    const [err, response]: [GaxiosError, OAuthTokenResponse] = await to(oauth2Client.getToken(code));
+
+    if (err) {
+      GoogleAPIErrorMapper.handleError(err);
+    }
+
+    const { tokens } = response;
     oauth2Client.setCredentials(tokens);
     const oauth2 = google.oauth2({
       auth: oauth2Client,

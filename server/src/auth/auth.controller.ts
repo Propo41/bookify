@@ -1,8 +1,7 @@
-import { ApiResponse } from '@bookify/shared';
+import { ApiResponse, LoginResponse } from '@bookify/shared';
 import { OAuth2Client } from 'google-auth-library';
 import { Body, Controller, Headers, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginResponse } from './dto';
 import { AuthGuard } from './auth.guard';
 import { _OAuth2Client } from './decorators';
 import { OAuthInterceptor } from './oauth.interceptor';

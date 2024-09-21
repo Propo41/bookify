@@ -32,7 +32,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
 import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions } from '../../helpers/utility';
-import { makeRequest } from '../../helpers/api';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
@@ -46,12 +45,14 @@ import { ROUTES } from '../../config/routes';
 import ChipInput from '../../components/ChipInput';
 import StyledTextField from '../../components/StyledTextField';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Api from '../../api/api';
+import { BookRoomDto } from '@bookify/shared';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
 const roomChangeTimeFrame = 2;
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const commonDurations = ['15', '30', '60'];
-
+const api = new Api();
 interface Event {
   room?: string;
   eventId?: string;
@@ -148,7 +149,7 @@ const BookRoomView = () => {
     const init = async (floors: string[]) => {
       setFloorOptions(createDropdownOptions(floors));
 
-      const floor = await cacheService.getFromCache('floor');
+      const floor = await cacheService.get('floor');
       setFormData({
         ...formData,
         startTime: options[0],
@@ -158,11 +159,13 @@ const BookRoomView = () => {
 
     const initializeFormData = async () => {
       // Fetch floors first
-      const floors = await cacheService.getFromCache('floors');
+      const floors = await cacheService.get('floors');
       if (floors) {
         await init(JSON.parse(floors));
       } else {
-        const { data, redirect } = await makeRequest('/floors', 'GET');
+        const res = await api.getFloors();
+        const { data, redirect } = res!;
+
         if (redirect) {
           toast.error("Couldn't complete request. Redirecting to login page");
           setTimeout(() => {
@@ -170,15 +173,15 @@ const BookRoomView = () => {
           }, 2000);
         }
 
-        if (data === null) {
+        if (!data) {
           return;
         }
 
-        await cacheService.saveToCache('floors', JSON.stringify(data));
+        await cacheService.save('floors', JSON.stringify(data));
         await init(data);
       }
 
-      const duration = await cacheService.getFromCache('duration');
+      const duration = await cacheService.get('duration');
       if (duration) {
         setFormData((prevFormData) => ({
           ...prevFormData,
@@ -204,6 +207,8 @@ const BookRoomView = () => {
   };
 
   const onChangeRoomClick = async () => {
+    if (!currentEvent.eventId) return;
+
     if (currentEvent.roomEmail === requestedRoom) {
       toast.error('You have already booked this room');
       return;
@@ -216,52 +221,34 @@ const BookRoomView = () => {
 
     setChangeRoomLoading(true);
 
-    const { data, redirect } = await makeRequest('/room/id', 'PUT', {
-      eventId: currentEvent.eventId,
-      roomId: requestedRoom,
-      requestedAt: new Date(),
-    });
+    const res = await api.updateRoomId(currentEvent.eventId, requestedRoom, new Date());
+    const { redirect, data, status, message } = res!;
 
     if (redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
       setTimeout(() => {
         navigate(ROUTES.signIn);
       }, 2000);
+      return;
     }
 
-    console.log(data);
-
-    if (data.error) {
-      toast.error(data.message);
+    if (status === 'error' || !data) {
+      message && toast.error(message);
       setChangeRoomLoading(false);
       return;
     }
 
-    if (!data.status) {
-      const rooms: DropdownOption[] = data.availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: `${r.name} (${r.seats})` }));
-      if (currentEvent.roomEmail) {
-        rooms.push({ value: currentEvent.roomEmail, text: `${currentEvent.room} (${currentEvent.seats})` });
-        setRequestedRoom(currentEvent.roomEmail);
-      }
-
-      toast.error(data.statusMessage);
-      setCurrentEvent({
-        ...currentEvent,
-        availableRooms: rooms,
-      });
-
-      setChangeRoomLoading(false);
-      return;
+    const rooms: DropdownOption[] = (data?.availableRooms || []).map((r: ConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` }));
+    if (currentEvent.roomEmail) {
+      rooms.push({ value: currentEvent.roomEmail, text: `${currentEvent.room} (${currentEvent.seats})` });
+      setRequestedRoom(currentEvent.roomEmail);
     }
 
-    setCurrentEvent({
-      ...currentEvent,
-      room: data.room,
-      seats: data.seats,
-      isEditable: false,
-    });
-
+    setCurrentEvent({ ...currentEvent, availableRooms: rooms });
     setChangeRoomLoading(false);
+    setCurrentEvent({ ...currentEvent, room: data.room, seats: data.seats, isEditable: false });
+    setChangeRoomLoading(false);
+
     toast.success('Room changed!');
   };
 
@@ -272,7 +259,7 @@ const BookRoomView = () => {
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
 
-    const { data, redirect } = await makeRequest('/room', 'POST', {
+    const payload: BookRoomDto = {
       startTime: formattedStartTime,
       duration: duration,
       seats: seats,
@@ -281,7 +268,10 @@ const BookRoomView = () => {
       createConference: conference,
       title,
       attendees,
-    });
+    };
+
+    const res = await api.createRoom(payload);
+    const { data, redirect, status, message } = res!;
 
     if (redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
@@ -290,13 +280,11 @@ const BookRoomView = () => {
       }, 2000);
     }
 
-    if (data.statusCode && data.statusCode !== 201) {
-      toast.error(data.message);
+    if (status !== 'success' || !data) {
+      message && toast.error(message);
       setLoading(false);
       return;
     }
-
-    console.log('room booked: ', data);
 
     const { room, eventId, start, end, summary, seats: _seats, roomEmail, availableRooms } = data;
     setLoading(false);
@@ -310,11 +298,11 @@ const BookRoomView = () => {
       summary,
       roomEmail,
       seats: _seats,
-      availableRooms: availableRooms.map((r: ConferenceRoom) => ({ value: r.email, text: `${r.name} (${r.seats})` })),
+      availableRooms: (availableRooms || []).map((r: ConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` })),
       createdAt: Date.now(),
     });
 
-    setRequestedRoom(roomEmail);
+    roomEmail && setRequestedRoom(roomEmail);
     setDialogOpen(true);
 
     toast.success(`Room booked! You have ${roomChangeTimeFrame} minutes to change the room`);
@@ -499,11 +487,14 @@ const MyEventsView = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    makeRequest('/rooms', 'GET', null, {
+    const query = {
       startTime: new Date().toISOString(),
       endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
       timeZone: getTimeZoneString(),
-    }).then(({ data, redirect }) => {
+    };
+
+    api.getRooms(query.startTime, query.endTime, query.timeZone).then((res) => {
+      const { data, redirect } = res!;
       setLoading(false);
 
       if (redirect) {
@@ -524,14 +515,13 @@ const MyEventsView = () => {
   const onDeleteClick = async (id?: string) => {
     setLoading(true);
 
-    const { data, redirect } = await makeRequest('/room', 'DELETE', { id });
-
-    if (redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
-      setTimeout(() => {
-        navigate(ROUTES.signIn);
-      }, 2000);
+    if (!id) {
+      toast.error('Please select the event to delete');
+      return;
     }
+
+    const res = await api.deleteRoom(id);
+    const { data } = res!;
 
     if (data) {
       setEvents(events.filter((e) => e.id !== id));
@@ -570,7 +560,7 @@ const MyEventsView = () => {
             mt: 2,
             mb: i === events.length - 1 ? 3 : 0,
           }}
-          onEdit={onEdit} // todo: change the state without reloading
+          onEdit={onEdit}
           disabled={loading}
           onDelete={onDeleteClick}
         />
@@ -594,8 +584,8 @@ const SettingsView = () => {
       setFloorOptions(createDropdownOptions(floors));
       setDurationOptions(createDropdownOptions(commonDurations));
 
-      const floor = await cacheService.getFromCache('floor');
-      const duration = await cacheService.getFromCache('duration');
+      const floor = await cacheService.get('floor');
+      const duration = await cacheService.get('duration');
 
       setFormData({
         ...formData,
@@ -604,13 +594,14 @@ const SettingsView = () => {
       });
     };
 
-    cacheService.getFromCache('floors').then(async (floors) => {
+    cacheService.get('floors').then(async (floors) => {
       if (floors) {
         init(JSON.parse(floors));
       }
 
       if (!floors) {
-        const { data, redirect } = await makeRequest('/floors', 'GET');
+        const res = await api.getFloors();
+        const { data, redirect } = res!;
 
         if (redirect) {
           toast.error("Couldn't complete request. Redirecting to login page");
@@ -620,7 +611,7 @@ const SettingsView = () => {
         }
 
         if (data) {
-          await cacheService.saveToCache('floors', JSON.stringify(floors));
+          await cacheService.save('floors', JSON.stringify(floors));
           init(data);
         }
       }
@@ -635,8 +626,8 @@ const SettingsView = () => {
   };
 
   const onSaveClick = async () => {
-    await cacheService.saveToCache('floor', formData.floor);
-    await cacheService.saveToCache('duration', formData.duration);
+    await cacheService.save('floor', formData.floor);
+    await cacheService.save('duration', formData.duration);
   };
 
   return (
@@ -685,7 +676,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    cacheService.getFromCache('access_token').then((token) => {
+    cacheService.get('access_token').then((token) => {
       if (!token) {
         navigate(ROUTES.signIn);
         return;
