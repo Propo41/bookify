@@ -1,3 +1,4 @@
+import { IConferenceRoom } from '@bookify/shared';
 import toast from 'react-hot-toast';
 import { CacheService, CacheServiceFactory } from './cache';
 import { secrets } from '../config/secrets';

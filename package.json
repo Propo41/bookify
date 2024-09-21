@@ -6,11 +6,13 @@
   "license": "MIT",
   "scripts": {
     "build": "npm run build --workspaces",
+    "build:client": "npm run build --w client",
     "build:shared": "npm run build --w shared",
     "build:server": "npm run build --w server",
     "start": "npm run start --w server",
     "start:server": "npm run start:server --w server",
-    "start:client": "npm run start --w client"
+    "start:client": "npm run start --w client",
+    "migration:run": "npm run migration:run --w server"
   },
   "workspaces": [
     "shared",
