@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { ApiResponse, StatusTypes } from '../shared/dto';
+import { ApiResponse, StatusTypes } from '@bookify/shared';
 
 export const createResponse = <T>(
   data: T,

@@ -4,7 +4,7 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse } from '../shared/dto';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
 
 @Controller()
 export class CalenderController {

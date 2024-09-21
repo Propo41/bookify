@@ -16,9 +16,6 @@ RUN npm run build
 FROM node:18-alpine AS build-backend
 WORKDIR /usr/src
 
-COPY .env /usr/src/.env
-# COPY .env.chrome /usr/src/.env.chrome
-
 COPY package*.json ./
 RUN npm install
 COPY . .

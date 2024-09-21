@@ -1,4 +1,4 @@
-import { ApiResponse } from '../shared/dto/api.response';
+import { ApiResponse } from '@bookify/shared';
 import { OAuth2Client } from 'google-auth-library';
 import { Body, Controller, Headers, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';

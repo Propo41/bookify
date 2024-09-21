@@ -1,6 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Inject, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { User } from './entities';
