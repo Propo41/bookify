@@ -31,13 +31,13 @@ import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
-import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions } from '../../helpers/utility';
+import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions, renderError } from '../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import { ConferenceRoom, FormData, RoomResponse } from '../../helpers/types';
+import { FormData } from '../../helpers/types';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
 import TopNavigationBar from './TopNavigationBar';
@@ -46,13 +46,16 @@ import ChipInput from '../../components/ChipInput';
 import StyledTextField from '../../components/StyledTextField';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Api from '../../api/api';
-import { BookRoomDto } from '@bookify/shared';
+import { BookRoomDto, EventResponse, IConferenceRoom } from '@bookify/shared';
+import { isMobile } from 'react-device-detect';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
+
 const roomChangeTimeFrame = 2;
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const commonDurations = ['15', '30', '60'];
 const api = new Api();
+
 interface Event {
   room?: string;
   eventId?: string;
@@ -86,7 +89,6 @@ const Container = styled(Box)(({ theme }) => ({
   textAlign: 'center',
   paddingBottom: 0,
   gap: theme.spacing(2),
-  maxHeight: '600px',
   height: '100%',
 }));
 
@@ -99,8 +101,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   alignSelf: 'center',
   textAlign: 'center',
   width: '100%',
-  maxHeight: '650px',
-  height: '650px',
+  maxHeight: '750px',
+  height: '750px',
   [theme.breakpoints.up('sm')]: {
     maxWidth: '412px',
   },
@@ -164,13 +166,10 @@ const BookRoomView = () => {
         await init(JSON.parse(floors));
       } else {
         const res = await api.getFloors();
-        const { data, redirect } = res!;
+        const { data, status } = res;
 
-        if (redirect) {
-          toast.error("Couldn't complete request. Redirecting to login page");
-          setTimeout(() => {
-            navigate(ROUTES.signIn);
-          }, 2000);
+        if (status !== 'success') {
+          return renderError(res, navigate);
         }
 
         if (!data) {
@@ -222,32 +221,21 @@ const BookRoomView = () => {
     setChangeRoomLoading(true);
 
     const res = await api.updateRoomId(currentEvent.eventId, requestedRoom, new Date());
-    const { redirect, data, status, message } = res!;
+    const { data, status } = res;
+    setChangeRoomLoading(false);
 
-    if (redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
-      setTimeout(() => {
-        navigate(ROUTES.signIn);
-      }, 2000);
-      return;
+    if (status !== 'success') {
+      return renderError(res, navigate);
     }
 
-    if (status === 'error' || !data) {
-      message && toast.error(message);
-      setChangeRoomLoading(false);
-      return;
-    }
-
-    const rooms: DropdownOption[] = (data?.availableRooms || []).map((r: ConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` }));
+    const rooms: DropdownOption[] = (data?.availableRooms || []).map((r: IConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` }));
     if (currentEvent.roomEmail) {
       rooms.push({ value: currentEvent.roomEmail, text: `${currentEvent.room} (${currentEvent.seats})` });
       setRequestedRoom(currentEvent.roomEmail);
     }
 
     setCurrentEvent({ ...currentEvent, availableRooms: rooms });
-    setChangeRoomLoading(false);
     setCurrentEvent({ ...currentEvent, room: data.room, seats: data.seats, isEditable: false });
-    setChangeRoomLoading(false);
 
     toast.success('Room changed!');
   };
@@ -271,23 +259,14 @@ const BookRoomView = () => {
     };
 
     const res = await api.createRoom(payload);
-    const { data, redirect, status, message } = res!;
+    const { data, status } = res;
+    setLoading(false);
 
-    if (redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
-      setTimeout(() => {
-        navigate(ROUTES.signIn);
-      }, 2000);
-    }
-
-    if (status !== 'success' || !data) {
-      message && toast.error(message);
-      setLoading(false);
-      return;
+    if (status !== 'success') {
+      return renderError(res, navigate);
     }
 
     const { room, eventId, start, end, summary, seats: _seats, roomEmail, availableRooms } = data;
-    setLoading(false);
 
     setCurrentEvent({
       isEditable: true,
@@ -298,7 +277,7 @@ const BookRoomView = () => {
       summary,
       roomEmail,
       seats: _seats,
-      availableRooms: (availableRooms || []).map((r: ConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` })),
+      availableRooms: (availableRooms || []).map((r: IConferenceRoom) => ({ value: r.email || '', text: `${r.name} (${r.seats})` })),
       createdAt: Date.now(),
     });
 
@@ -483,8 +462,10 @@ const BookRoomView = () => {
 
 const MyEventsView = () => {
   const [loading, setLoading] = useState(true);
-  const [events, setEvents] = useState<RoomResponse[]>([]);
+  const [events, setEvents] = useState<EventResponse[]>([]);
   const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
 
   useEffect(() => {
     const query = {
@@ -494,14 +475,11 @@ const MyEventsView = () => {
     };
 
     api.getRooms(query.startTime, query.endTime, query.timeZone).then((res) => {
-      const { data, redirect } = res!;
+      const { data, status } = res;
       setLoading(false);
 
-      if (redirect) {
-        toast.error("Couldn't complete request. Redirecting to login page");
-        setTimeout(() => {
-          navigate(ROUTES.signIn);
-        }, 2000);
+      if (status !== 'success') {
+        renderError(res, navigate);
       }
 
       if (!data?.length) {
@@ -512,29 +490,43 @@ const MyEventsView = () => {
     });
   }, []);
 
-  const onDeleteClick = async (id?: string) => {
-    setLoading(true);
+  const handleDeleteClick = (id: string) => {
+    setDeleteEventId(id);
+    setDialogOpen(true);
+  };
 
-    if (!id) {
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setDeleteEventId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    setDialogOpen(false);
+
+    if (!deleteEventId) {
       toast.error('Please select the event to delete');
       return;
     }
 
-    const res = await api.deleteRoom(id);
-    const { data } = res!;
+    const res = await api.deleteRoom(deleteEventId);
+    const { data, status } = res;
+    setLoading(false);
 
-    if (data) {
-      setEvents(events.filter((e) => e.id !== id));
-      toast.success('Deleted event!');
+    if (status !== 'success') {
+      return renderError(res, navigate);
     }
 
-    setLoading(false);
+    if (data) {
+      setEvents(events.filter((e) => e.eventId !== deleteEventId));
+      toast.success('Deleted event!');
+    }
   };
 
   const onEdit = (id: string, data: any) => {
     if (data) {
       const { start, end } = data;
-      setEvents((prevEvents) => prevEvents.map((event) => (event.id === id ? { ...event, start, end } : event)));
+      setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === id ? { ...event, start, end } : event)));
       toast.success('Room has been updated');
     } else {
       //todo: add proper message from backend
@@ -562,9 +554,27 @@ const MyEventsView = () => {
           }}
           onEdit={onEdit}
           disabled={loading}
-          onDelete={onDeleteClick}
+          onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
         />
       ))}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
+          {'Confirm delete'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="subtitle1">Are you sure you want to delete this event?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <CustomButton onClick={handleCloseDialog} color="primary">
+            Cancel
+          </CustomButton>
+          <CustomButton onClick={() => handleConfirmDelete()} color="error" autoFocus>
+            Delete
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
@@ -597,23 +607,19 @@ const SettingsView = () => {
     cacheService.get('floors').then(async (floors) => {
       if (floors) {
         init(JSON.parse(floors));
+        return;
       }
 
-      if (!floors) {
-        const res = await api.getFloors();
-        const { data, redirect } = res!;
+      const res = await api.getFloors();
+      const { data, status } = res!;
 
-        if (redirect) {
-          toast.error("Couldn't complete request. Redirecting to login page");
-          setTimeout(() => {
-            navigate(ROUTES.signIn);
-          }, 2000);
-        }
+      if (status !== 'success') {
+        return renderError(res, navigate);
+      }
 
-        if (data) {
-          await cacheService.save('floors', JSON.stringify(floors));
-          init(data);
-        }
+      if (data) {
+        await cacheService.save('floors', JSON.stringify(floors));
+        init(data);
       }
     });
   }, []);
@@ -735,14 +741,24 @@ const Home = () => {
     </Box>
   );
 
-  if (!isChromeExt) {
+  // for chrome view
+  if (!isChromeExt && !isMobile) {
     return (
       <RootContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">{common}</Card>
       </RootContainer>
     );
   }
-  return <Container>{common}</Container>;
+
+  return (
+    <Container
+      sx={{
+        maxHeight: isChromeExt ? '600px' : '100vh',
+      }}
+    >
+      {common}
+    </Container>
+  );
 };
 
 export default Home;

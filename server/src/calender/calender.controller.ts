@@ -69,7 +69,7 @@ export class CalenderController {
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Delete('/room')
-  async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Body('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
+  async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Query('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
     return await this.calenderService.deleteEvent(client, eventId);
   }
 

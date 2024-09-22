@@ -1,3 +1,9 @@
+import { ApiResponse } from '@bookify/shared';
+import { toast } from 'react-hot-toast';
+import { NavigateFunction } from 'react-router-dom';
+import { ROUTES } from '../config/routes';
+import { CacheService, CacheServiceFactory } from './cache';
+
 export function populateTimeOptions() {
   const timeOptions = [];
 
@@ -86,4 +92,21 @@ export function convertToLocaleTime(dateStr?: string) {
 
 export const createDropdownOptions = (options: string[]) => {
   return (options || []).map((option) => ({ value: option, text: option }));
+};
+
+export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunction) => {
+  const { status, statusCode, message, redirect } = err;
+  if (status === 'error') {
+    if (statusCode === 401) {
+      const cacheService: CacheService = CacheServiceFactory.getCacheService();
+      await cacheService.remove('access_token');
+      navigate(ROUTES.signIn, { state: { message } });
+    } else if (redirect) {
+      navigate(ROUTES.signIn, { state: { message: message + ' | Try re-logging in' } });
+    } else {
+      message && toast.error(message);
+    }
+
+    return;
+  }
 };

@@ -2,8 +2,6 @@ import { IConferenceRoom } from 'interfaces';
 
 export interface EventResponse {
   eventId?: string;
-  status?: boolean;
-  statusMessage?: string;
   summary?: string;
   room?: string;
   start?: string;

@@ -8,8 +8,11 @@ import { secrets } from '../../config/secrets';
 import { ROUTES } from '../../config/routes';
 import toast from 'react-hot-toast';
 import Api from '../../api/api';
+import { renderError } from '../../helpers/utility';
+import { isMobile } from 'react-device-detect';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
+
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();
 
@@ -18,11 +21,7 @@ const Container = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   alignSelf: 'center',
   textAlign: 'center',
-  padding: theme.spacing(4),
-  paddingBottom: 0,
-  paddingTop: theme.spacing(15),
   gap: theme.spacing(2),
-  maxHeight: '600px',
   height: '100%',
 }));
 
@@ -33,8 +32,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   textAlign: 'center',
   width: '100%',
   gap: theme.spacing(2),
-  maxHeight: '650px',
-  height: '650px',
+  maxHeight: '750px',
+  height: '750px',
   [theme.breakpoints.up('sm')]: {
     maxWidth: '412px',
   },
@@ -77,16 +76,17 @@ const Login = () => {
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {
-      const { redirect, data, message } = await api.loginChrome();
+      const res = await api.loginChrome();
+      const { data, status } = res;
+
+      if (status !== 'success') {
+        return renderError(res, navigate);
+      }
 
       if (data) {
         const cacheService: CacheService = CacheServiceFactory.getCacheService();
         await cacheService.save('access_token', data);
         navigate(ROUTES.home);
-      } else {
-        if (redirect) {
-          navigate(ROUTES.signIn, { state: { errorMessage: message || "Couldn't sign in user" } });
-        }
       }
     } else {
       await api.login();
@@ -95,7 +95,7 @@ const Login = () => {
 
   const common = (
     <>
-      <Box mt={isChromeExt ? 4 : 10}>
+      <Box mt={isChromeExt ? 4 : 18}>
         <Typography component="h1" variant="h2" sx={{ width: '100%' }}>
           {secrets.appTitle}
         </Typography>
@@ -127,11 +127,12 @@ const Login = () => {
             Sign in
           </Button>
         </Box>
+        {/* login bottom asset */}
         {!isChromeExt && (
           <>
             <Box sx={{ flexGrow: 1 }} />
             <Box>
-              <Box component="img" sx={{}} alt="The house from the offer." src="./branding_asset.png" />
+              <Box component="img" alt="The house from the offer." src="./branding_asset.png" />
             </Box>
           </>
         )}
@@ -139,14 +140,27 @@ const Login = () => {
     </>
   );
 
-  if (!isChromeExt) {
+  // for web view
+  if (!isChromeExt && !isMobile) {
     return (
       <RootContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">{common}</Card>
       </RootContainer>
     );
   }
-  return <Container>{common}</Container>;
+
+  // for chrome and web view
+  return (
+    <Container
+      sx={{
+        maxHeight: isChromeExt ? '600px' : '100vh',
+        px: isChromeExt ? 4 : 0,
+        pt: isChromeExt ? 9 : 0,
+      }}
+    >
+      {common}
+    </Container>
+  );
 };
 
 export default Login;

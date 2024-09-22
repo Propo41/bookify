@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
 import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
+import { useColorScheme } from '@mui/material';
 
 // only used for the web version
 // for chrome extension, a different oauth flow is used using the chrome api
@@ -20,7 +21,7 @@ function OAuth() {
     const error = url.searchParams.get('error');
 
     if (error) {
-      navigate(ROUTES.signIn, { state: { errorMessage: error } });
+      navigate(ROUTES.signIn, { state: { message: error } });
       return;
     }
 
@@ -48,6 +49,14 @@ function OAuth() {
 }
 
 function App() {
+  const { mode, setMode } = useColorScheme();
+
+  useEffect(() => {
+    if (mode) {
+      setMode('light');
+    }
+  }, []);
+
   return (
     <AppTheme>
       <Routes>

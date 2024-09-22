@@ -1,5 +1,5 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, ErrorResponse, EventResponse, EventUpdateResponse, LoginResponse } from '@bookify/shared';
-import axios, { AxiosError, AxiosInstance, RawAxiosRequestHeaders } from 'axios';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, LoginResponse } from '@bookify/shared';
+import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '../config/secrets';
 import { CacheService, CacheServiceFactory } from '../helpers/cache';
@@ -33,11 +33,12 @@ export default class Api {
         code,
       };
 
-      const res: ApiResponse<LoginResponse> = await this.client.post('/oauth2callback', payload, {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.post('/oauth2callback', payload, {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<LoginResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -45,17 +46,18 @@ export default class Api {
 
   async logout() {
     try {
-      const res: ApiResponse<boolean> = await this.client.post('/logout', {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.post('/logout', {
+        headers,
       });
 
+      return res.data as ApiResponse<boolean>;
+    } catch (error: any) {
+      console.log(error);
+    } finally {
       await this.cacheService.remove('access_token');
       await this.cacheService.remove('floors');
       await this.cacheService.remove('floor');
-
-      return res;
-    } catch (error: any) {
-      return this.handleError(error);
     }
   }
 
@@ -132,8 +134,8 @@ export default class Api {
     return res;
   }
 
-  getHeaders(): Partial<RawAxiosRequestHeaders> {
-    const token = this.cacheService.get('access_token');
+  async getHeaders(): Promise<Partial<RawAxiosRequestHeaders>> {
+    const token = await this.cacheService.get('access_token');
     return {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
@@ -143,8 +145,9 @@ export default class Api {
 
   async getRooms(startTime: string, endTime: string, timeZone: string) {
     try {
-      const res: ApiResponse<EventResponse[]> = await this.client.get('/rooms', {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/rooms', {
+        headers,
         params: {
           startTime,
           endTime,
@@ -152,7 +155,7 @@ export default class Api {
         },
       });
 
-      return res;
+      return res.data as ApiResponse<EventResponse[]>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -160,11 +163,12 @@ export default class Api {
 
   async createRoom(payload: BookRoomDto) {
     try {
-      const res: ApiResponse<EventResponse> = await this.client.post('/rooms', payload, {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.post('/room', payload, {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -173,11 +177,12 @@ export default class Api {
   async updateRoomId(eventId: string, roomId: string, requestedAt: Date) {
     try {
       const data = { eventId, roomId, requestedAt };
-      const res: ApiResponse<EventUpdateResponse> = await this.client.put('/room/id', data, {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.put('/room/id', data, {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<EventUpdateResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -186,11 +191,13 @@ export default class Api {
   async updateRoomDuration(eventId: string, roomId: string, duration: number) {
     try {
       const data = { eventId, roomId, duration };
-      const res: ApiResponse<EventUpdateResponse> = await this.client.put('/room/duration', data, {
-        headers: this.getHeaders(),
+
+      const headers = await this.getHeaders();
+      const res = await this.client.put('/room/duration', data, {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<EventUpdateResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -198,11 +205,12 @@ export default class Api {
 
   async deleteRoom(roomId: string) {
     try {
-      const res: ApiResponse<DeleteResponse> = await this.client.put(`/room?id=${roomId}`, {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.delete(`/room?id=${roomId}`, {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<DeleteResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -210,11 +218,12 @@ export default class Api {
 
   async getFloors() {
     try {
-      const res: ApiResponse<string[]> = await this.client.get('/floors', {
-        headers: this.getHeaders(),
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/floors', {
+        headers,
       });
 
-      return res;
+      return res.data as ApiResponse<string[]>;
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -227,12 +236,10 @@ export default class Api {
       return res;
     }
 
-    if (error?.message) {
-      return {
-        status: 'error',
-        message: 'Something went wrong',
-        data: null,
-      } as ApiResponse<any>;
-    }
+    return {
+      status: 'error',
+      message: 'Something went wrong',
+      data: null,
+    } as ApiResponse<any>;
   }
 }
