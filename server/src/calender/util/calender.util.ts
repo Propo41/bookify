@@ -15,7 +15,7 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
 }
 
 export function extractRoomName(rooms: ConferenceRoom[], googleApiRoomName: string) {
-  const index = rooms.findIndex((room) => room.name.toLowerCase().includes(googleApiRoomName.toLowerCase()));
+  const index = rooms.findIndex((room) => googleApiRoomName.toLowerCase().includes(room.name.toLowerCase()));
   if (index !== -1) {
     return rooms[index].name;
   }

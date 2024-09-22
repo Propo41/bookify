@@ -25,12 +25,13 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 
 import { convertToLocaleTime } from '../helpers/utility';
-import { FormData, RoomResponse } from '../helpers/types';
+import { FormData } from '../helpers/types';
 import TimeAdjuster from './TimeAdjuster';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import Api from '../api/api';
+import { EventResponse } from '@bookify/shared';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -41,7 +42,7 @@ interface ChipData {
 
 interface EventCardProps {
   sx?: SxProps<Theme>;
-  event?: RoomResponse;
+  event?: EventResponse;
   onDelete: (id?: string) => void;
   disabled?: boolean;
   onEdit: (id: string, data: any) => void;
@@ -64,7 +65,7 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
 }));
 
-const createChips = (event: RoomResponse) => {
+const createChips = (event: EventResponse) => {
   return [
     {
       label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
@@ -120,9 +121,9 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
       const _chips: ChipData[] = createChips(event);
 
-      if (event.conference) {
+      if (event.meet) {
         _chips.push({
-          label: event.conference,
+          label: event.meet,
           type: 'conference',
           icon: <InsertLinkRoundedIcon />,
           color: '#99D2FF',
@@ -134,12 +135,12 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   }, [event]);
 
   const onEditRoomClick = async () => {
-    if (!event?.id || !event?.roomEmail) return;
+    if (!event?.eventId || !event?.roomEmail) return;
 
     console.log('edit room:', formData);
     setLoading(true);
 
-    const res = await new Api().updateRoomDuration(event.id, event.roomEmail, formData.duration);
+    const res = await new Api().updateRoomDuration(event.eventId, event.roomEmail, formData.duration);
 
     if (res?.redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
@@ -155,8 +156,8 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       return;
     }
 
-    if (event.id) {
-      onEdit(event.id, res?.data);
+    if (event.eventId) {
+      onEdit(event.eventId, res?.data);
 
       setLoading(false);
       setEditDialogOpen(false);
@@ -182,7 +183,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
             textAlign: 'left',
           }}
         >
-          {event?.title}
+          {event?.summary}
         </Typography>
         <Box flexGrow={1} />
         {isOngoingEvent && (
@@ -239,7 +240,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         <IconButton disabled={disabled || false} color={'primary'} onClick={() => setEditDialogOpen(true)}>
           <EditRoundedIcon />
         </IconButton>
-        <IconButton disabled={disabled || false} color={'error'} onClick={() => onDelete(event!.id)}>
+        <IconButton disabled={disabled || false} color={'error'} onClick={() => onDelete(event!.eventId)}>
           <DeleteForeverRoundedIcon />
         </IconButton>
       </CardActions>

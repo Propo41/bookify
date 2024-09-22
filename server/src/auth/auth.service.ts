@@ -117,11 +117,11 @@ export class AuthService {
 
   async logout(oauth2Client: OAuth2Client): Promise<ApiResponse<boolean>> {
     try {
-      const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
-      this.logger.log(`[logout]: revoke token success: ${res.status === 200}`);
+      // const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
+      // this.logger.log(`[logout]: revoke token success: ${res.status === 200}`);
       return createResponse(true);
     } catch (error) {
-      this.logger.error(`[logout]: Error revoking token: ${error}`);
+      // this.logger.error(`[logout]: Error revoking token: ${error}`);
       return createResponse(false);
     }
   }
