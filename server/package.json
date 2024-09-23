@@ -12,7 +12,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/main",
     "start:prod": "node dist/main",
-    "start:dev": "(cd client && npm run build) && nest start --watch",
+    "start:dev": "nest start --watch",
     "start:docker": "docker-compose up --build",
     "start:server": "nest start --watch",
     "start:client": "cd client && npm run start",

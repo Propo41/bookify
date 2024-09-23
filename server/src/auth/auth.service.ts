@@ -15,6 +15,7 @@ import { createResponse } from '../helpers/payload.util';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
 import { OAuthTokenResponse } from './dto/oauth-token.response';
+import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     @InjectRepository(ConferenceRoom)
     private conferenceRoomsRepository: Repository<ConferenceRoom>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
     private jwtService: JwtService,
     private logger: Logger,
   ) {}

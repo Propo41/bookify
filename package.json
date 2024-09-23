@@ -12,6 +12,7 @@
     "build:server": "npm run build --w server",
     "start": "npm run start --w server",
     "start:server": "npm run start:server --w server",
+    "start:dev": "npm run start:dev --w server",
     "start:client": "npm run start --w client",
     "migration:run": "npm run migration:run --w server",
     "start:prod": "cd server && npm run start"

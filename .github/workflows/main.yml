@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'npm' 
 
       - name: Create .env file for server
         run: |
@@ -62,11 +62,9 @@ jobs:
       - name: Install dependencies using npm workspaces
         run: npm install
 
-      - name: Build shared dependencies
-        run: npm run build:shared
+      - name: Build all dependencies
+        run: npm run build
 
       - name: Run database migrations
         run: npm run migration:run
 
-      - name: Build all dependencies
-        run: npm run build
