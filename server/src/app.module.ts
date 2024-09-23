@@ -12,6 +12,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { GoogleApiModule } from './google-api/google-api.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { join } from 'path';
     ]),
     AuthModule,
     CalenderModule,
+    GoogleApiModule,
   ],
   controllers: [AppController],
   providers: [

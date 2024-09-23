@@ -5,9 +5,10 @@ import { Auth, ConferenceRoom, User } from './entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './auth.guard';
+import { GoogleApiModule } from '../google-api/google-api.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Auth, ConferenceRoom])],
+  imports: [TypeOrmModule.forFeature([User, Auth, ConferenceRoom]), GoogleApiModule],
   controllers: [AuthController],
   providers: [AuthService, JwtService, AuthGuard, Logger],
   exports: [AuthService, AuthGuard],
