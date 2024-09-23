@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.json'
+      - '**/*.yml'
+
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Deploy the app
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+          app_name: ${{ secrets.DIGITAL_OCEAN_APP_NAME }}

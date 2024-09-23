@@ -13,6 +13,7 @@
 
 <p align="center">
   <a href="https://github.com/Propo41/bookify/actions/workflows/main.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/main.yml/badge.svg" alt="GitHub Actions status"></a>
+  <a href="https://github.com/Propo41/bookify/actions/workflows/deploy.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/deploy.yml/badge.svg" alt="GitHub Actions status"></a>
   <a href="README.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
   <a href= "https://github.com/prettier/prettier"><img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg"></a>
   <a href="#license"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
@@ -138,6 +139,9 @@ Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CO
 
 - [Chrome extension Storage API](https://developer.chrome.com/docs/extensions/reference/api/storage)
 
+- [Deploying to Digital Ocean](https://docs.digitalocean.com/products/app-platform/how-to/create-apps/)
+
+- [Deplying to Digital Ocean using Github actions](https://docs.digitalocean.com/products/app-platform/how-to/deploy-from-github-actions/)
 
 ## License
 

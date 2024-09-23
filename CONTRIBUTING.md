@@ -45,6 +45,53 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 6. Run `npm run start:server` to start the server.
 7. Reload the extension
 
+### Project structure
+
+```
+├── shared/
+│   ├── dist
+│   ├── dto
+│   ├── interfaces
+│   ├── index.ts
+│   └── package.json
+├── client/
+│   ├── build_web
+│   ├── public
+│   ├── src/
+│   │   ├── api
+│   │   ├── components
+│   │   ├── helpers
+│   │   ├── config
+│   │   ├── pages
+│   │   ├── theme
+│   │   ├── App.tsx
+│   │   └── index.tsx
+│   ├── .env
+│   ├── .env.chrome
+│   └── package.json
+└── server/
+    ├── dist
+    ├── src/
+    │   ├── auth
+    │   ├── calender
+    │   ├── config
+    │   ├── helpers
+    │   ├── migrations
+    │   ├── app.controller.ts
+    │   ├── app.module.ts
+    │   ├── app.service.ts
+    │   └── main.ts
+    ├── .env
+    └── package.json
+```
+
+
+### Tech stack
+
+Frontend: ReactJs
+
+Backend: NestJs
+
 ### Commands
 
 ```bash

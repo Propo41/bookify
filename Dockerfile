@@ -1,30 +1,72 @@
-# Step 1: Build the React app
-FROM node:18-alpine AS build-frontend
-WORKDIR /usr/src/client
+# Stage 1: Build Stage for Dependencies
+FROM node:20-alpine AS builder
 
-COPY .env /usr/src/
-# COPY .env.chrome /usr/src/client/.env.chrome
+# Set working directory to /app
+WORKDIR /app
 
-COPY client/package*.json ./
+# Copy package files from shared, client, and server
+COPY shared/package.json /app/shared/
+COPY client/package.json /app/client/
+COPY server/package.json /app/server/
+
+# Install dependencies using npm workspaces
+COPY package.json /app/
 RUN npm install
-COPY client/ ./
 
-# RUN npm run build:chrome
+
+# Stage 2: Build Shared, Server, and Client
+
+# Define build arguments
+ARG SQLITE_DB
+ARG TYPEORM_CLI
+ARG APP_PORT
+ARG NODE_ENV
+ARG OAUTH_CLIENT_SECRET
+ARG OAUTH_CLIENT_ID
+ARG OAUTH_REDIRECT_URL
+ARG JWT_SECRET
+ARG REACT_APP_APP_TITLE
+ARG REACT_APP_APP_SLOGAN
+ARG REACT_APP_CLIENT_ID
+ARG REACT_APP_REDIRECT_URI
+ARG REACT_APP_BACKEND_ENDPOINT
+ARG REACT_APP_ENVIRONMENT
+ARG BUILD_PATH
+
+
+COPY shared/ /app/shared/
+COPY server/ /app/server/
+COPY client/ /app/client/
+
+# Set environment variables for server
+RUN touch /app/server/.env
+RUN echo "SQLITE_DB=${SQLITE_DB}" >> /app/server/.env && \
+    echo "TYPEORM_CLI=${TYPEORM_CLI}" >> /app/server/.env && \
+    echo "APP_PORT=${APP_PORT}" >> /app/server/.env && \
+    echo "NODE_ENV=${NODE_ENV}" >> /app/server/.env && \
+    echo "OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}" >> /app/server/.env && \
+    echo "OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}" >> /app/server/.env && \
+    echo "JWT_SECRET=${JWT_SECRET}" >> /app/server/.env
+
+# Set environment variables for client
+RUN touch /app/client/.env
+RUN echo "REACT_APP_APP_TITLE=${REACT_APP_APP_TITLE}" >> /app/client/.env && \
+    echo "REACT_APP_APP_SLOGAN=${REACT_APP_APP_SLOGAN}" >> /app/client/.env && \
+    echo "REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID}" >> /app/client/.env && \
+    echo "REACT_APP_REDIRECT_URI=${REACT_APP_REDIRECT_URI}" >> /app/client/.env && \
+    echo "REACT_APP_BACKEND_ENDPOINT=${REACT_APP_BACKEND_ENDPOINT}" >> /app/client/.env && \
+    echo "REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT}" >> /app/client/.env && \
+    echo "BUILD_PATH=${BUILD_PATH}" >> /app/client/.env
+
+# # Build shared libraries
 RUN npm run build
 
-# Step 2: Build the NestJS backend
-FROM node:18-alpine AS build-backend
-WORKDIR /usr/src
+RUN npm run migration:run
+# # Stage 3: Runtime Stage
 
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# # Set environment variables
+ARG APP_PORT
+ENV PORT=${APP_PORT}
+EXPOSE ${PORT}
 
-# Copy React build files to the NestJS container
-COPY --from=build-frontend /usr/src/client/build_web /usr/src/client/build_web
-
-# Step 3: Expose the port and run the NestJS app
-EXPOSE 3000
-
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start"]

@@ -5,9 +5,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        SQLITE_DB: ${SQLITE_DB}
+        TYPEORM_CLI: ${TYPEORM_CLI}
+        APP_PORT: ${APP_PORT}
+        NODE_ENV: ${NODE_ENV}
+        OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+        OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+        JWT_SECRET: ${JWT_SECRET}
+        REACT_APP_APP_TITLE: ${REACT_APP_APP_TITLE}
+        REACT_APP_APP_SLOGAN: ${REACT_APP_APP_SLOGAN}
+        REACT_APP_CLIENT_ID: ${REACT_APP_CLIENT_ID}
+        REACT_APP_REDIRECT_URI: ${REACT_APP_REDIRECT_URI}
+        REACT_APP_BACKEND_ENDPOINT: ${REACT_APP_BACKEND_ENDPOINT}
+        REACT_APP_ENVIRONMENT: ${REACT_APP_ENVIRONMENT}
+        BUILD_PATH: ${BUILD_PATH}
     ports:
-      - '3000:3000'
+      - '${APP_PORT}:${APP_PORT}'
     volumes:
       - ./bookify_db.sqlite:/usr/src/data
-    environment:
-      - NODE_ENV=production
