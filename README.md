@@ -20,7 +20,7 @@
 </p>
 
 
-Bookify enhances productivity by minimizing the time spent finding and securing meeting rooms, ensuring a smooth workflow for teams and managers alike.
+Bookify enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
 
 
 ### Key Features:
@@ -28,6 +28,16 @@ Bookify enhances productivity by minimizing the time spent finding and securing 
 - **Extend Overrunning Meetings**: Easily extend the current meeting time if no conflicts exist, or quickly book another room with a single click.
 - **Floor-Specific Bookings**: For managers or teams that prefer a specific floor, the tool allows you to specify your floor while booking.
 - **Efficient High-Demand Booking**: During peak periods, the tool automatically finds and books the best available room, avoiding manual searching.
+
+### Who this is for?
+
+Bookify is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
+
+- Corporate Offices: Companies with various specialized meeting spaces that need to streamline room bookings for teams and departments.
+
+- Creative Agencies: Organizations that require unique environments for brainstorming sessions, presentations, and client meetings, ensuring that the right atmosphere is matched with the right room.
+
+- Tech Companies: Businesses that rely on collaborative workspaces and need to efficiently manage the booking of cmeeting rooms equipped with specific tools and resources.
 
 
 ### Bookify vs Google Calendar

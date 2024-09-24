@@ -29,15 +29,15 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 ### Installation [web]
 
-1. Copy the `.env.example` file as `.env` file in the root dir and fill the required keys. Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)
-2. Run `npm run migration:run` to create the migrations
-3. If you have docker, run `npm run start:docker` to run the app in *production*.
-3. Run the app using: `npm run start:dev`
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir 
+2. If you have docker, run `npm run start:docker` to run the app without installing any dependencies.
+3. Run `npm run migration:run` to create the migrations
+4. Run the app using: `npm run start`
 
 ### Installation [chrome-extension]
 
-1. Copy the `.env.example` file as `.env.chrome` file in the root dir and fill the required keys as mentioned earlier. <br>
-   *Note: The REDIRECT_URL should be in the format `https://<extension-id>.chromiumapp.org`*
+1. Copy the `.env.example` file as `.env.chrome` file in the `/client` dir and fill the required keys as mentioned earlier.
 2. Run `npm run build:chrome`
 3. Go to Chrome extensions and load the `client/build_chrome` folder. Note the extension id.
 4. Edit the `REACT_APP_REDIRECT_URI` in the `.env.chrome` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
@@ -85,12 +85,7 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
     └── package.json
 ```
 
-
-### Tech stack
-
-Frontend: ReactJs
-
-Backend: NestJs
+The app uses [npm workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) with 3 packages: `client`, `server` and `shared`. The `client` is built using **ReactJs** and the `server` is built using **NestJs**. The `shared` dir contains common packages used by both `client` and `server`.
 
 ### Commands
 
@@ -115,6 +110,13 @@ Possible solutions:
 
 ```
 /*    /index.html   200
+```
+3. Adding a wildcard route when serving the build files 
+```js
+  ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'client', 'build_web'),
+      renderPath: '*', //  ensures all routes are redirected to index.html
+    }),
 ```
 
 ## Pull Requests

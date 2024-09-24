@@ -17,6 +17,8 @@ export class OAuthInterceptor implements NestInterceptor {
     let oauth2Client = this.createOauthClient(user, redirectUrl);
     request['oauth2Client'] = oauth2Client;
 
+    console.log(user, oauth2Client);
+
     return next.handle();
   }
 
