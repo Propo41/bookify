@@ -3,11 +3,14 @@ import { Observable } from 'rxjs';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { User } from './entities';
-import { google } from 'googleapis';
+import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
 
 @Injectable()
 export class OAuthInterceptor implements NestInterceptor {
-  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
+  constructor(
+    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
+  ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
@@ -23,18 +26,6 @@ export class OAuthInterceptor implements NestInterceptor {
   }
 
   private createOauthClient(user: User, redirectUrl: string) {
-    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
-    const { accessToken, scope, tokenType, expiryDate, idToken, refreshToken } = user.auth;
-
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      scope: scope,
-      token_type: tokenType,
-      expiry_date: expiryDate,
-      id_token: idToken,
-      refresh_token: refreshToken,
-    });
-
-    return oauth2Client;
+    return this.googleApiService.getOAuthClient(redirectUrl, user);
   }
 }

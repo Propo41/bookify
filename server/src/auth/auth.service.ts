@@ -1,8 +1,7 @@
 import { LoginResponse } from '@bookify/shared';
 import { ApiResponse } from '@bookify/shared';
-import { HttpStatus, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
-import { admin_directory_v1, google } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
@@ -12,9 +11,6 @@ import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { createResponse } from '../helpers/payload.util';
-import { GaxiosError, GaxiosResponse } from 'gaxios';
-import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
-import { OAuthTokenResponse } from './dto/oauth-token.response';
 import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
 
 @Injectable()
@@ -33,22 +29,9 @@ export class AuthService {
   ) {}
 
   async login(code: string, redirectUrl: string): Promise<ApiResponse<LoginResponse>> {
-    const oauth2Client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
-
-    const [err, response]: [GaxiosError, OAuthTokenResponse] = await to(oauth2Client.getToken(code));
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
-    const { tokens } = response;
-    oauth2Client.setCredentials(tokens);
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: 'v2',
-    });
-
-    const { data } = await oauth2.userinfo.get();
+    const oauth2Client = this.googleApiService.getOAuthClient(redirectUrl);
+    const { tokens } = await this.googleApiService.getToken(oauth2Client, code);
+    const userInfo = await this.googleApiService.getUserInfo(oauth2Client);
 
     const authPayload: Auth = {
       accessToken: tokens.access_token,
@@ -59,7 +42,7 @@ export class AuthService {
       refreshToken: tokens.refresh_token,
     };
 
-    const existingUser = await this.getUser(data.id);
+    const existingUser = await this.getUser(userInfo.id);
     if (existingUser) {
       const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
       await this.authRepository.update({ id: existingUser.authId }, authPayload);
@@ -68,16 +51,16 @@ export class AuthService {
       return createResponse(res);
     }
 
-    const domain = data.email.split('@')[1];
+    const domain = userInfo.email.split('@')[1];
     if (!(await this.isCalenderResourceExist(domain))) {
       await this.createCalenderResources(oauth2Client, domain);
     }
 
     const auth = await this.authRepository.save(authPayload);
     const user = await this.usersRepository.save({
-      id: data.id,
-      name: data.name,
-      email: data.email,
+      id: userInfo.id,
+      name: userInfo.name,
+      email: userInfo.email,
       authId: auth.id,
       domain,
     });
@@ -157,26 +140,10 @@ export class AuthService {
   }
 
   async createCalenderResources(oauth2Client: OAuth2Client, domain: string) {
-    const service = google.admin({ version: 'directory_v1', auth: oauth2Client });
-    const options = { customer: 'my_customer' };
-
-    const [err, res]: [GaxiosError, GaxiosResponse<admin_directory_v1.Schema$CalendarResources>] = await to(service.resources.calendars.list(options));
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err, (status: HttpStatus) => {
-        if (status === HttpStatus.NOT_FOUND) {
-          throw new NotFoundException('No directory resources found. Are you using an organization account?');
-        }
-      });
-    }
-
-    if (res.status !== 200) {
-      throw new NotFoundException("Couldn't obtain directory resources");
-    }
+    const { items } = await this.googleApiService.getCalendarResources(oauth2Client);
 
     const rooms: ConferenceRoom[] = [];
-    const { items: resources } = res.data;
-    for (const resource of resources) {
+    for (const resource of items) {
       rooms.push({
         id: resource.resourceId,
         email: resource.resourceEmail,

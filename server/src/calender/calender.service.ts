@@ -11,12 +11,14 @@ import to from 'await-to-js';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
 import { createResponse } from '../helpers/payload.util';
+import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
 
 @Injectable()
 export class CalenderService {
   constructor(
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     private authService: AuthService,
+    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
   ) {}
 
   async createEvent(
@@ -63,7 +65,7 @@ export class CalenderService {
 
     // room.seat should be as closer to user's preferred minSeat value
     const pickedRoom = rooms[0];
-    var event = {
+    var event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || 'Quick Meeting | Bookify',
       location: pickedRoom.name,
       description: 'A quick meeting created by Bookify',
@@ -78,39 +80,21 @@ export class CalenderService {
       ...conference,
     };
 
-    const calendar = google.calendar({ version: 'v3', auth: client });
+    const createdEvent = await this.googleApiService.createCalenderEvent(client, event);
 
-    const [err, result]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Event>] = await to(
-      calendar.events.insert({
-        calendarId: 'primary',
-        conferenceDataVersion: 1,
-        requestBody: {
-          ...event,
-        },
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
-    if (result.status !== 200) {
-      throw new ConflictException("Couldn't book room. Please try again later.");
-    }
-
-    const room = extractRoomName(rooms, result.data.location);
+    const room = extractRoomName(rooms, createdEvent.location);
     if (!room) {
       throw new NotFoundException('Room not found');
     }
 
-    console.log('Room has been booked', result.data);
+    console.log('Room has been booked', createdEvent);
 
     const data: EventResponse = {
-      eventId: result.data.id,
-      summary: result.data.summary,
-      meet: result.data.hangoutLink,
-      start: result.data.start.dateTime,
-      end: result.data.end.dateTime,
+      eventId: createdEvent.id,
+      summary: createdEvent.summary,
+      meet: createdEvent.hangoutLink,
+      start: createdEvent.start.dateTime,
+      end: createdEvent.end.dateTime,
       room: room,
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
@@ -130,8 +114,7 @@ export class CalenderService {
     timeZone: string,
     floor?: string,
   ): Promise<ConferenceRoom[]> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
-    const filteredRoomEmails = [];
+    const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getCalenderResources(domain);
 
     for (const room of rooms) {
@@ -140,26 +123,8 @@ export class CalenderService {
       }
     }
 
-    const [err, roomsFreeBusy]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$FreeBusyResponse>] = await to(
-      calendar.freebusy.query({
-        requestBody: {
-          timeMin: start,
-          timeMax: end,
-          timeZone,
-          items: filteredRoomEmails.map((email) => {
-            return {
-              id: email,
-            };
-          }),
-        },
-      }),
-    );
+    const calenders = this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
 
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
-    const calenders = roomsFreeBusy.data.calendars;
     const availableRooms: ConferenceRoom[] = [];
     let room: ConferenceRoom = null;
 
@@ -175,24 +140,8 @@ export class CalenderService {
   }
 
   async isRoomAvailable(client: OAuth2Client, start: string, end: string, roomEmail: string, timeZone?: string): Promise<boolean> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
+    const calenders = this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [roomEmail]);
 
-    const [err, roomsFreeBusy]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$FreeBusyResponse>] = await to(
-      calendar.freebusy.query({
-        requestBody: {
-          timeMin: start,
-          timeMax: end,
-          timeZone,
-          items: [{ id: roomEmail }],
-        },
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
-    const calenders = roomsFreeBusy.data.calendars;
     const availableRooms: ConferenceRoom[] = [];
     let room: ConferenceRoom = null;
 
@@ -211,26 +160,10 @@ export class CalenderService {
   }
 
   async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
-
-    const [err, result]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Events>] = await to(
-      calendar.events.list({
-        calendarId: 'primary',
-        timeMin: startTime,
-        timeMax: endTime,
-        timeZone,
-        maxResults: 20,
-        singleEvents: true,
-        orderBy: 'startTime',
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
     const rooms = await this.authService.getCalenderResources(domain);
-    const events = result.data.items.map((event) => {
+    const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
+
+    const formattedEvents = events.map((event) => {
       let room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
       const _event: EventResponse = {
@@ -248,23 +181,11 @@ export class CalenderService {
       return _event;
     });
 
-    return createResponse(events);
+    return createResponse(formattedEvents);
   }
 
   async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<ApiResponse<EventUpdateResponse>> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
-
-    const [err, res]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Event>] = await to(
-      calendar.events.get({
-        eventId: eventId,
-        calendarId: 'primary',
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
+    const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms: ConferenceRoom[] = await this.authService.getCalenderResources(domain);
     const room = rooms.find((room) => room.email === roomEmail);
     if (!room) {
@@ -275,10 +196,10 @@ export class CalenderService {
     const availableRooms: ConferenceRoom[] = await this.getAvailableRooms(
       client,
       domain,
-      res.data.start.dateTime,
-      res.data.end.dateTime,
+      event.start.dateTime,
+      event.end.dateTime,
       room.seats,
-      res.data.start.timeZone,
+      event.start.timeZone,
       room.floor,
     );
 
@@ -289,20 +210,19 @@ export class CalenderService {
     }
 
     // remove the previous room id from the list
-    const filteredAttendees = res.data.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
-    const result = await calendar.events.update({
-      eventId: eventId,
-      calendarId: 'primary',
-      requestBody: {
-        ...res.data,
-        location: room.name,
-        attendees: [...filteredAttendees, { email: roomEmail }],
-      },
-    });
+    const filteredAttendees = event.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
 
-    console.log('Room has been updated', result.data);
+    const updatedEvent: calendar_v3.Schema$Event = {
+      ...event,
+      location: room.name,
+      attendees: [...filteredAttendees, { email: roomEmail }],
+    };
 
-    const roomName = extractRoomName(rooms, result.data.location);
+    const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
+
+    console.log('Room has been updated', result);
+
+    const roomName = extractRoomName(rooms, result.location);
     if (!roomName) {
       throw new BadRequestException('Room not found');
     }
@@ -315,20 +235,9 @@ export class CalenderService {
   }
 
   async updateEventDuration(client: OAuth2Client, eventId: string, roomId: string, duration: number): Promise<ApiResponse<EventUpdateResponse>> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
+    const event = await this.googleApiService.getCalenderEvent(client, eventId);
 
-    const [err, events]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Event>] = await to(
-      calendar.events.get({
-        eventId: eventId,
-        calendarId: 'primary',
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
-
-    const { start, end } = events.data;
+    const { start, end } = event;
 
     // start time
     const startMs = new Date(start.dateTime).getTime();
@@ -357,48 +266,26 @@ export class CalenderService {
     }
 
     // update the room
-    const [error, res]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Event>] = await to(
-      calendar.events.update({
-        eventId: eventId,
-        calendarId: 'primary',
-        requestBody: {
-          ...events.data,
-          end: {
-            dateTime: newEnd,
-            timeZone: end.timeZone,
-          },
-        },
-      }),
-    );
+    const newEvent: calendar_v3.Schema$Event = {
+      ...event,
+      end: {
+        dateTime: newEnd,
+        timeZone: end.timeZone,
+      },
+    };
 
-    if (error) {
-      GoogleAPIErrorMapper.handleError(error);
-    }
-
-    if (res.status !== 200) {
-      throw new ForbiddenException('Could not change event time');
-    }
+    const result = await this.googleApiService.updateCalenderEvent(client, eventId, newEvent);
 
     const data: EventUpdateResponse = {
-      start: res.data.start.dateTime,
-      end: res.data.end.dateTime,
+      start: result.start.dateTime,
+      end: result.end.dateTime,
     };
 
     return createResponse(data, 'Room has been updated');
   }
 
   async deleteEvent(client: OAuth2Client, id: string): Promise<ApiResponse<DeleteResponse>> {
-    const calendar = google.calendar({ version: 'v3', auth: client });
-    const [err, _]: [GaxiosError, GaxiosResponse<void>] = await to(
-      calendar.events.delete({
-        calendarId: 'primary',
-        eventId: id,
-      }),
-    );
-
-    if (err) {
-      GoogleAPIErrorMapper.handleError(err);
-    }
+    await this.googleApiService.deleteEvent(client, id);
 
     const data: DeleteResponse = {
       deleted: true,
