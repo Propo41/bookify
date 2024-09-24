@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm' 
+          cache: 'npm'
 
       - name: Create .env file for server
         run: |
@@ -68,45 +68,3 @@ jobs:
 
       - name: Build all dependencies
         run: npm run build
-
-      - name: Archive build files
-        run: zip -r deployment.zip . -x "node_modules/*" -x "client/node_modules/*" -x "server/node_modules/*" -x "shared/node_modules/*"
-  
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: bookify-app
-          path: deployment.zip
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: bookify-app
-          path: deployment.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - cleanup
-    environment:
-      name: 'development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: bookify-app
-
-      - name: Unzip build files
-        run: unzip deployment.zip
-
-      - name: Remove archived file
-        run: rm deployment.zip
-
-      - name: Deploy to Digital Ocean
-        uses: digitalocean/app_action/deploy@v2     
-        with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
-          app_name: ${{ secrets.DIGITAL_OCEAN_APP_NAME }}

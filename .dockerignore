@@ -4,6 +4,7 @@
 **/build_web
 **/build_chrome
 dist
+**/.env
 
 # Ignore other unnecessary files
 *.log
