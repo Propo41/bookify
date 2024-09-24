@@ -1,21 +1,51 @@
 import { Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
+import { OAuth2Client } from 'google-auth-library';
+import { oauth2_v2, calendar_v3, admin_directory_v1 } from 'googleapis';
+import { OAuthTokenResponse } from 'src/auth/dto/oauth-token.response';
+import { User } from 'src/auth/entities';
 
 @Injectable()
 export class GoogleApiMockService implements IGoogleApiService {
-  async getCalendarEvents(): Promise<any> {
-    return {
-      data: {
-        items: [
-          { summary: 'Test Event 1', start: { dateTime: '2024-09-01T10:00:00Z' } },
-          { summary: 'Test Event 2', start: { dateTime: '2024-09-02T11:00:00Z' } },
-        ],
-      },
-    };
+  getOAuthClient(redirectUrl: string): OAuth2Client;
+  getOAuthClient(redirectUrl: string, user?: User): OAuth2Client;
+  getOAuthClient(redirectUrl: unknown, user?: unknown): import('google-auth-library').OAuth2Client {
+    throw new Error('Method not implemented.');
   }
 
-  async getAuthToken(): Promise<any> {
-    // Mocked response for testing
-    return { access_token: 'mock_access_token', refresh_token: 'mock_refresh_token' };
+  getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  getUserInfo(oauth2Client: OAuth2Client): Promise<oauth2_v2.Schema$Userinfo> {
+    throw new Error('Method not implemented.');
+  }
+
+  createCalenderEvent(oauth2Client: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
+    throw new Error('Method not implemented.');
+  }
+
+  getCalendarResources(oauth2Client: OAuth2Client): Promise<admin_directory_v1.Schema$CalendarResources> {
+    throw new Error('Method not implemented.');
+  }
+
+  getCalenderSchedule(oauth2Client: OAuth2Client, start: string, end: string, timeZone: string, rooms: string[]): Promise<calendar_v3.Schema$FreeBusyCalendar> {
+    throw new Error('Method not implemented.');
+  }
+
+  getCalenderEvents(oauth2Client: OAuth2Client, start: string, end: string, timeZone: string, limit?: number): Promise<calendar_v3.Schema$Event[]> {
+    throw new Error('Method not implemented.');
+  }
+
+  getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event> {
+    throw new Error('Method not implemented.');
+  }
+
+  updateCalenderEvent(oauth2Client: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
+    throw new Error('Method not implemented.');
+  }
+
+  deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 }
