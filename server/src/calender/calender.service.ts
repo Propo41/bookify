@@ -1,15 +1,12 @@
 import { OAuth2Client } from 'google-auth-library';
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { google, calendar_v3 } from 'googleapis';
+import { calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
 import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
-import to from 'await-to-js';
-import { GaxiosError, GaxiosResponse } from 'gaxios';
-import { GoogleAPIErrorMapper } from '../helpers/google-api-error.mapper';
 import { createResponse } from '../helpers/payload.util';
 import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
 
@@ -123,7 +120,7 @@ export class CalenderService {
       }
     }
 
-    const calenders = this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
+    const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
 
     const availableRooms: ConferenceRoom[] = [];
     let room: ConferenceRoom = null;
@@ -140,7 +137,7 @@ export class CalenderService {
   }
 
   async isRoomAvailable(client: OAuth2Client, start: string, end: string, roomEmail: string, timeZone?: string): Promise<boolean> {
-    const calenders = this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [roomEmail]);
+    const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [roomEmail]);
 
     const availableRooms: ConferenceRoom[] = [];
     let room: ConferenceRoom = null;

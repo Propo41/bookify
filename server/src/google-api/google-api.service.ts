@@ -12,13 +12,7 @@ import { User } from '../auth/entities';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
-  private calendar;
-  private oauth2Client: OAuth2Client;
-
-  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {
-    this.oauth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.GOOGLE_REDIRECT_URI);
-    this.calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
-  }
+  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
 
   // @ overloaded method signature
   getOAuthClient(redirectUrl: string, user: User): OAuth2Client;
@@ -49,10 +43,9 @@ export class GoogleApiService implements IGoogleApiService {
       GoogleAPIErrorMapper.handleError(err);
     }
 
-    const { tokens } = response;
-    oauth2Client.setCredentials(tokens);
+    oauth2Client.setCredentials(response.tokens);
 
-    return tokens as OAuthTokenResponse;
+    return response as OAuthTokenResponse;
   }
 
   async getUserInfo(oauth2Client: OAuth2Client): Promise<oauth2_v2.Schema$Userinfo> {
@@ -116,7 +109,9 @@ export class GoogleApiService implements IGoogleApiService {
     end: string,
     timeZone: string,
     rooms: string[],
-  ): Promise<calendar_v3.Schema$FreeBusyCalendar> {
+  ): Promise<{
+    [key: string]: calendar_v3.Schema$FreeBusyCalendar;
+  }> {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     const [err, roomsFreeBusy]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$FreeBusyResponse>] = await to(
       calendar.freebusy.query({
