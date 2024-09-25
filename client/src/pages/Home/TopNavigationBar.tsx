@@ -3,6 +3,7 @@ import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../config/routes';
 import Api from '../../api/api';
+import { secrets } from '../../config/secrets';
 
 const TopBar = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.grey[100],
@@ -12,7 +13,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'flex-end',
+  alignItems: 'center',
   textAlign: 'left',
 }));
 
@@ -28,6 +29,11 @@ const TopNavigationBar = ({ title }: { title: string }) => {
     <TopBar>
       <Box>
         <Typography variant="h4">{title}</Typography>
+        {(secrets.mockCalender === 'true' || !secrets.mockCalender) && (
+          <Typography variant="subtitle2" color={'textDisabled'}>
+            App is using mock calender
+          </Typography>
+        )}
       </Box>
 
       <IconButton

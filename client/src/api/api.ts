@@ -70,7 +70,7 @@ export default class Api {
   }
 
   async login() {
-    if (secrets.nodeEnvironment === 'development') {
+    if (secrets.mockCalender === 'true' || !secrets.mockCalender) {
       const mockRedirectUrl = `${secrets.oAuthRedirectUrl}?code=mock_code`;
       window.location.href = mockRedirectUrl;
     } else {

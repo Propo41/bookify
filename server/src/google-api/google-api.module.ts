@@ -10,7 +10,7 @@ import { ConfigType } from '@nestjs/config';
       provide: 'GoogleApiService',
       inject: [appConfig.KEY],
       useFactory: (config: ConfigType<typeof appConfig>) => {
-        return config.environment === 'production' ? new GoogleApiService(config) : new GoogleApiMockService();
+        return config.mockCalender === 'true' || !config.mockCalender ? new GoogleApiMockService() : new GoogleApiService(config);
       },
     },
   ],
