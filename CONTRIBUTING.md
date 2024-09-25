@@ -29,11 +29,15 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 ### Installation [web]
 
-1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)
-2. Copy the `.env.example` file as `.env` file in the `/client/` dir 
-2. If you have docker, run `npm run start:docker` to run the app without installing any dependencies.
-3. Run `npm run migration:run` to create the migrations
-4. Run the app using: `npm run start`
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _OPTIONAL: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
+3. Run `npm install`
+4. Run `npm run build`
+5. Run `npm run migration:run` to create the migrations
+6. Run the server app in development mode using: `npm run start:server`
+7. Run the client app in development mode using: `npm run start:client`
+
+**Note**: In _development_ mode, the calender is mocked, ie, the developer does not need to have access to the OAuth credentials. Every interaction should work as if interacting with a real calender. Check `server/src/google-api/google-api-mock.service.ts` and `server/src/google-api/google-api.module.ts` to learn more on how it works.
 
 ### Installation [chrome-extension]
 
@@ -44,6 +48,28 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 5. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
 6. Run `npm run start:server` to start the server.
 7. Reload the extension
+
+## Production [without docker]
+
+You must require the OAuth credentials and an organization account that utilizes google calender resources in order to test it on a real calender.
+
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _REQUIRED: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _REQUIRED: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
+3. Run `npm install`
+4. Run `npm run build`
+5. Run `npm run migration:run` to create the migrations
+6. Run the server in production mode using: `npm run start`.
+
+**Note**: The server serves the static files, so a dedicated server for the client is not required.
+
+## Production [with docker]
+
+You must require the OAuth credentials and an organization account that utilizes google calender resources in order to test it on a real calender.
+
+1. Copy the `.env.example` file as `.env` file in the root dir and fill the required keys. _REQUIRED: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Run `docker-compose up --build`
+
+**Note**: The server serves the static files, so a dedicated server for the client is not required.
 
 ### Project structure
 
@@ -74,6 +100,7 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
     ├── src/
     │   ├── auth
     │   ├── calender
+    │   ├── google-api
     │   ├── config
     │   ├── helpers
     │   ├── migrations
@@ -86,6 +113,8 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 ```
 
 The app uses [npm workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) with 3 packages: `client`, `server` and `shared`. The `client` is built using **ReactJs** and the `server` is built using **NestJs**. The `shared` dir contains common packages used by both `client` and `server`.
+
+An in-memory database (sqlite) has been used as persisting the users data is not really mandatory. Even if the users data is lost, they can continue normally after logging in again. However, previously stored tokens would have to be revoked in that case.
 
 ### Commands
 
@@ -111,7 +140,9 @@ Possible solutions:
 ```
 /*    /index.html   200
 ```
-3. Adding a wildcard route when serving the build files 
+
+3. Adding a wildcard route when serving the build files
+
 ```js
   ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'client', 'build_web'),

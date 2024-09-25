@@ -70,10 +70,15 @@ export default class Api {
   }
 
   async login() {
-    const scopes = SCOPES.join(' ').trim();
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${secrets.clientId}&redirect_uri=${secrets.oAuthRedirectUrl}&response_type=code&scope=${scopes}&access_type=offline`;
+    if (secrets.nodeEnvironment === 'development') {
+      const mockRedirectUrl = `${secrets.oAuthRedirectUrl}?code=mock_code`;
+      window.location.href = mockRedirectUrl;
+    } else {
+      const scopes = SCOPES.join(' ').trim();
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${secrets.clientId}&redirect_uri=${secrets.oAuthRedirectUrl}&response_type=code&scope=${scopes}&access_type=offline`;
 
-    window.location.href = authUrl;
+      window.location.href = authUrl;
+    }
   }
 
   async handleChromeOauthFlow(authUrl: string) {
