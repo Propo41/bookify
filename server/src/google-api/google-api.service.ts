@@ -12,7 +12,9 @@ import { User } from '../auth/entities';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
-  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
+  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {
+    console.log('googgle api service: ', config);
+  }
 
   // @ overloaded method signature
   getOAuthClient(redirectUrl: string, user: User): OAuth2Client;

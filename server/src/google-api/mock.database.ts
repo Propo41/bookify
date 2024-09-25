@@ -18,7 +18,7 @@ export class CalenderMockDb {
     this.rooms.push(
       {
         resourceId: 'room102',
-        resourceName: 'Cedar Meeting Room',
+        resourceName: 'Cedar',
         resourceEmail: 'cedar.room@@resource.calendar.google.com',
         userVisibleDescription: 'A cozy room with wooden accents and a large display screen.',
         floorName: 'F1',
@@ -26,7 +26,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room112',
-        resourceName: 'Aurora Conference Room',
+        resourceName: 'Aurora',
         resourceEmail: 'aurora.room@@resource.calendar.google.com',
         userVisibleDescription: 'A high-tech room with smart lighting and advanced video conferencing equipment.',
         floorName: 'F1',
@@ -34,7 +34,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room203',
-        resourceName: 'Oasis Room',
+        resourceName: 'Oasis',
         resourceEmail: 'oasis.room@@resource.calendar.google.com',
         userVisibleDescription: 'A relaxing room with plants and a calming atmosphere, ideal for creative sessions.',
         floorName: 'F2',
@@ -42,7 +42,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room306',
-        resourceName: 'Summit Boardroom',
+        resourceName: 'Summit',
         resourceEmail: 'summit.room@@resource.calendar.google.com',
         userVisibleDescription: 'An executive boardroom with premium furnishings and a city skyline view.',
         floorName: 'F3',
@@ -50,7 +50,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room207',
-        resourceName: 'Cascade Room',
+        resourceName: 'Cascade',
         resourceEmail: 'cascade.room@@resource.calendar.google.com',
         userVisibleDescription: 'A quiet room with comfortable seating and a large whiteboard for brainstorming.',
         floorName: 'F2',
@@ -58,7 +58,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room307',
-        resourceName: 'Zen Conference Room',
+        resourceName: 'Zen Conference',
         resourceEmail: 'zen.room@@resource.calendar.google.com',
         userVisibleDescription: 'A minimalist room with natural lighting and a video wall for presentations.',
         floorName: 'F3',
@@ -66,7 +66,7 @@ export class CalenderMockDb {
       },
       {
         resourceId: 'room108',
-        resourceName: 'Galaxy Room',
+        resourceName: 'Galaxy',
         resourceEmail: 'galaxy.room@@resource.calendar.google.com',
         userVisibleDescription: 'A futuristic room with interactive displays and advanced connectivity options.',
         floorName: 'F1',
