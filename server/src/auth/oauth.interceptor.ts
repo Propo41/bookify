@@ -3,13 +3,13 @@ import { Observable } from 'rxjs';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { User } from './entities';
-import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
+import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
 export class OAuthInterceptor implements NestInterceptor {
   constructor(
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
-    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
+    @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {

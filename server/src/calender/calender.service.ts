@@ -8,14 +8,14 @@ import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
 import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
 import { createResponse } from '../helpers/payload.util';
-import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
+import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
 export class CalenderService {
   constructor(
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     private authService: AuthService,
-    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
+    @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
   ) {}
 
   async createEvent(

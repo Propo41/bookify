@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { createResponse } from '../helpers/payload.util';
-import { IGoogleApiService } from '../google-api/interfaces/google-api.interface';
+import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +23,7 @@ export class AuthService {
     @InjectRepository(ConferenceRoom)
     private conferenceRoomsRepository: Repository<ConferenceRoom>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
-    @Inject('IGoogleApiService') private readonly googleApiService: IGoogleApiService,
+    @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
     private jwtService: JwtService,
     private logger: Logger,
   ) {}

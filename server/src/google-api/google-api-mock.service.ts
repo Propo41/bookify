@@ -4,7 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { oauth2_v2, calendar_v3, admin_directory_v1 } from 'googleapis';
 import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
 import { User } from '../auth/entities';
-import { CalenderMockDb } from '../calender/util/mock.database';
+import { CalenderMockDb } from './mock.database';
 
 @Injectable()
 export class GoogleApiMockService implements IGoogleApiService {
