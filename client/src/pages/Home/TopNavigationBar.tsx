@@ -28,7 +28,9 @@ const TopNavigationBar = ({ title }: { title: string }) => {
   return (
     <TopBar>
       <Box>
-        <Typography variant="h4">{title}</Typography>
+        <Typography sx={[(theme) => ({ color: theme.palette.text.primary })]} variant="h4">
+          {title}
+        </Typography>
         {(secrets.mockCalender === 'true' || !secrets.mockCalender) && (
           <Typography variant="subtitle2" color={'textDisabled'}>
             App is using mock calender

@@ -96,7 +96,7 @@ const Login = () => {
   const common = (
     <>
       <Box mt={isChromeExt ? 4 : 18}>
-        <Typography component="h1" variant="h2" sx={{ width: '100%' }}>
+        <Typography variant="h2" sx={[(theme) => ({ color: theme.palette.text.primary, width: '100%' })]}>
           {secrets.appTitle}
         </Typography>
         <Typography variant="h5" sx={[(theme) => ({ color: theme.palette.text.secondary, fontWeight: 400, mt: 1 })]}>
