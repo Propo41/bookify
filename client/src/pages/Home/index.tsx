@@ -113,17 +113,21 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const RootContainer = styled(Stack)(({ theme }) => ({
-  marginTop: '10vh',
+  paddingTop: '10vh',
+  paddingBottom: '10vh',
   textAlign: 'center',
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-    backgroundImage: 'radial-gradient(at 50% 50%, #005192, #002644)',
-    backgroundRepeat: 'no-repeat',
-  },
+  backgroundImage: 'radial-gradient(at 50% 50%, #005192, #002644)',
+  minHeight: '100vh',
+  justifyContent: 'center',
+  // '&::before': {
+  //   content: '""',
+  //   display: 'block',
+  //   position: 'absolute',
+  //   zIndex: -1,
+  //   inset: 0,
+  //   backgroundImage: '',
+  //   backgroundRepeat: 'no-repeat',
+  // },
 }));
 
 const BookRoomView = () => {
