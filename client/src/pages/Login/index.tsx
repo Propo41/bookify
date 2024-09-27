@@ -44,8 +44,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const RootContainer = styled(Stack)(({ theme }) => ({
-  paddingTop: '10vh',
-  paddingBottom: '10vh',
+  // padding: '4%',
   textAlign: 'center',
   backgroundImage: 'radial-gradient(at 50% 50%, #005192, #002644)',
   minHeight: '100vh',
