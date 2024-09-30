@@ -432,7 +432,11 @@ const BookRoomView = () => {
               id="room"
               disabled={!editRoom}
               value={requestedRoom}
-              sx={{ height: '28px', mx: 1 }}
+              sx={{
+                height: '28px',
+                mx: 1,
+                minWidth: '205px',
+              }}
               options={currentEvent.availableRooms}
               onChange={handleRoomChange}
             />
