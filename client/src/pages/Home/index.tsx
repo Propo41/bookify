@@ -641,6 +641,7 @@ const SettingsView = () => {
   const onSaveClick = async () => {
     await cacheService.save('floor', formData.floor);
     await cacheService.save('duration', formData.duration);
+    toast.success('Saved successfully!');
   };
 
   return (
