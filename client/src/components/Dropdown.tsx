@@ -28,6 +28,21 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
       onChange={handleChange}
       fullWidth
       disabled={disabled || false}
+      renderValue={(selected) => {
+        const selectedOption = options?.find((option) => option.value === selected);
+        return (
+          <Typography
+            variant="subtitle1"
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {selectedOption ? selectedOption.text + (decorator || '') : ''}
+          </Typography>
+        );
+      }}
       sx={[
         (theme) => ({
           height: height,
