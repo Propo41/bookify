@@ -618,7 +618,7 @@ const SettingsView = () => {
         ...formData,
         floor: floor || floors[0],
         duration: duration || commonDurations[0],
-        seats: Number(seats),
+        seats: Number(seats) || 1,
       });
     };
 
