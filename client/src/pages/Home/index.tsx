@@ -190,6 +190,14 @@ const BookRoomView = () => {
           duration: parseInt(duration),
         }));
       }
+
+      const seats = await cacheService.get('seats');
+      if (seats) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          seats: Number(seats),
+        }));
+      }
     };
 
     initializeFormData();
@@ -590,6 +598,7 @@ const SettingsView = () => {
   const [formData, setFormData] = useState({
     floor: '',
     duration: commonDurations[0],
+    seats: 1,
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
@@ -603,11 +612,13 @@ const SettingsView = () => {
 
       const floor = await cacheService.get('floor');
       const duration = await cacheService.get('duration');
+      const seats = await cacheService.get('seats');
 
       setFormData({
         ...formData,
         floor: floor || floors[0],
         duration: duration || commonDurations[0],
+        seats: Number(seats),
       });
     };
 
@@ -641,6 +652,7 @@ const SettingsView = () => {
   const onSaveClick = async () => {
     await cacheService.save('floor', formData.floor);
     await cacheService.save('duration', formData.duration);
+    await cacheService.save('seats', formData.seats.toString());
     toast.success('Saved successfully!');
   };
 
@@ -659,6 +671,17 @@ const SettingsView = () => {
         Preferred meeting duration
       </Typography>
       <Dropdown sx={{ mt: 1, height: '60px' }} id="duration" value={formData.duration} decorator="m" options={durationOptions} onChange={handleInputChange} />
+
+      <Typography variant="subtitle1" mt={2}>
+        Preferred room capacity
+      </Typography>
+      <TimeAdjuster
+        sx={{ mt: 1, height: '60px' }}
+        incrementBy={1}
+        minAmount={1}
+        value={formData.seats}
+        onChange={(newValue) => handleInputChange('seats', newValue)}
+      />
 
       <CustomButton sx={{ py: 2, mt: 3 }} onClick={onSaveClick} fullWidth variant="contained">
         Save

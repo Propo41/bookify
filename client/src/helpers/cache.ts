@@ -1,6 +1,6 @@
 import { secrets } from '../config/secrets';
 
-type CacheItems = 'access_token' | 'floor' | 'floors' | 'duration';
+type CacheItems = 'access_token' | 'floor' | 'floors' | 'duration' | 'seats';
 export interface CacheService {
   save(key: CacheItems, val: string): Promise<void>;
   get(key: CacheItems): Promise<string | null>;
