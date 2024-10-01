@@ -1,4 +1,5 @@
-import { MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface DropdownProps {
   id: string;
@@ -8,6 +9,7 @@ interface DropdownProps {
   disabled?: boolean;
   onChange: (id: string, value: string) => void;
   decorator?: string;
+  icon?: ReactElement;
 }
 
 export interface DropdownOption {
@@ -15,8 +17,8 @@ export interface DropdownOption {
   value: string; // the main value used for api calls
 }
 
-export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator }: DropdownProps) {
-  const height = '65px';
+export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon }: DropdownProps) {
+  const height = '58px';
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
@@ -27,26 +29,43 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
       value={value}
       onChange={handleChange}
       fullWidth
+      variant="standard"
       disabled={disabled || false}
       renderValue={(selected) => {
         const selectedOption = options?.find((option) => option.value === selected);
         return (
-          <Typography
-            variant="subtitle1"
+          <Box
             sx={{
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              alignItems: 'center',
+              display: 'flex',
             }}
           >
-            {selectedOption ? selectedOption.text + (decorator || '') : ''}
-          </Typography>
+            {icon && icon}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                ml: 2,
+              }}
+            >
+              {selectedOption ? selectedOption.text + (decorator || '') : ''}
+            </Typography>
+          </Box>
         );
       }}
+      disableUnderline={true}
       sx={[
         (theme) => ({
           height: height,
-          backgroundColor: theme.palette.grey[100],
+          backgroundColor: theme.palette.common.white,
+          paddingLeft: 1.5,
+          paddingRight: 1.5,
+          '& .MuiSelect-icon': {
+            paddingRight: 1.5,
+            color: theme.palette.grey[50],
+          },
           ...sx,
         }),
       ]}

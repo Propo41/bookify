@@ -14,7 +14,7 @@ export const brand = {
 };
 
 export const gray = {
-  50: 'hsl(220, 35%, 97%)',
+  50: '#C8C8C8',
   100: '#E1E1E1',
   200: '#8B8B8B',
   300: 'hsl(220, 20%, 80%)',

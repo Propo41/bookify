@@ -2,13 +2,13 @@ import { Box, SxProps, TextField, Theme } from '@mui/material';
 
 interface StyledTextFieldProps {
   id: string;
-  sx?: SxProps<Theme>;
+  sx?: any;
   value?: string;
   disabled?: boolean;
   onChange: (id: string, value: string) => void;
 }
 
-const StyledTextField = ({ id, sx, disabled, onChange }: StyledTextFieldProps) => {
+const StyledTextField = ({ id, sx, disabled, onChange, value }: StyledTextFieldProps) => {
   return (
     <Box
       display="flex"
@@ -19,17 +19,18 @@ const StyledTextField = ({ id, sx, disabled, onChange }: StyledTextFieldProps) =
           gap: '8px',
           padding: '10px',
           borderRadius: 1,
-          backgroundColor: '#ECECEC',
-          mt: 1,
+          backgroundColor: '#f9f9f9',
           '&:focus-within': {
-            border: `2px solid ${theme.palette.primary.dark}`,
+            border: 'none',
           },
+          ...sx,
         }),
       ]}
     >
       <TextField
         onChange={(e) => onChange(id, e.target.value)}
         variant="standard"
+        value={value}
         placeholder="Enter title"
         slotProps={{
           input: {

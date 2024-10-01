@@ -42,14 +42,16 @@ import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import { secrets } from '../../config/secrets';
 import TopNavigationBar from './TopNavigationBar';
 import { ROUTES } from '../../config/routes';
-import ChipInput from '../../components/ChipInput';
-import StyledTextField from '../../components/StyledTextField';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Api from '../../api/api';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@bookify/shared';
 import { isMobile } from 'react-device-detect';
+import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
+import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AdvancedOptionsDialog from './AdvancedOptionsDialog';
 
-const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = secrets.appEnvironment === 'chrome';
+const isChromeExt = true;
 
 const roomChangeTimeFrame = 2;
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
@@ -139,6 +141,7 @@ const BookRoomView = () => {
   const [currentEvent, setCurrentEvent] = useState<Event>({});
   const [requestedRoom, setRequestedRoom] = useState(''); // room
   const navigate = useNavigate();
+  const [advOptionsOpen, setAdvOptionsOpen] = useState(true);
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
@@ -298,84 +301,145 @@ const BookRoomView = () => {
     toast.success(`Room booked! You have ${roomChangeTimeFrame} minutes to change the room`);
   }
 
-  return (
-    <Box>
-      <Grid container spacing={1} columns={16} px={2} mt={3}>
-        <Grid size={8}>
-          <Dropdown id="startTime" options={timeOptions} value={formData.startTime} onChange={handleInputChange} />
-          <Typography
-            variant="subtitle1"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[400],
-                fontStyle: 'italic',
-              }),
-            ]}
-          >
-            Start time
-          </Typography>
-        </Grid>
-        <Grid size={8}>
-          <TimeAdjuster
-            incrementBy={15}
-            minAmount={15}
-            decorator={'m'}
-            value={formData.duration}
-            onChange={(newValue) => handleInputChange('duration', newValue)}
-          />
-          <Typography
-            variant="subtitle1"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[400],
-                fontStyle: 'italic',
-              }),
-            ]}
-          >
-            Duration
-          </Typography>
-        </Grid>
-      </Grid>
+  const handleAdvancedOptionsDialogOpen = () => {
+    setAdvOptionsOpen(true);
+  };
 
-      <Grid container spacing={1} columns={16} px={2} mt={2}>
+  const handleAdvancedOptionsDialogClose = () => {
+    setAdvOptionsOpen(false);
+  };
+
+  return (
+    <Box mx={2}>
+      <Grid
+        container
+        spacing={0}
+        columns={16}
+        px={0}
+        mt={3}
+        sx={{
+          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          borderBottomLeftRadius: 10,
+          borderBottomRightRadius: 10,
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+        }}
+      >
+        <Dropdown
+          id="startTime"
+          options={timeOptions}
+          value={formData.startTime}
+          onChange={handleInputChange}
+          sx={{
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          icon={
+            <AccessTimeFilledRoundedIcon
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[50],
+                }),
+              ]}
+            />
+          }
+        />
         <Grid size={8}>
-          <TimeAdjuster incrementBy={1} minAmount={1} value={formData.seats} onChange={(newValue) => handleInputChange('seats', newValue)} />
-          <Typography
-            variant="subtitle1"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[400],
-                fontStyle: 'italic',
-              }),
-            ]}
-          >
-            Capacity
-          </Typography>
+          <Dropdown
+            id="duration"
+            options={timeOptions}
+            value={formData.startTime}
+            onChange={handleInputChange}
+            icon={
+              <HourglassBottomRoundedIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
+          />
         </Grid>
         <Grid size={8}>
-          <Dropdown id="floor" value={formData.floor} options={floorOptions} onChange={handleInputChange} />
-          <Typography
-            variant="subtitle1"
+          <Dropdown
+            id="capacity"
+            options={timeOptions}
+            value={formData.startTime}
+            onChange={handleInputChange}
+            icon={
+              <PeopleRoundedIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
+          />
+        </Grid>
+        <Dropdown
+          id="room"
+          options={timeOptions}
+          value={formData.startTime}
+          onChange={handleInputChange}
+          sx={{
+            borderBottomLeftRadius: 10,
+            borderBottomRightRadius: 10,
+          }}
+          icon={
+            <MeetingRoomRoundedIcon
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[50],
+                }),
+              ]}
+            />
+          }
+        />
+
+        <Grid
+          size={16}
+          sx={{
+            display: 'flex',
+            px: 2,
+            py: 3,
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+          }}
+          onClick={handleAdvancedOptionsDialogOpen}
+        >
+          <Typography variant="subtitle2">Advanced options</Typography>
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          />
+          <PlayArrowIcon
+            fontSize="small"
             sx={[
               (theme) => ({
-                color: theme.palette.grey[400],
-                fontStyle: 'italic',
+                color: theme.palette.grey[50],
               }),
             ]}
-          >
-            Floor
-          </Typography>
+          />
         </Grid>
       </Grid>
+      <Box flexGrow={1} />
 
       <Box
         sx={{
-          mx: 2,
           mt: 2,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          mb: 3,
+          mx: 2,
         }}
       >
         <LoadingButton
-          color="primary"
           onClick={onBookClick}
           fullWidth
           loading={loading}
@@ -383,38 +447,21 @@ const BookRoomView = () => {
           variant="contained"
           disableElevation
           sx={[
-            (_) => ({
-              py: 2.5,
-              boxShadow: 'none',
+            (theme) => ({
+              py: 2,
+              backgroundColor: theme.palette.common.white,
+              borderRadius: 15,
+              color: theme.palette.common.black,
             }),
           ]}
         >
-          <Typography variant="h6">Book</Typography>
+          <Typography variant="h6" fontWeight={700}>
+            Book now
+          </Typography>
         </LoadingButton>
-
-        <Box sx={{ mt: 2, pb: 2 }}>
-          <Accordion
-            sx={{
-              boxShadow: '0 0px 6px 0 rgba(0,0,0,0.0), 0 3px 10px 0 rgba(0,0,0,0.2)',
-            }}
-            disableGutters
-          >
-            <AccordionSummary expandIcon={<ArrowDropDownIcon />} sx={{ px: 1.5 }} id="panel2-header">
-              <Typography>More options</Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ py: 0, my: 0, px: 1.5 }}>
-              <Box pb={0}>
-                <StyledTextField id="title" onChange={handleInputChange} />
-                <ChipInput id="attendees" onChange={handleInputChange} />
-                <Box display={'flex'} mt={1} pb={1} alignItems={'center'}>
-                  <Typography variant="subtitle2">Create online conference: </Typography>
-                  <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
-                </Box>
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        </Box>
       </Box>
+
+      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
 
       <Dialog
         PaperProps={{
@@ -707,10 +754,9 @@ const tabs = [
 
 const Home = () => {
   const navigate = useNavigate();
-
-  const [value, setValue] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
+  const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
     cacheService.get('access_token').then((token) => {
@@ -723,6 +769,10 @@ const Home = () => {
     });
   }, []);
 
+  const handleTabChange = (newValue: number) => {
+    setTabIndex(newValue);
+  };
+
   const common = (
     <Box
       ref={ref}
@@ -732,47 +782,12 @@ const Home = () => {
         paddingBottom: '56px',
       }}
     >
-      <TopNavigationBar title={tabs[value].title} />
-
-      {loading ? <LinearProgress /> : tabs[value].component}
-
-      <Paper
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          boxShadow: 'none',
-          border: 'none',
-          backgroundColor: 'transparent',
-        }}
-      >
-        <BottomNavigation
-          value={value}
-          onChange={(event, newValue) => {
-            console.log(newValue);
-            setValue(newValue);
-          }}
-          sx={[
-            (theme) => ({
-              backgroundColor: theme.palette.grey[100],
-              borderRadius: 10,
-              mx: 2,
-              mb: 1,
-              overflow: 'hidden',
-            }),
-          ]}
-        >
-          <BottomNavigationAction icon={<HomeRoundedIcon />} />
-          <BottomNavigationAction icon={<CalendarMonthRoundedIcon />} />
-          <BottomNavigationAction icon={<SettingsRoundedIcon />} />
-        </BottomNavigation>
-      </Paper>
+      <TopNavigationBar tabIndex={tabIndex} handleTabChange={handleTabChange} />
+      {loading ? <LinearProgress /> : tabs[tabIndex].component}
     </Box>
   );
 
-  // for chrome view
+  // web view
   if (!isChromeExt && !isMobile) {
     return (
       <RootContainer direction="column" justifyContent="space-between">
@@ -781,6 +796,7 @@ const Home = () => {
     );
   }
 
+  // chrome view
   return (
     <Container
       sx={{

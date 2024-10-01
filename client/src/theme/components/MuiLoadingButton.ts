@@ -1,6 +1,6 @@
-export default function Button() {
+export default function LoadingButton() {
   return {
-    MuiButton: {
+    MuiLoadingButton: {
       styleOverrides: {
         root: {
           boxShadow: '0 3px 15px 0 rgba(0,0,0,0.0), 0 3px 20px 0 rgba(0,0,0,0.2)',
@@ -18,7 +18,6 @@ export default function Button() {
             color: '#a0a0a0',
             boxShadow: 'none',
           },
-          borderRadius: 10,
         },
       },
     },
