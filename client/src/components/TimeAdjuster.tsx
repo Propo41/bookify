@@ -19,6 +19,20 @@ export default function TimeAdjuster({ sx, incrementBy: adjustBy, minAmount, dec
     onChange(Math.max(value - adjustBy, minAmount)); // Pass updated value to parent
   };
 
+  const formatTime = (value: number) => {
+    const hours = Math.floor(value / 60);
+    const minutes = value % 60;
+
+    let result = '';
+    if (hours > 0) {
+      result += `${hours} hr${hours > 1 ? 's' : ''} `;
+    }
+    if (minutes > 0 || hours === 0) {
+      result += `${minutes}${decorator ? decorator : ''}`;
+    }
+    return result.trim();
+  };
+
   return (
     <Box
       sx={{
@@ -61,8 +75,7 @@ export default function TimeAdjuster({ sx, incrementBy: adjustBy, minAmount, dec
           backgroundColor: '#ECECEC',
         }}
       >
-        {value}
-        {decorator ?? ''}
+        {formatTime(value)}
       </Typography>
       <Button
         disableElevation
