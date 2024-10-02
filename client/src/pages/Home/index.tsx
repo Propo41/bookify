@@ -1,31 +1,8 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  BottomNavigation,
-  BottomNavigationAction,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Stack,
-  styled,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Stack, styled, Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import TimeAdjuster from '../../components/TimeAdjuster';
+import StairsIcon from '@mui/icons-material/Stairs';
 import Grid from '@mui/material/Grid2';
 import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -48,7 +25,6 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { FormData } from '../../helpers/types';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
-import { secrets } from '../../config/secrets';
 import TopNavigationBar from './TopNavigationBar';
 import { ROUTES } from '../../config/routes';
 import Api from '../../api/api';
@@ -464,7 +440,13 @@ const BookRoomView = () => {
             }),
           ]}
         >
-          <Typography variant="h6" fontWeight={700}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              color: '#005192',
+            }}
+          >
             Book now
           </Typography>
         </LoadingButton>
@@ -621,7 +603,6 @@ const MyEventsView = () => {
           sx={{
             mx: 2,
             mt: 2,
-            mb: i === events.length - 1 ? 3 : 0,
           }}
           onEdit={onEdit}
           disabled={loading}
@@ -653,7 +634,7 @@ const MyEventsView = () => {
 const SettingsView = () => {
   const [formData, setFormData] = useState({
     floor: '',
-    duration: commonDurations[0],
+    duration: '30',
     seats: 1,
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
@@ -664,7 +645,9 @@ const SettingsView = () => {
   useEffect(() => {
     const init = async (floors: string[]) => {
       setFloorOptions(createDropdownOptions(floors));
-      setDurationOptions(createDropdownOptions(commonDurations));
+
+      const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
+      setDurationOptions(createDropdownOptions(durationOptions, 'time'));
 
       const floor = await cacheService.get('floor');
       const duration = await cacheService.get('duration');
@@ -717,31 +700,64 @@ const SettingsView = () => {
       mt={4}
       mx={2}
       sx={{
+        bgcolor: 'white',
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+        borderBottomLeftRadius: 15,
+        borderBottomRightRadius: 15,
         textAlign: 'left',
       }}
     >
-      <Typography variant="subtitle1">Preferred floor</Typography>
-      <Dropdown sx={{ mt: 1, height: '60px' }} id="floor" value={formData.floor} options={floorOptions} onChange={handleInputChange} />
-
-      <Typography variant="subtitle1" mt={2}>
-        Preferred meeting duration
-      </Typography>
-      <Dropdown sx={{ mt: 1, height: '60px' }} id="duration" value={formData.duration} decorator="m" options={durationOptions} onChange={handleInputChange} />
-
-      <Typography variant="subtitle1" mt={2}>
-        Preferred room capacity
-      </Typography>
-      <TimeAdjuster
+      <Dropdown
         sx={{ mt: 1, height: '60px' }}
-        incrementBy={1}
-        minAmount={1}
-        value={formData.seats}
-        onChange={(newValue) => handleInputChange('seats', newValue)}
+        id="floor"
+        value={formData.floor}
+        options={floorOptions}
+        onChange={handleInputChange}
+        icon={
+          <StairsIcon
+            sx={[
+              (theme) => ({
+                color: theme.palette.grey[50],
+              }),
+            ]}
+          />
+        }
       />
 
-      <CustomButton sx={{ py: 2, mt: 3 }} onClick={onSaveClick} fullWidth variant="contained">
-        Save
-      </CustomButton>
+      <Dropdown
+        sx={{ mt: 1, height: '60px' }}
+        id="duration"
+        value={formData.duration}
+        options={durationOptions}
+        onChange={handleInputChange}
+        icon={
+          <HourglassBottomRoundedIcon
+            sx={[
+              (theme) => ({
+                color: theme.palette.grey[50],
+              }),
+            ]}
+          />
+        }
+      />
+
+      <Dropdown
+        sx={{ mt: 1, height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
+        id="seats"
+        value={formData.seats.toString()}
+        options={durationOptions}
+        onChange={(newValue) => handleInputChange('seats', newValue)}
+        icon={
+          <PeopleRoundedIcon
+            sx={[
+              (theme) => ({
+                color: theme.palette.grey[50],
+              }),
+            ]}
+          />
+        }
+      />
     </Box>
   );
 };
@@ -806,15 +822,7 @@ const Home = () => {
   }
 
   // chrome view
-  return (
-    <Container
-      sx={{
-        maxHeight: isChromeExt ? '600px' : '100vh',
-      }}
-    >
-      {common}
-    </Container>
-  );
+  return <Container>{common}</Container>;
 };
 
 export default Home;

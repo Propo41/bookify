@@ -14,17 +14,21 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Menu,
+  MenuItem,
+  Slide,
+  AppBar,
 } from '@mui/material';
-import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
+import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import React, { useEffect, useState } from 'react';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-
-import { convertToLocaleTime } from '../helpers/utility';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import { convertToLocaleTime, createDropdownOptions, populateDurationOptions } from '../helpers/utility';
 import { FormData } from '../helpers/types';
 import TimeAdjuster from './TimeAdjuster';
 import toast from 'react-hot-toast';
@@ -32,6 +36,10 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import Api from '../api/api';
 import { EventResponse } from '@bookify/shared';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { TransitionProps } from '@mui/material/transitions';
+import Dropdown, { DropdownOption } from './Dropdown';
+import StyledTextField from './StyledTextField';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -47,6 +55,17 @@ interface EventCardProps {
   disabled?: boolean;
   onEdit: (id: string, data: any) => void;
 }
+
+type EditRoomFields = Pick<FormData, 'duration'>;
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 const CustomButton = styled(Button)(({ theme }) => ({
   boxShadow: 'none',
@@ -93,11 +112,21 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  type EditRoomFields = Pick<FormData, 'duration'>;
   const [formData, setFormData] = useState<EditRoomFields>({
     duration: 30,
   });
+  const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  // TODO: create separate component for the dialog
+  useEffect(() => {
+    if (editDialogOpen) {
+      const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
+      setDurationOptions(createDropdownOptions(durationOptions, 'time'));
+    }
+  }, [editDialogOpen]);
 
   useEffect(() => {
     if (event) {
@@ -133,6 +162,10 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       setChips(_chips);
     }
   }, [event]);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
   const onEditRoomClick = async () => {
     if (!event?.eventId || !event?.roomEmail) return;
@@ -173,9 +206,19 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
     console.log(formData);
   };
 
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = () => {
+    onDelete(event!.eventId);
+    setAnchorEl(null);
+  };
+
   return (
-    <Card sx={{ borderRadius: 2, py: 1.5, px: 1.5, ...sx }}>
-      <Box display={'flex'}>
+    <Card sx={{ borderRadius: 2, pt: 2, pb: 3, px: 1.5, ...sx }}>
+      <Box display={'flex'} alignItems="center">
         <Typography
           variant="h5"
           component="div"
@@ -185,19 +228,50 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         >
           {event?.summary}
         </Typography>
+        {isOngoingEvent && <FiberManualRecordIcon fontSize="small" sx={{ pl: 1 }} color="success" />}
         <Box flexGrow={1} />
-        {isOngoingEvent && (
-          <Chip
-            label="Ongoing"
-            sx={[
-              (theme) => ({
-                borderRadius: 1,
-                backgroundColor: theme.palette.error.main,
-                color: theme.palette.common.white,
-              }),
-            ]}
-          />
-        )}
+
+        {/* Options menu */}
+
+        <IconButton
+          aria-label="more"
+          id="basic-button"
+          aria-controls={open ? 'basic-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+          onClick={handleClick}
+          sx={{ p: 0 }}
+        >
+          <MoreVertIcon />
+        </IconButton>
+
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={() => setAnchorEl(null)}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          slotProps={{
+            paper: {
+              style: {
+                width: '15ch',
+              },
+            },
+          }}
+        >
+          <MenuItem onClick={handleEditClick}>Edit</MenuItem>
+          <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+        </Menu>
       </Box>
 
       <Box
@@ -219,7 +293,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
                 icon={chip.icon}
                 label={chip.label}
                 sx={{
-                  fontSize: 14,
+                  fontSize: 15,
                   backgroundColor: chip.color,
                   cursor: chip.type === 'conference' ? 'pointer' : 'auto',
                 }}
@@ -234,64 +308,118 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         })}
       </Box>
 
-      <Divider sx={{ my: 1 }} />
-
-      <CardActions sx={{ p: 0, justifyContent: 'flex-end' }}>
-        <IconButton disabled={disabled || false} color={'primary'} onClick={() => setEditDialogOpen(true)}>
-          <EditRoundedIcon />
-        </IconButton>
-        <IconButton disabled={disabled || false} color={'error'} onClick={() => onDelete(event!.eventId)}>
-          <DeleteForeverRoundedIcon />
-        </IconButton>
-      </CardActions>
-
       {/* edit dialog*/}
-      <Dialog
-        PaperProps={{
-          sx: { width: '350px' },
-        }}
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-      >
-        <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
-          {'Edit event'}
-        </DialogTitle>
-        <DialogContent>
-          <Box
-            sx={{
-              textAlign: 'center',
-              mt: 2,
-              mb: 2,
-            }}
-          >
-            <TimeAdjuster
-              incrementBy={15}
-              minAmount={15}
-              decorator={'m'}
-              value={formData.duration}
-              onChange={(newValue) => handleInputChange('duration', newValue)}
-            />
-            <Typography
-              variant="subtitle1"
+      <Dialog fullScreen open={editDialogOpen} onClose={() => setEditDialogOpen(false)} TransitionComponent={Transition}>
+        <AppBar
+          sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 4, boxShadow: 'none' }}
+        >
+          <IconButton edge="start" color="inherit" onClick={() => setEditDialogOpen(false)} aria-label="close">
+            <ArrowBackIosRoundedIcon
+              fontSize="small"
               sx={[
                 (theme) => ({
-                  color: theme.palette.grey[400],
-                  fontStyle: 'italic',
+                  color: theme.palette.common.black,
                 }),
               ]}
-            >
-              Duration
+            />
+          </IconButton>
+          <Typography
+            sx={[
+              (theme) => ({
+                textAlign: 'center',
+                flex: 1,
+                color: theme.palette.common.black,
+                fontWeight: 700,
+              }),
+            ]}
+            variant="h5"
+            component={'div'}
+          >
+            Edit event
+          </Typography>
+        </AppBar>
+
+        <Box
+          mt={2}
+          mx={4}
+          sx={{
+            py: 1,
+            px: 2,
+            bgcolor: 'white',
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            borderBottomLeftRadius: 15,
+            borderBottomRightRadius: 15,
+          }}
+        >
+          <Dropdown
+            id="duration"
+            options={durationOptions}
+            value={formData.duration.toString()}
+            onChange={handleInputChange}
+            icon={
+              <HourglassBottomRoundedIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
+          />
+        </Box>
+
+        <Box flexGrow={1} />
+        <Box
+          sx={{
+            mx: 4,
+            mb: 3,
+            textAlign: 'center',
+          }}
+        >
+          <Button
+            onClick={onEditRoomClick}
+            fullWidth
+            variant="contained"
+            disableElevation
+            sx={[
+              (theme) => ({
+                py: 2,
+                backgroundColor: theme.palette.common.white,
+                borderRadius: 15,
+
+                color: theme.palette.common.black,
+              }),
+            ]}
+          >
+            <Typography variant="h6" fontWeight={700} color="error">
+              Save
             </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <CustomButton disabled={loading} onClick={() => setEditDialogOpen(false)}>
-            Dismiss
-          </CustomButton>
-          <CustomButton disabled={loading} variant="text" color="error" disableElevation onClick={onEditRoomClick}>
-            Save changes
-          </CustomButton>
-        </DialogActions>
+          </Button>
+          <Button
+            variant="text"
+            onClick={() => setEditDialogOpen(false)}
+            sx={{
+              py: 2,
+              mt: 2,
+              px: 3,
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: 'none',
+              },
+              '&:active': {
+                boxShadow: 'none',
+              },
+              '&:focus': {
+                boxShadow: 'none',
+              },
+            }}
+          >
+            <Typography variant="subtitle2" fontWeight={700}>
+              Dismiss
+            </Typography>
+          </Button>
+        </Box>
       </Dialog>
     </Card>
   );
