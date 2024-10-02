@@ -84,14 +84,14 @@ const CustomButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const Container = styled(Box)(({ theme }) => ({
+const Container = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'center',
   textAlign: 'center',
   paddingBottom: 0,
   gap: theme.spacing(2),
-  height: '100%',
+  height: '100vh',
 }));
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -115,20 +115,10 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const RootContainer = styled(Stack)(({ theme }) => ({
-  // padding: '4%',
   textAlign: 'center',
   backgroundImage: 'radial-gradient(at 50% 50%, #005192, #002644)',
   minHeight: '100vh',
   justifyContent: 'center',
-  // '&::before': {
-  //   content: '""',
-  //   display: 'block',
-  //   position: 'absolute',
-  //   zIndex: -1,
-  //   inset: 0,
-  //   backgroundImage: '',
-  //   backgroundRepeat: 'no-repeat',
-  // },
 }));
 
 const BookRoomView = () => {
@@ -141,7 +131,7 @@ const BookRoomView = () => {
   const [currentEvent, setCurrentEvent] = useState<Event>({});
   const [requestedRoom, setRequestedRoom] = useState(''); // room
   const navigate = useNavigate();
-  const [advOptionsOpen, setAdvOptionsOpen] = useState(true);
+  const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
@@ -384,8 +374,8 @@ const BookRoomView = () => {
           value={formData.startTime}
           onChange={handleInputChange}
           sx={{
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10,
+            borderBottomLeftRadius: 15,
+            borderBottomRightRadius: 15,
           }}
           icon={
             <MeetingRoomRoundedIcon

@@ -19,7 +19,7 @@ const StyledTextField = ({ id, sx, disabled, onChange, value }: StyledTextFieldP
           gap: '8px',
           padding: '10px',
           borderRadius: 1,
-          backgroundColor: '#f9f9f9',
+          backgroundColor: theme.palette.common.white,
           '&:focus-within': {
             border: 'none',
           },
@@ -42,7 +42,6 @@ const StyledTextField = ({ id, sx, disabled, onChange, value }: StyledTextFieldP
           (theme) => ({
             flex: 1,
             py: 0,
-            px: 1,
             '& .MuiInputBase-input': {
               fontSize: theme.typography.subtitle1,
             },
