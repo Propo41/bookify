@@ -31,7 +31,16 @@ import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
-import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions, renderError } from '../../helpers/utility';
+import {
+  convertToLocaleTime,
+  convertToRFC3339,
+  createDropdownOptions,
+  getTimeZoneString,
+  populateDurationOptions,
+  populateRoomCapacity,
+  populateTimeOptions,
+  renderError,
+} from '../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
@@ -126,6 +135,9 @@ const BookRoomView = () => {
   const [changeRoomLoading, setChangeRoomLoading] = useState(false);
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
+  const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
+  const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editRoom, setEditRoom] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<Event>({});
@@ -135,14 +147,20 @@ const BookRoomView = () => {
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
-    duration: parseInt(commonDurations[0]),
+    duration: 30,
     seats: 1,
     floor: '',
   });
 
   useEffect(() => {
-    const options = populateTimeOptions();
-    setTimeOptions(createDropdownOptions(options));
+    const startTimeOptions = populateTimeOptions();
+    setTimeOptions(createDropdownOptions(startTimeOptions));
+
+    const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
+    setDurationOptions(createDropdownOptions(durationOptions));
+
+    const capacityOptions = populateRoomCapacity(); // 30 mins -> 5 hrs
+    setRoomCapacityOptions(createDropdownOptions(capacityOptions));
 
     const init = async (floors: string[]) => {
       setFloorOptions(createDropdownOptions(floors));
@@ -150,8 +168,9 @@ const BookRoomView = () => {
       const floor = await cacheService.get('floor');
       setFormData({
         ...formData,
-        startTime: options[0],
+        startTime: startTimeOptions[0],
         floor: floor || floors[0],
+        duration: Number(durationOptions[0]),
       });
     };
 
@@ -337,8 +356,8 @@ const BookRoomView = () => {
         <Grid size={8}>
           <Dropdown
             id="duration"
-            options={timeOptions}
-            value={formData.startTime}
+            options={durationOptions}
+            value={formData.duration.toString()}
             onChange={handleInputChange}
             icon={
               <HourglassBottomRoundedIcon
@@ -354,8 +373,8 @@ const BookRoomView = () => {
         <Grid size={8}>
           <Dropdown
             id="capacity"
-            options={timeOptions}
-            value={formData.startTime}
+            options={roomCapacityOptions}
+            value={formData.seats.toString()}
             onChange={handleInputChange}
             icon={
               <PeopleRoundedIcon

@@ -32,6 +32,31 @@ export function populateTimeOptions() {
   return timeOptions;
 }
 
+export function populateDurationOptions(start: number, end: number) {
+  let mins = start;
+  const options = [];
+
+  while (mins < end) {
+    options.push(mins.toString());
+    mins += 15;
+  }
+
+  return options;
+}
+
+// TODO: fetch from database
+export function populateRoomCapacity() {
+  const options = [];
+  let capacity = 1;
+
+  while (capacity < 30) {
+    options.push(capacity.toString());
+    capacity += 1;
+  }
+
+  return options;
+}
+
 export function toMinutesSinceMidnight(hours: number, minutes: number) {
   return hours * 60 + minutes;
 }
