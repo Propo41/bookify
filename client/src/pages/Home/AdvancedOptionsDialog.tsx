@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
-import { Box, Checkbox } from '@mui/material';
+import { Box, Checkbox, Divider } from '@mui/material';
 import StyledTextField from '../../components/StyledTextField';
 import ChipInput from '../../components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -65,7 +65,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
         mx={2}
         mt={2}
         sx={{
-          bgcolor: 'white',
+          backgroundColor: 'rgba(0, 0, 0, 0.08)',
           borderBottomLeftRadius: 10,
           borderBottomRightRadius: 10,
           borderTopLeftRadius: 10,
@@ -74,16 +74,32 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
       >
         <Box
           sx={{
+            pt: 1,
             px: 2,
+            bgcolor: 'white',
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            borderBottomLeftRadius: 15,
+            borderBottomRightRadius: 15,
           }}
         >
-          <StyledTextField sx={{ mt: 1 }} value={formData.title} id="title" onChange={handleInputChange} />
+          <StyledTextField value={formData.title} id="title" onChange={handleInputChange} />
+          <Divider />
 
           <ChipInput sx={{ mt: 1 }} id="attendees" onChange={handleInputChange} value={formData.attendees} />
-          <Box display={'flex'} mt={1} pb={1} alignItems={'center'}>
-            <Typography variant="subtitle1">Create meet link: </Typography>
-            <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
-          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            mx: 2,
+            alignItems: 'center',
+            pb: 1,
+            my: 1,
+            mt: 2,
+          }}
+        >
+          <Typography variant="subtitle1">Create meet link: </Typography>
+          <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
         </Box>
       </Box>
       <Box flexGrow={1} />

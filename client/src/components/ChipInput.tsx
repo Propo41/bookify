@@ -37,9 +37,9 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
       sx={[
         (theme) => ({
           gap: '8px',
-          padding: '15px',
+          padding: '10px',
           borderRadius: 1,
-          backgroundColor: '#f9f9f9',
+          backgroundColor: theme.palette.common.white,
           '&:focus-within': {
             border: 'none',
           },
@@ -76,7 +76,6 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
           (theme) => ({
             flex: 1,
             py: 0,
-            px: 1,
             '& .MuiInputBase-input': {
               fontSize: theme.typography.subtitle1,
             },
