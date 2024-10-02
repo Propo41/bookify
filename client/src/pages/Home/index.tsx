@@ -31,7 +31,7 @@ import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { capitalize } from 'lodash';
 import EventCard from '../../components/EventCard';
-import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions, renderError } from '../../helpers/utility';
+import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, useTimeOptions, renderError } from '../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
@@ -147,8 +147,9 @@ const BookRoomView = () => {
     floor: '',
   });
 
+  const options = useTimeOptions();
+
   useEffect(() => {
-    const options = populateTimeOptions();
     setTimeOptions(createDropdownOptions(options));
 
     const init = async (floors: string[]) => {
@@ -201,15 +202,13 @@ const BookRoomView = () => {
     };
 
     initializeFormData();
-  }, []);
+  }, [options]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
     }));
-
-    console.log(formData);
   };
 
   const handleRoomChange = (id: string, value: string) => {
