@@ -3,31 +3,54 @@ import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import { CacheService, CacheServiceFactory } from './cache';
+import { useState, useEffect } from 'react';
 
-export function populateTimeOptions() {
-  const timeOptions = [];
+export function useTimeOptions() {
+  const [timeOptions, setTimeOptions] = useState<string[]>(['']);
+  const [lastMinute, setLastMinute] = useState<number>(new Date().getMinutes());
 
-  const now = new Date();
-  let currentHours = now.getHours();
-  let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
+  const populateTimeOptions = () => {
+    const options = [];
+    const now = new Date();
+    let currentHours = now.getHours();
+    let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
 
-  if (currentMinutes === 60) {
-    currentMinutes = 0;
-    currentHours += 1;
-  }
-
-  const currentTimeInMinutes = toMinutesSinceMidnight(currentHours, currentMinutes);
-
-  for (let i = 0; i < 24 * 4; i++) {
-    const hours = Math.floor(i / 4);
-    const minutes = (i % 4) * 15;
-    const formattedTime = formatTime(hours, minutes);
-    const optionTimeInMinutes = toMinutesSinceMidnight(hours, minutes);
-
-    if (optionTimeInMinutes >= currentTimeInMinutes) {
-      timeOptions.push(formattedTime);
+    if (currentMinutes === 60) {
+      currentMinutes = 0;
+      currentHours += 1;
     }
-  }
+
+    const currentTimeInMinutes = toMinutesSinceMidnight(currentHours, currentMinutes);
+
+    for (let i = 0; i < 24 * 4; i++) {
+      const hours = Math.floor(i / 4);
+      const minutes = (i % 4) * 15;
+      const formattedTime = formatTime(hours, minutes);
+      const optionTimeInMinutes = toMinutesSinceMidnight(hours, minutes);
+
+      if (optionTimeInMinutes >= currentTimeInMinutes) {
+        options.push(formattedTime);
+      }
+    }
+
+    setTimeOptions(options.length > 0 ? options.slice(1) : ['']);
+  };
+
+  useEffect(() => {
+    populateTimeOptions();
+
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+
+      if (currentMinute !== lastMinute && currentMinute % 15 === 0) {
+        populateTimeOptions();
+        setLastMinute(currentMinute);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [lastMinute]);
 
   return timeOptions;
 }
