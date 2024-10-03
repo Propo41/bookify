@@ -1,6 +1,20 @@
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Stack, styled, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  LinearProgress,
+  Stack,
+  styled,
+  Typography,
+} from '@mui/material';
 import MuiCard from '@mui/material/Card';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StairsIcon from '@mui/icons-material/Stairs';
 import Grid from '@mui/material/Grid2';
@@ -34,6 +48,7 @@ import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRound
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdvancedOptionsDialog from './AdvancedOptionsDialog';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 
 // const isChromeExt = secrets.appEnvironment === 'chrome';
 const isChromeExt = true;
@@ -133,9 +148,9 @@ const BookRoomView = () => {
     setTimeOptions(createDropdownOptions(startTimeOptions));
 
     const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
-    setDurationOptions(createDropdownOptions(durationOptions));
+    setDurationOptions(createDropdownOptions(durationOptions, 'time'));
 
-    const capacityOptions = populateRoomCapacity(); // 30 mins -> 5 hrs
+    const capacityOptions = populateRoomCapacity();
     setRoomCapacityOptions(createDropdownOptions(capacityOptions));
 
     const init = async (floors: string[]) => {
@@ -301,7 +316,7 @@ const BookRoomView = () => {
         spacing={0}
         columns={16}
         px={0}
-        mt={3}
+        mt={1}
         sx={{
           backgroundColor: 'rgba(0, 0, 0, 0.08)',
           borderBottomLeftRadius: 10,
@@ -440,13 +455,7 @@ const BookRoomView = () => {
             }),
           ]}
         >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              color: '#005192',
-            }}
-          >
+          <Typography variant="h6" fontWeight={700}>
             Book now
           </Typography>
         </LoadingButton>
@@ -587,28 +596,35 @@ const MyEventsView = () => {
     }
   };
 
+  if (loading) return <></>;
+
   return (
     <Box>
-      {loading && <LinearProgress />}
-
       {events.length === 0 && (
         <Typography mt={3} variant="h6">
           No events to show
         </Typography>
       )}
-      {events.map((event, i) => (
-        <EventCard
-          key={i}
-          event={event}
-          sx={{
-            mx: 2,
-            mt: 2,
-          }}
-          onEdit={onEdit}
-          disabled={loading}
-          onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
-        />
-      ))}
+      <Box
+        sx={{
+          borderBottomLeftRadius: 10,
+          borderBottomRightRadius: 10,
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+          pb: 1,
+          px: 1.5,
+          mx: 2,
+          mt: 1,
+          bgcolor: 'white',
+        }}
+      >
+        {events.map((event, i) => (
+          <React.Fragment key={i}>
+            <EventCard key={i} event={event} onEdit={onEdit} disabled={loading} onDelete={() => event.eventId && handleDeleteClick(event.eventId)} />
+            {i !== events.length - 1 && <Divider />}
+          </React.Fragment>
+        ))}
+      </Box>
 
       {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
@@ -639,6 +655,7 @@ const SettingsView = () => {
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
+  const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
 
   const navigate = useNavigate();
 
@@ -679,13 +696,23 @@ const SettingsView = () => {
         init(data);
       }
     });
+
+    const capacityOptions = populateRoomCapacity();
+    setRoomCapacityOptions(createDropdownOptions(capacityOptions));
   }, []);
 
   const handleInputChange = (id: string, value: string | number) => {
+    console.log(value);
+
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
     }));
+  };
+
+  const onLogoutClick = async () => {
+    await new Api().logout();
+    navigate(ROUTES.signIn);
   };
 
   const onSaveClick = async () => {
@@ -697,67 +724,142 @@ const SettingsView = () => {
 
   return (
     <Box
-      mt={4}
       mx={2}
+      mt={1}
       sx={{
-        bgcolor: 'white',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
-        borderBottomLeftRadius: 15,
-        borderBottomRightRadius: 15,
-        textAlign: 'left',
+        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
       }}
     >
-      <Dropdown
-        sx={{ mt: 1, height: '60px' }}
-        id="floor"
-        value={formData.floor}
-        options={floorOptions}
-        onChange={handleInputChange}
-        icon={
-          <StairsIcon
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[50],
-              }),
-            ]}
-          />
-        }
-      />
+      <Box
+        sx={{
+          bgcolor: 'white',
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+          borderBottomLeftRadius: 15,
+          borderBottomRightRadius: 15,
+          textAlign: 'left',
+        }}
+      >
+        <Dropdown
+          sx={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, height: '60px' }}
+          id="floor"
+          value={formData.floor}
+          options={floorOptions}
+          onChange={handleInputChange}
+          icon={
+            <StairsIcon
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[50],
+                }),
+              ]}
+            />
+          }
+        />
 
-      <Dropdown
-        sx={{ mt: 1, height: '60px' }}
-        id="duration"
-        value={formData.duration}
-        options={durationOptions}
-        onChange={handleInputChange}
-        icon={
-          <HourglassBottomRoundedIcon
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[50],
-              }),
-            ]}
-          />
-        }
-      />
+        <Dropdown
+          sx={{ height: '60px' }}
+          id="duration"
+          value={formData.duration}
+          options={durationOptions}
+          onChange={handleInputChange}
+          icon={
+            <HourglassBottomRoundedIcon
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[50],
+                }),
+              ]}
+            />
+          }
+        />
 
-      <Dropdown
-        sx={{ mt: 1, height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
-        id="seats"
-        value={formData.seats.toString()}
-        options={durationOptions}
-        onChange={(newValue) => handleInputChange('seats', newValue)}
-        icon={
-          <PeopleRoundedIcon
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[50],
-              }),
-            ]}
-          />
-        }
-      />
+        <Dropdown
+          sx={{ height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
+          id="seats"
+          value={formData.seats + ''}
+          options={roomCapacityOptions}
+          onChange={handleInputChange}
+          icon={
+            <PeopleRoundedIcon
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[50],
+                }),
+              ]}
+            />
+          }
+        />
+      </Box>
+
+      <Box>
+        <Button
+          variant="text"
+          color="primary"
+          disableElevation
+          fullWidth
+          onClick={onLogoutClick}
+          startIcon={<LogoutRoundedIcon />}
+          sx={{
+            py: 3,
+            borderRadius: 0,
+            fontWeight: 700,
+            boxShadow: 'none',
+            '&:hover': {
+              boxShadow: 'none',
+            },
+            '&:active': {
+              boxShadow: 'none',
+            },
+            '&:focus': {
+              boxShadow: 'none',
+            },
+            '& .MuiButton-startIcon': {
+              mr: 1.5,
+            },
+            alignItems: 'flex-start',
+          }}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      <Box flexGrow={1} />
+      <Box
+        sx={{
+          mx: 2,
+          mb: 3,
+          textAlign: 'center',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Button
+          onClick={onSaveClick}
+          fullWidth
+          variant="contained"
+          disableElevation
+          sx={[
+            (theme) => ({
+              py: 2,
+              backgroundColor: theme.palette.common.white,
+              borderRadius: 15,
+
+              color: theme.palette.common.black,
+            }),
+          ]}
+        >
+          <Typography variant="h6" fontWeight={700} color="error">
+            Save
+          </Typography>
+        </Button>
+      </Box>
     </Box>
   );
 };

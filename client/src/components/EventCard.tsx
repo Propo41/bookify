@@ -1,24 +1,4 @@
-import {
-  Card,
-  Typography,
-  Chip,
-  IconButton,
-  Box,
-  styled,
-  Theme,
-  SxProps,
-  Divider,
-  CardActions,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Menu,
-  MenuItem,
-  Slide,
-  AppBar,
-} from '@mui/material';
+import { Card, Typography, Chip, IconButton, Box, styled, Theme, SxProps, Dialog, Button, Menu, MenuItem, Slide, AppBar } from '@mui/material';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
@@ -30,7 +10,6 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { convertToLocaleTime, createDropdownOptions, populateDurationOptions } from '../helpers/utility';
 import { FormData } from '../helpers/types';
-import TimeAdjuster from './TimeAdjuster';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
@@ -39,7 +18,6 @@ import { EventResponse } from '@bookify/shared';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { TransitionProps } from '@mui/material/transitions';
 import Dropdown, { DropdownOption } from './Dropdown';
-import StyledTextField from './StyledTextField';
 
 interface ChipData {
   icon: React.ReactElement;
@@ -66,19 +44,6 @@ const Transition = React.forwardRef(function Transition(
 ) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
-
-const CustomButton = styled(Button)(({ theme }) => ({
-  boxShadow: 'none',
-  '&:hover': {
-    boxShadow: 'none',
-  },
-  '&:active': {
-    boxShadow: 'none',
-  },
-  '&:focus': {
-    boxShadow: 'none',
-  },
-}));
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -217,7 +182,12 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   };
 
   return (
-    <Card sx={{ borderRadius: 2, pt: 2, pb: 3, px: 1.5, ...sx }}>
+    <Box
+      sx={{
+        py: 3,
+        px: 1,
+      }}
+    >
       <Box display={'flex'} alignItems="center">
         <Typography
           variant="h5"
@@ -421,7 +391,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
           </Button>
         </Box>
       </Dialog>
-    </Card>
+    </Box>
   );
 };
 
