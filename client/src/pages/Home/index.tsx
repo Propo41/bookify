@@ -10,9 +10,10 @@ import { isMobile } from 'react-device-detect';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
 import SettingsView from './SettingsView';
+import { secrets } from '../../config/secrets';
 
-// const isChromeExt = secrets.appEnvironment === 'chrome';
-const isChromeExt = true;
+const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = true;
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 

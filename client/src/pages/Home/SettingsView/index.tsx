@@ -224,7 +224,7 @@ export default function SettingsView() {
             }),
           ]}
         >
-          <Typography variant="h6" fontWeight={700} color="error">
+          <Typography variant="h6" fontWeight={700}>
             Save
           </Typography>
         </Button>
