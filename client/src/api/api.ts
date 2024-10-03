@@ -1,4 +1,4 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, LoginResponse } from '@bookify/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, LoginResponse } from '@bookify/shared';
 import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '../config/secrets';
@@ -146,6 +146,26 @@ export default class Api {
       Authorization: `Bearer ${token}`,
       'X-Redirect-Url': secrets.oAuthRedirectUrl,
     };
+  }
+
+  async getAvailableRooms(startTime: string, duration: number, timeZone: string, seats: number, floor?: string) {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/available-rooms', {
+        headers,
+        params: {
+          startTime,
+          duration,
+          timeZone,
+          seats,
+          floor,
+        },
+      });
+
+      return res.data as ApiResponse<IConferenceRoom[]>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
   }
 
   async getRooms(startTime: string, endTime: string, timeZone: string) {

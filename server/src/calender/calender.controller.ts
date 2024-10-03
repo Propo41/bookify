@@ -4,7 +4,8 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@bookify/shared';
+import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()
 export class CalenderController {
@@ -21,6 +22,26 @@ export class CalenderController {
     @Query('timeZone') timeZone: string,
   ): Promise<ApiResponse<EventResponse[]>> {
     return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
+  @Get('/available-rooms')
+  async getAvailableRooms(
+    @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
+    @Query('startTime') startTime: string,
+    @Query('duration') duration: number,
+    @Query('timeZone') timeZone: string,
+    @Query('seats') seats: number,
+    @Query('floor') floor: string,
+  ): Promise<ApiResponse<IConferenceRoom[]>> {
+    const startDate = new Date(startTime);
+    startDate.setMinutes(startDate.getMinutes() + duration);
+    const endTime = startDate.toISOString();
+
+    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
+    return createResponse(rooms);
   }
 
   @UseGuards(AuthGuard)

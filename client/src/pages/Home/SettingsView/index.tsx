@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Api from '../../../api/api';
 import { CacheService, CacheServiceFactory } from '../../../helpers/cache';
 import { useEffect, useState } from 'react';
-import { createDropdownOptions, populateDurationOptions, populateRoomCapacity, renderError } from '../../../helpers/utility';
+import { createDropdownOptions, renderError } from '../../../helpers/utility';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import { ROUTES } from '../../../config/routes';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
+import { availableDurations, availableRoomCapacities } from '../shared';
 
 export default function SettingsView() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,6 @@ export default function SettingsView() {
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
 
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
-  const commonDurations = ['15', '30', '60'];
   const api = new Api();
 
   const navigate = useNavigate();
@@ -31,9 +31,7 @@ export default function SettingsView() {
   useEffect(() => {
     const init = async (floors: string[]) => {
       setFloorOptions(createDropdownOptions(floors));
-
-      const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
-      setDurationOptions(createDropdownOptions(durationOptions, 'time'));
+      setDurationOptions(createDropdownOptions(availableDurations, 'time'));
 
       const floor = await cacheService.get('floor');
       const duration = await cacheService.get('duration');
@@ -41,8 +39,8 @@ export default function SettingsView() {
 
       setFormData({
         ...formData,
-        floor: floor || floors[0],
-        duration: duration || commonDurations[0],
+        floor: floor || '',
+        duration: duration || availableDurations[0],
         seats: Number(seats) || 1,
       });
     };
@@ -61,13 +59,12 @@ export default function SettingsView() {
       }
 
       if (data) {
-        await cacheService.save('floors', JSON.stringify(floors));
+        await cacheService.save('floors', JSON.stringify(data));
         init(data);
       }
     });
 
-    const capacityOptions = populateRoomCapacity();
-    setRoomCapacityOptions(createDropdownOptions(capacityOptions));
+    setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
   }, []);
 
   const handleInputChange = (id: string, value: string | number) => {
@@ -117,6 +114,7 @@ export default function SettingsView() {
           sx={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, height: '60px' }}
           id="floor"
           value={formData.floor}
+          placeholder={'Select preferred floor'}
           options={floorOptions}
           onChange={handleInputChange}
           icon={
@@ -136,6 +134,7 @@ export default function SettingsView() {
           value={formData.duration}
           options={durationOptions}
           onChange={handleInputChange}
+          placeholder={'Select preferred meeting duration'}
           icon={
             <HourglassBottomRoundedIcon
               sx={[
@@ -150,6 +149,7 @@ export default function SettingsView() {
         <Dropdown
           sx={{ height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
           id="seats"
+          placeholder={'Select preferred room capacity'}
           value={formData.seats + ''}
           options={roomCapacityOptions}
           onChange={handleInputChange}
