@@ -115,7 +115,7 @@ export class CalenderService {
     const rooms = await this.authService.getCalenderResources(domain);
 
     for (const room of rooms) {
-      if (room.seats >= minSeats && room.floor === floor) {
+      if (room.seats >= minSeats && (floor === undefined || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
       }
     }

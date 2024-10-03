@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 
 interface DropdownProps {
@@ -10,6 +10,8 @@ interface DropdownProps {
   onChange: (id: string, value: string) => void;
   decorator?: string;
   icon?: ReactElement;
+  placeholder?: string;
+  loading?: boolean;
 }
 
 export interface DropdownOption {
@@ -17,7 +19,7 @@ export interface DropdownOption {
   value: string; // the main value used for api calls
 }
 
-export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon }: DropdownProps) {
+export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon, placeholder, loading }: DropdownProps) {
   const height = '58px';
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -29,10 +31,49 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
       value={value}
       onChange={handleChange}
       fullWidth
+      displayEmpty
       variant="standard"
       disabled={disabled || false}
       renderValue={(selected) => {
         const selectedOption = options?.find((option) => option.value === selected);
+
+        if (placeholder && selected.length === 0) {
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {icon && icon}
+              {loading ? (
+                <Skeleton
+                  animation="wave"
+                  sx={{
+                    width: '100%',
+                    mx: 2,
+                    borderRadius: 0.5,
+                  }}
+                />
+              ) : (
+                <Typography
+                  variant="subtitle2"
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[500],
+                      fontStyle: 'italic',
+                      ml: 2,
+                      fontWeight: 400,
+                    }),
+                  ]}
+                >
+                  {placeholder}
+                </Typography>
+              )}
+            </Box>
+          );
+        }
+
         return (
           <Box
             sx={{
@@ -70,6 +111,12 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
         }),
       ]}
     >
+      {placeholder && (
+        <MenuItem disabled value="">
+          <em>{placeholder}</em>
+        </MenuItem>
+      )}
+
       {options?.map((option) => (
         <MenuItem value={option.value} key={option.value}>
           <Typography variant="subtitle1">

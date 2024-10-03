@@ -100,31 +100,32 @@ export default function MyEventsView() {
 
   return (
     <Box>
-      {events.length === 0 && (
+      {events.length === 0 ? (
         <Typography mt={3} variant="h6">
           No events to show
         </Typography>
+      ) : (
+        <Box
+          sx={{
+            borderBottomLeftRadius: 10,
+            borderBottomRightRadius: 10,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            pb: 1,
+            px: 1.5,
+            mx: 2,
+            mt: 1,
+            bgcolor: 'white',
+          }}
+        >
+          {events.map((event, i) => (
+            <React.Fragment key={i}>
+              <EventCard key={i} event={event} onEdit={onEdit} disabled={loading} onDelete={() => event.eventId && handleDeleteClick(event.eventId)} />
+              {i !== events.length - 1 && <Divider />}
+            </React.Fragment>
+          ))}
+        </Box>
       )}
-      <Box
-        sx={{
-          borderBottomLeftRadius: 10,
-          borderBottomRightRadius: 10,
-          borderTopLeftRadius: 10,
-          borderTopRightRadius: 10,
-          pb: 1,
-          px: 1.5,
-          mx: 2,
-          mt: 1,
-          bgcolor: 'white',
-        }}
-      >
-        {events.map((event, i) => (
-          <React.Fragment key={i}>
-            <EventCard key={i} event={event} onEdit={onEdit} disabled={loading} onDelete={() => event.eventId && handleDeleteClick(event.eventId)} />
-            {i !== events.length - 1 && <Divider />}
-          </React.Fragment>
-        ))}
-      </Box>
 
       {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>

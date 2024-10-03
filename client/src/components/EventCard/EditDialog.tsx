@@ -3,9 +3,10 @@ import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect } from 'react';
 import { TransitionProps } from '@mui/material/transitions';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import { createDropdownOptions, populateDurationOptions } from '../../helpers/utility';
+import { createDropdownOptions } from '../../helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import { EditRoomFields } from './util';
+import { availableDurations } from '../../pages/Home/shared';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -29,8 +30,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
 
   useEffect(() => {
     if (open) {
-      const durationOptions = populateDurationOptions(30, 3 * 60); // 30 mins -> 5 hrs
-      setDurationOptions(createDropdownOptions(durationOptions, 'time'));
+      setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     }
   }, [open]);
 
