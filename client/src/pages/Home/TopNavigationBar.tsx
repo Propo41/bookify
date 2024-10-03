@@ -1,13 +1,6 @@
-import { Box, IconButton, styled, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../config/routes';
-import Api from '../../api/api';
-import { secrets } from '../../config/secrets';
-import { useState } from 'react';
+import { Box, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
-  // backgroundColor: theme.palette.grey[100],
   paddingTop: theme.spacing(1.5),
   paddingBottom: theme.spacing(1.5),
   paddingRight: theme.spacing(2),
@@ -44,17 +37,10 @@ interface TopNavigationBarProps {
 }
 
 const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) => {
-  const navigate = useNavigate();
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue !== null) {
       handleTabChange(newValue);
     }
-  };
-
-  const onLogoutClick = async () => {
-    await new Api().logout();
-    navigate(ROUTES.signIn);
   };
 
   return (
