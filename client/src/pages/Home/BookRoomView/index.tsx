@@ -19,11 +19,18 @@ import { CacheService, CacheServiceFactory } from '../../../helpers/cache';
 import Api from '../../../api/api';
 import { availableDurations, availableRoomCapacities, availableStartTimeOptions, Event } from '../shared';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
+import RoomsDropdown, { RoomsDropdownOption } from '../../../components/RoomsDropdown';
 
 const roomChangeTimeFrame = 2;
 
+const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
+  return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
+};
+
 export default function BookRoomView() {
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
@@ -31,7 +38,7 @@ export default function BookRoomView() {
   const navigate = useNavigate();
   const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
-  const [availableRooms, setAvailableRooms] = useState<IConferenceRoom[]>([]);
+  const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
 
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const api = new Api();
@@ -93,8 +100,20 @@ export default function BookRoomView() {
       }
     };
 
-    initializeFormData();
+    initializeFormData().then(() => {
+      setInitialized(true);
+    });
   }, []);
+
+  useEffect(() => {
+    if (initialized) {
+      setAvailableRooms();
+    }
+
+    return () => {
+      setInitialized(false);
+    };
+  }, [initialized, formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
@@ -105,7 +124,7 @@ export default function BookRoomView() {
     console.log(formData);
   };
 
-  async function onSearchRoomClick() {
+  async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
@@ -114,21 +133,30 @@ export default function BookRoomView() {
     const floor = (await cacheService.get('floor')) || undefined;
 
     const res = await api.getAvailableRooms(formattedStartTime, duration, getTimeZoneString(), seats, floor);
-    const { data, status } = res;
     setLoading(false);
 
-    if (status !== 'success') {
+    if (res.status !== 'success') {
       return renderError(res, navigate);
     }
 
-    console.log(data);
-
-    setAvailableRooms(data);
+    const data = res.data as IConferenceRoom[];
+    if (data.length > 0) {
+      setFormData((prev) => {
+        return {
+          ...prev,
+          room: data[0].email,
+        };
+      });
+      setAvailableRoomOptions(createRoomDropdownOptions(data));
+    }
   }
 
+  // TODO: add room email to request
   async function onBookClick() {
     setLoading(true);
     const { startTime, duration, seats, conference, attendees, title } = formData;
+
+    console.log(formData);
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
@@ -222,7 +250,7 @@ export default function BookRoomView() {
         </Grid>
         <Grid size={8}>
           <Dropdown
-            id="capacity"
+            id="seats"
             options={roomCapacityOptions}
             value={formData.seats.toString()}
             onChange={handleInputChange}
@@ -238,14 +266,14 @@ export default function BookRoomView() {
           />
         </Grid>
 
-        <Dropdown
+        <RoomsDropdown
           id="room"
-          options={timeOptions}
-          value={''}
+          options={availableRoomOptions}
+          value={formData.room || ''}
           loading={loading}
-          disabled={!availableRooms.length}
+          disabled={!availableRoomOptions.length}
           onChange={handleInputChange}
-          placeholder={availableRooms.length === 0 ? 'Search for rooms first' : '[Optional] Select your room'}
+          placeholder={availableRoomOptions.length === 0 ? 'Search for rooms first' : 'Select your room'}
           sx={{
             borderBottomLeftRadius: 15,
             borderBottomRightRadius: 15,
@@ -303,7 +331,7 @@ export default function BookRoomView() {
         }}
       >
         <LoadingButton
-          onClick={availableRooms.length > 0 ? onBookClick : onSearchRoomClick}
+          onClick={onBookClick}
           fullWidth
           loading={loading}
           loadingPosition="center"
@@ -319,7 +347,7 @@ export default function BookRoomView() {
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            {availableRooms.length > 0 ? 'Book now' : 'Search rooms'}
+            Book now
           </Typography>
         </LoadingButton>
       </Box>
