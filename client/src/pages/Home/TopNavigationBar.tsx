@@ -1,4 +1,4 @@
-import { Box, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, IconButton, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -6,6 +6,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   paddingRight: theme.spacing(2),
   paddingLeft: theme.spacing(2),
   display: 'flex',
+  width: '100%',
   justifyContent: 'center',
   alignItems: 'center',
   textAlign: 'center',
@@ -37,7 +38,7 @@ interface TopNavigationBarProps {
 }
 
 const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) => {
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       handleTabChange(newValue);
     }
@@ -51,9 +52,6 @@ const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) 
         </StyledToggleButton>
         <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
           <Typography variant="subtitle2">My Events</Typography>
-        </StyledToggleButton>
-        <StyledToggleButton value={2} aria-label="my events" fullWidth={true}>
-          <Typography variant="subtitle2">Settings</Typography>
         </StyledToggleButton>
       </StyledToggleButtonGroup>
     </TopBar>

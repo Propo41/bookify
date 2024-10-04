@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
-import { Box, Checkbox, Divider } from '@mui/material';
+import { Box, Checkbox, Divider, useTheme } from '@mui/material';
 import StyledTextField from '../../components/StyledTextField';
 import ChipInput from '../../components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -29,8 +29,34 @@ interface AdvancedOptionsDialogProps {
 }
 
 export default function AdvancedOptionsDialog({ handleInputChange, open, handleClose, formData }: AdvancedOptionsDialogProps) {
+  const theme = useTheme();
+
   return (
-    <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog
+      fullWidth
+      PaperProps={{
+        sx: {
+          width: '100%',
+          [theme.breakpoints.up('sm')]: {
+            maxWidth: '412px',
+          },
+          [theme.breakpoints.down('sm')]: {
+            width: '450px',
+          },
+          height: '750px',
+          mx: 1.5,
+          justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 3.5,
+          bgcolor: 'white',
+          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+        },
+      }}
+      open={open}
+      onClose={handleClose}
+      TransitionComponent={Transition}
+    >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 2, boxShadow: 'none' }}
       >
