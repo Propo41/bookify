@@ -38,20 +38,51 @@ const Card = styled(MuiCard)(({ theme }) => ({
   width: '100%',
   maxHeight: '750px',
   height: '750px',
+  borderRadius: 20,
+  boxShadow: '0 8px 20px 0 rgba(0,0,0,0.1)', // Adjusted for better visibility with transparent background
+  background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)',
+  border: 'none',
   [theme.breakpoints.up('sm')]: {
     maxWidth: '412px',
   },
   [theme.breakpoints.down('sm')]: {
     maxWidth: '390px',
   },
-  boxShadow: 'none',
 }));
 
 const RootContainer = styled(Stack)(({ theme }) => ({
   textAlign: 'center',
-  backgroundImage: 'radial-gradient(at 50% 50%, #005192, #002644)',
   minHeight: '100vh',
   justifyContent: 'center',
+  position: 'relative',
+  overflow: 'hidden',
+  background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+  '&::before, &::after': {
+    content: '""',
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    borderRadius: '50%',
+    border: '8px solid rgba(255, 255, 255, 0.3)',
+  },
+
+  '&::before': {
+    top: '25%',
+    left: '25%',
+    right: '25%',
+    bottom: '25%',
+    transform: 'rotate(-45deg)',
+  },
+
+  '&::after': {
+    top: '33%',
+    left: '33%',
+    right: '-33%',
+    bottom: '-33%',
+    transform: 'rotate(12deg)',
+  },
 }));
 
 const tabs = [
@@ -105,7 +136,7 @@ export default function Home() {
   );
 
   // web view
-  if (!isChromeExt && !isMobile) {
+  if (!isChromeExt) {
     return (
       <RootContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">{common}</Card>
