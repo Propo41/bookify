@@ -1,4 +1,4 @@
-import { Box, LinearProgress, Stack, styled } from '@mui/material';
+import { Box, IconButton, LinearProgress, Stack, styled } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,11 +6,11 @@ import { capitalize } from 'lodash';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import TopNavigationBar from './TopNavigationBar';
 import { ROUTES } from '../../config/routes';
-import { isMobile } from 'react-device-detect';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
-import SettingsView from './SettingsView';
 import { secrets } from '../../config/secrets';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import SettingsDialog from './SettingsDialog';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
 // const isChromeExt = true;
@@ -48,6 +48,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     maxWidth: '390px',
   },
+  zIndex: 1,
 }));
 
 const RootContainer = styled(Stack)(({ theme }) => ({
@@ -56,7 +57,7 @@ const RootContainer = styled(Stack)(({ theme }) => ({
   justifyContent: 'center',
   position: 'relative',
   overflow: 'hidden',
-  background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+  background: 'linear-gradient(to bottom right, #ffffff, #FFF9E3, #DFF2FF)',
   '&::before, &::after': {
     content: '""',
     position: 'absolute',
@@ -64,6 +65,7 @@ const RootContainer = styled(Stack)(({ theme }) => ({
     left: '0',
     right: '0',
     bottom: '0',
+    zIndex: 0,
     borderRadius: '50%',
     border: '8px solid rgba(255, 255, 255, 0.3)',
   },
@@ -88,15 +90,11 @@ const RootContainer = styled(Stack)(({ theme }) => ({
 const tabs = [
   {
     title: capitalize('book room'),
-    component: <BookRoomView />,
+    component: (props?: any) => <BookRoomView {...props} />,
   },
   {
     title: capitalize('my events'),
-    component: <MyEventsView />,
-  },
-  {
-    title: capitalize('Settings'),
-    component: <SettingsView />,
+    component: (props?: any) => <MyEventsView {...props} />,
   },
 ];
 
@@ -104,7 +102,9 @@ export default function Home() {
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
   useEffect(() => {
     cacheService.get('access_token').then((token) => {
@@ -114,11 +114,23 @@ export default function Home() {
       }
 
       setLoading(false);
+
+      return () => {
+        setRefresh(false);
+      };
     });
   }, []);
 
   const handleTabChange = (newValue: number) => {
     setTabIndex(newValue);
+  };
+
+  const onSettingClick = () => {
+    setSettingsDialogOpen(true);
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsDialogOpen(false);
   };
 
   const common = (
@@ -130,8 +142,17 @@ export default function Home() {
         paddingBottom: '56px',
       }}
     >
-      <TopNavigationBar tabIndex={tabIndex} handleTabChange={handleTabChange} />
-      {loading ? <LinearProgress /> : tabs[tabIndex].component}
+      <Box display={'flex'} alignItems={'center'}>
+        <TopNavigationBar tabIndex={tabIndex} handleTabChange={handleTabChange} />
+        <Box>
+          <IconButton aria-label="settings" sx={{ mr: 2 }} onClick={onSettingClick}>
+            <SettingsRoundedIcon />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {loading ? <LinearProgress /> : tabs[tabIndex].component({ refresh, setRefresh: (val: boolean) => setRefresh(val) })}
+      <SettingsDialog open={settingsDialogOpen} handleClose={handleSettingsClose} onSave={() => setRefresh(true)} />
     </Box>
   );
 

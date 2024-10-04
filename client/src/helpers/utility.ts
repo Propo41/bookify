@@ -49,7 +49,7 @@ export function populateRoomCapacity() {
   const options = [];
   let capacity = 1;
 
-  while (capacity < 30) {
+  while (capacity < 15) {
     options.push(capacity.toString());
     capacity += 1;
   }

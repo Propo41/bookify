@@ -9,7 +9,6 @@ import { ROUTES } from '../../config/routes';
 import toast from 'react-hot-toast';
 import Api from '../../api/api';
 import { renderError } from '../../helpers/utility';
-import { isMobile } from 'react-device-detect';
 
 const isChromeExt = secrets.appEnvironment === 'chrome';
 

@@ -27,7 +27,12 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
 };
 
-export default function BookRoomView() {
+interface BookRoomViewProps {
+  refresh?: boolean;
+  setRefresh: (val: boolean) => void;
+}
+
+export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps) {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -50,6 +55,40 @@ export default function BookRoomView() {
   });
 
   useEffect(() => {
+    if (refresh) {
+      console.log('refresh');
+
+      setAvailableRooms();
+      setPreferences();
+      setRefresh(false);
+    }
+  }, [refresh]);
+
+  useEffect(() => {
+    setPreferences();
+  }, []);
+
+  useEffect(() => {
+    if (initialized) {
+      console.log('initialized');
+      setAvailableRooms();
+    }
+
+    return () => {
+      setInitialized(false);
+    };
+  }, [initialized, formData.startTime, formData.duration, formData.seats]);
+
+  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+
+    console.log(formData);
+  };
+
+  async function setPreferences() {
     setTimeOptions(createDropdownOptions(availableStartTimeOptions));
     setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
@@ -103,26 +142,7 @@ export default function BookRoomView() {
     initializeFormData().then(() => {
       setInitialized(true);
     });
-  }, []);
-
-  useEffect(() => {
-    if (initialized) {
-      setAvailableRooms();
-    }
-
-    return () => {
-      setInitialized(false);
-    };
-  }, [initialized, formData.startTime, formData.duration, formData.seats]);
-
-  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
-
-    console.log(formData);
-  };
+  }
 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;

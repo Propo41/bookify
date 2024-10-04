@@ -25,7 +25,6 @@ export const createChips = (event: EventResponse) => {
     {
       label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
       icon: <AccessTimeFilledRoundedIcon />,
-      color: '#9BF679',
     },
     {
       label: event?.seats + '' || '-',
