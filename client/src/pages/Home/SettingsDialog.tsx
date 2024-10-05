@@ -376,6 +376,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
   return (
     <Dialog
       fullWidth
+      hideBackdrop
       PaperProps={{
         sx: {
           width: '100%',

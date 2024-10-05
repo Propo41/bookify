@@ -14,6 +14,15 @@ export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime
   return true;
 }
 
+export function extractRoomByEmail(rooms: ConferenceRoom[], email: string) {
+  const index = rooms.findIndex((room) => email.includes(room.email));
+  if (index !== -1) {
+    return rooms[index];
+  }
+
+  return null;
+}
+
 export function extractRoomName(rooms: ConferenceRoom[], googleApiRoomName: string) {
   const index = rooms.findIndex((room) => googleApiRoomName.toLowerCase().includes(room.name.toLowerCase()));
   if (index !== -1) {

@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Dialog, IconButton, Slide, Typography } from '@mui/material';
+import { AppBar, Box, Button, Dialog, Divider, IconButton, Slide, Typography, useTheme } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect } from 'react';
 import { TransitionProps } from '@mui/material/transitions';
@@ -27,6 +27,7 @@ interface EditDialogProps {
 
 export default function EditDialog({ open, setOpen, onChange, data, onEditRoomClick }: EditDialogProps) {
   const [durationOptions, setDurationOptions] = React.useState<DropdownOption[]>([]);
+  const theme = useTheme();
 
   useEffect(() => {
     if (open) {
@@ -39,7 +40,31 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
   };
 
   return (
-    <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog
+      hideBackdrop
+      PaperProps={{
+        sx: {
+          width: '100%',
+          [theme.breakpoints.up('sm')]: {
+            maxWidth: '412px',
+          },
+          [theme.breakpoints.down('sm')]: {
+            width: '450px',
+          },
+          height: '750px',
+          mx: 1.5,
+          justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 3.5,
+          bgcolor: 'white',
+          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+        },
+      }}
+      open={open}
+      onClose={handleClose}
+      TransitionComponent={Transition}
+    >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 4, boxShadow: 'none' }}
       >
@@ -74,7 +99,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
         mx={4}
         sx={{
           py: 1,
-          px: 2,
+          px: 0,
           bgcolor: 'white',
           borderTopLeftRadius: 10,
           borderTopRightRadius: 10,
@@ -97,6 +122,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
             />
           }
         />
+        <Divider />
       </Box>
 
       <Box flexGrow={1} />
@@ -146,7 +172,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           }}
         >
           <Typography variant="subtitle2" fontWeight={700}>
-            Dismiss
+            Cancel
           </Typography>
         </Button>
       </Box>

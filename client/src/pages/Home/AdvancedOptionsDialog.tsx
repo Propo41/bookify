@@ -34,6 +34,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
   return (
     <Dialog
       fullWidth
+      hideBackdrop
       PaperProps={{
         sx: {
           width: '100%',

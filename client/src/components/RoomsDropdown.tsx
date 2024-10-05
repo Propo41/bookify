@@ -21,6 +21,8 @@ export interface RoomsDropdownOption {
 }
 
 export default function RoomsDropdown({ sx, id, disabled, value, options, onChange, icon, placeholder, loading }: DropdownProps) {
+  console.log(loading);
+
   const height = '58px';
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -36,6 +38,32 @@ export default function RoomsDropdown({ sx, id, disabled, value, options, onChan
       variant="standard"
       disabled={disabled || false}
       renderValue={(selected) => {
+        if (!loading && options?.length === 0) {
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {icon && icon}
+
+              <Typography
+                variant="subtitle2"
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[500],
+                    fontStyle: 'italic',
+                    ml: 2,
+                    fontWeight: 400,
+                  }),
+                ]}
+              >
+                No rooms available
+              </Typography>
+            </Box>
+          );
+        }
         const selectedOption = options?.find((option) => option.value === selected);
 
         if (placeholder && selected.length === 0) {
@@ -83,17 +111,28 @@ export default function RoomsDropdown({ sx, id, disabled, value, options, onChan
             }}
           >
             {icon && icon}
-            <Typography
-              variant="subtitle1"
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                ml: 2,
-              }}
-            >
-              {selectedOption ? selectedOption.text : ''}
-            </Typography>
+            {loading ? (
+              <Skeleton
+                animation="wave"
+                sx={{
+                  width: '100%',
+                  mx: 2,
+                  borderRadius: 0.5,
+                }}
+              />
+            ) : (
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  ml: 2,
+                }}
+              >
+                {selectedOption ? selectedOption.text : ''}
+              </Typography>
+            )}
           </Box>
         );
       }}
