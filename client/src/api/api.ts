@@ -227,6 +227,19 @@ export default class Api {
     }
   }
 
+  async getMaxSeatCount() {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/highest-seat-count', {
+        headers,
+      });
+
+      return res.data as ApiResponse<number>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
   async getFloors() {
     try {
       const headers = await this.getHeaders();
