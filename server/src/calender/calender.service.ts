@@ -95,6 +95,18 @@ export class CalenderService {
     return createResponse(data, 'Room has been booked');
   }
 
+  async getHighestSeatCapacity(domain: string) {
+    const rooms = await this.authService.getCalenderResources(domain);
+    let max = -1;
+    for (const room of rooms) {
+      if (room.seats > max) {
+        max = room.seats;
+      }
+    }
+
+    return createResponse(max);
+  }
+
   async getAvailableRooms(
     client: OAuth2Client,
     domain: string,

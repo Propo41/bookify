@@ -45,23 +45,9 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
   @Get('/highest-seat-count')
-  async getMaxSeatCapacity(
-    @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
-    @Query('startTime') startTime: string,
-    @Query('duration') duration: number,
-    @Query('timeZone') timeZone: string,
-    @Query('seats') seats: number,
-    @Query('floor') floor: string,
-  ): Promise<ApiResponse<IConferenceRoom[]>> {
-    const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + duration);
-    const endTime = startDate.toISOString();
-
-    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
-    return createResponse(rooms);
+  async getMaxSeatCapacity(@_User('domain') domain: string): Promise<ApiResponse<number>> {
+    return await this.calenderService.getHighestSeatCapacity(domain);
   }
 
   @UseGuards(AuthGuard)
