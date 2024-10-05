@@ -199,20 +199,6 @@ export default class Api {
     }
   }
 
-  async updateRoomId(eventId: string, roomId: string, requestedAt: Date) {
-    try {
-      const data = { eventId, roomId, requestedAt };
-      const headers = await this.getHeaders();
-      const res = await this.client.put('/room/id', data, {
-        headers,
-      });
-
-      return res.data as ApiResponse<EventUpdateResponse>;
-    } catch (error: any) {
-      return this.handleError(error);
-    }
-  }
-
   async updateRoomDuration(eventId: string, roomId: string, duration: number) {
     try {
       const data = { eventId, roomId, duration };

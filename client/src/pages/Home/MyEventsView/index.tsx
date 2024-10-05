@@ -4,21 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { getTimeZoneString, renderError } from '../../../helpers/utility';
 import Api from '../../../api/api';
 import toast from 'react-hot-toast';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, styled, Typography } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
 import { EventCard } from '../../../components/EventCard';
-
-const CustomButton = styled(Button)(({ theme }) => ({
-  boxShadow: 'none',
-  '&:hover': {
-    boxShadow: 'none',
-  },
-  '&:active': {
-    boxShadow: 'none',
-  },
-  '&:focus': {
-    boxShadow: 'none',
-  },
-}));
+import AlertDialog from '../../../components/AlertDialog';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
@@ -63,7 +51,6 @@ export default function MyEventsView() {
   };
 
   const handleConfirmDelete = async () => {
-    setLoading(true);
     setDialogOpen(false);
 
     if (!deleteEventId) {
@@ -73,7 +60,6 @@ export default function MyEventsView() {
 
     const res = await api.deleteRoom(deleteEventId);
     const { data, status } = res;
-    setLoading(false);
 
     if (status !== 'success') {
       return renderError(res, navigate);
@@ -128,22 +114,7 @@ export default function MyEventsView() {
       )}
 
       {/* Confirmation Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle fontSize={20} fontWeight={800} id="alert-dialog-title">
-          {'Confirm delete'}
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="subtitle1">Are you sure you want to delete this event?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <CustomButton onClick={handleCloseDialog} color="primary">
-            Cancel
-          </CustomButton>
-          <CustomButton onClick={() => handleConfirmDelete()} color="error" autoFocus>
-            Delete
-          </CustomButton>
-        </DialogActions>
-      </Dialog>
+      <AlertDialog open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />
     </Box>
   );
 }

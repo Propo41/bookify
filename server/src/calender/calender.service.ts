@@ -3,7 +3,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Inject, Inj
 import { ConfigType } from '@nestjs/config';
 import { calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
-import { extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
+import { extractRoomByEmail, extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
 import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
@@ -23,17 +23,12 @@ export class CalenderService {
     domain: string,
     startTime: string,
     endTime: string,
-    seats: number,
-    timeZone: string,
     createConference?: boolean,
     eventTitle?: string,
-    floor?: string,
     attendees?: string[],
+    room?: string, //todo: this is a required field. change BookRoomDto
   ): Promise<ApiResponse<EventResponse>> {
-    const rooms: ConferenceRoom[] = await this.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
-    if (!rooms?.length) {
-      throw new ConflictException('No room available within specified time range');
-    }
+    const rooms = await this.authService.getCalenderResources(domain);
 
     const attendeeList = [];
     if (attendees?.length) {
@@ -60,8 +55,12 @@ export class CalenderService {
       };
     }
 
-    // room.seat should be as closer to user's preferred minSeat value
-    const pickedRoom = rooms[0];
+    const pickedRoom = extractRoomByEmail(rooms, room);
+
+    if (!pickedRoom) {
+      throw new NotFoundException('Incorrect room picked!');
+    }
+
     var event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || 'Quick Meeting | Bookify',
       location: pickedRoom.name,
@@ -79,11 +78,6 @@ export class CalenderService {
 
     const createdEvent = await this.googleApiService.createCalenderEvent(client, event);
 
-    const room = extractRoomName(rooms, createdEvent.location);
-    if (!room) {
-      throw new NotFoundException('Room not found');
-    }
-
     console.log('Room has been booked', createdEvent);
 
     const data: EventResponse = {
@@ -92,11 +86,10 @@ export class CalenderService {
       meet: createdEvent.hangoutLink,
       start: createdEvent.start.dateTime,
       end: createdEvent.end.dateTime,
-      room: room,
+      room: pickedRoom.name,
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
-      availableRooms: rooms,
     };
 
     return createResponse(data, 'Room has been booked');
@@ -179,56 +172,6 @@ export class CalenderService {
     });
 
     return createResponse(formattedEvents);
-  }
-
-  async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<ApiResponse<EventUpdateResponse>> {
-    const event = await this.googleApiService.getCalenderEvent(client, eventId);
-    const rooms: ConferenceRoom[] = await this.authService.getCalenderResources(domain);
-    const room = rooms.find((room) => room.email === roomEmail);
-    if (!room) {
-      throw new NotFoundException('Room not found.');
-    }
-
-    // check if room is available
-    const availableRooms: ConferenceRoom[] = await this.getAvailableRooms(
-      client,
-      domain,
-      event.start.dateTime,
-      event.end.dateTime,
-      room.seats,
-      event.start.timeZone,
-      room.floor,
-    );
-
-    const isFree = !!availableRooms.find((room) => room.email === roomEmail);
-    if (!isFree) {
-      const data: EventResponse = { availableRooms };
-      return createResponse(data, 'Selected room is not available at the moment');
-    }
-
-    // remove the previous room id from the list
-    const filteredAttendees = event.attendees.filter((attendee) => !attendee.email.endsWith('@resource.calendar.google.com'));
-
-    const updatedEvent: calendar_v3.Schema$Event = {
-      ...event,
-      location: room.name,
-      attendees: [...filteredAttendees, { email: roomEmail }],
-    };
-
-    const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
-
-    console.log('Room has been updated', result);
-
-    const roomName = extractRoomName(rooms, result.location);
-    if (!roomName) {
-      throw new BadRequestException('Room not found');
-    }
-    const data: EventResponse = {
-      seats: room.seats,
-      room: roomName,
-    };
-
-    return createResponse(data, 'Selected room is not available at the moment');
   }
 
   async updateEventDuration(client: OAuth2Client, eventId: string, roomId: string, duration: number): Promise<ApiResponse<EventUpdateResponse>> {

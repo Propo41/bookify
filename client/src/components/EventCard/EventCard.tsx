@@ -121,7 +121,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       toast.error("Couldn't complete request. Redirecting to login page");
       setTimeout(() => {
         navigate(ROUTES.signIn);
-      }, 2000);
+      }, 1000);
     }
 
     if (res?.status === 'error') {
