@@ -62,7 +62,7 @@ export class CalenderService {
 
     // room.seat should be as closer to user's preferred minSeat value
     const pickedRoom = rooms[0];
-    var event: calendar_v3.Schema$Event = {
+    const event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || 'Quick Meeting | Bookify',
       location: pickedRoom.name,
       description: 'A quick meeting created by Bookify',
@@ -74,6 +74,11 @@ export class CalenderService {
       },
       attendees: [...attendeeList, { email: pickedRoom.email }],
       colorId: '3',
+      extendedProperties: {
+        private: {
+          createdAt: new Date().toISOString(), // Adding custom createdAt timestamp
+        },
+      },
       ...conference,
     };
 
@@ -161,7 +166,7 @@ export class CalenderService {
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
     const formattedEvents = events.map((event) => {
-      let room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
+      const room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
       const _event: EventResponse = {
         meet: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
@@ -173,12 +178,25 @@ export class CalenderService {
         summary: event.summary,
         start: event.start.dateTime,
         end: event.end.dateTime,
+        createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
       };
 
       return _event;
     });
 
-    return createResponse(formattedEvents);
+    const sortedEvents = formattedEvents.sort((a, b) => {
+      const startA = new Date(a.start).getTime();
+      const startB = new Date(b.start).getTime();
+      if (startA !== startB) {
+        return startA - startB;
+      }
+      const createdAtA = new Date(a.createdAt).getTime();
+      const createdAtB = new Date(b.createdAt).getTime();
+      const timestamps = [createdAtA, createdAtB];
+      const firstCreated = Math.min(...timestamps);
+      return firstCreated === createdAtA ? 1 : -1;
+    });
+    return createResponse(sortedEvents);
   }
 
   async updateEventRoom(client: OAuth2Client, domain: string, eventId: string, roomEmail: string): Promise<ApiResponse<EventUpdateResponse>> {
