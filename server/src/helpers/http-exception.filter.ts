@@ -1,4 +1,4 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorResponse } from '@bookify/shared';
 
@@ -14,6 +14,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status: 'error',
       message: exception.message,
     };
+
+    switch (status) {
+      case HttpStatus.UNAUTHORIZED:
+        errorResponse.redirect = true;
+        break;
+    }
 
     response.status(status).json(errorResponse);
   }

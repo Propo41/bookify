@@ -11,6 +11,10 @@ import StyledTextField from '../../components/StyledTextField';
 import ChipInput from '../../components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { FormData } from '../../helpers/types';
+import { secrets } from '../../config/secrets';
+
+const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = true;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -34,6 +38,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
   return (
     <Dialog
       fullWidth
+      fullScreen={isChromeExt}
       hideBackdrop
       PaperProps={{
         sx: {
@@ -44,12 +49,12 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
           [theme.breakpoints.down('sm')]: {
             width: '450px',
           },
-          height: '750px',
-          mx: 1.5,
+          height: isChromeExt ? '100%' : '750px',
+          mx: isChromeExt ? 0 : 1.5,
+          borderRadius: isChromeExt ? 0 : 3.5,
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: 3.5,
           bgcolor: 'white',
           // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
         },

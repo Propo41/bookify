@@ -37,7 +37,7 @@ export class CalenderController {
     @Query('floor') floor: string,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + duration);
+    startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
     const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);

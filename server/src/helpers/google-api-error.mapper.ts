@@ -26,6 +26,10 @@ export class GoogleAPIErrorMapper {
       callback(status);
     }
 
+    if (data?.error === 'invalid_grant') {
+      throw new UnauthorizedException(`Unauthorized: ${data?.error}. You might need to refresh your credentials.`);
+    }
+
     switch (status) {
       case 400:
         throw new BadRequestException(`Bad Request. Details: ${data?.error || 'Invalid parameters or request body'}`);
