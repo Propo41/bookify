@@ -7,6 +7,10 @@ import { createDropdownOptions } from '../../helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import { EditRoomFields } from './util';
 import { availableDurations } from '../../pages/Home/shared';
+import { secrets } from '../../config/secrets';
+
+const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = true;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -42,6 +46,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
   return (
     <Dialog
       hideBackdrop
+      fullScreen={isChromeExt}
       PaperProps={{
         sx: {
           width: '100%',
@@ -51,12 +56,12 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           [theme.breakpoints.down('sm')]: {
             width: '450px',
           },
-          height: '750px',
-          mx: 1.5,
+          height: isChromeExt ? '100%' : '750px',
+          mx: isChromeExt ? 0 : 1.5,
+          borderRadius: isChromeExt ? 0 : 3.5,
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: 3.5,
           bgcolor: 'white',
           // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
         },

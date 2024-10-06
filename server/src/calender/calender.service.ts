@@ -118,9 +118,10 @@ export class CalenderService {
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getCalenderResources(domain);
+    console.log(typeof minSeats);
 
     for (const room of rooms) {
-      if (room.seats >= minSeats && (floor === undefined || room.floor === floor)) {
+      if (room.seats >= Number(minSeats) && (floor === undefined || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
       }
     }

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getTimeZoneString, renderError } from '../../../helpers/utility';
 import Api from '../../../api/api';
 import toast from 'react-hot-toast';
-import { Box, Divider, Typography } from '@mui/material';
+import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import { EventCard } from '../../../components/EventCard';
 import AlertDialog from '../../../components/AlertDialog';
 
@@ -82,7 +82,15 @@ export default function MyEventsView() {
     }
   };
 
-  if (loading) return <></>;
+  if (loading)
+    return (
+      <Box mx={3}>
+        <Stack spacing={2} mt={3}>
+          <Skeleton animation="wave" variant="rounded" height={80} />
+          <Skeleton animation="wave" variant="rounded" height={80} />
+        </Stack>
+      </Box>
+    );
 
   return (
     <Box>

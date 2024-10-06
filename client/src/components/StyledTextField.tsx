@@ -1,14 +1,13 @@
-import { Box, SxProps, TextField, Theme } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 
 interface StyledTextFieldProps {
   id: string;
   sx?: any;
   value?: string;
-  disabled?: boolean;
   onChange: (id: string, value: string) => void;
 }
 
-const StyledTextField = ({ id, sx, disabled, onChange, value }: StyledTextFieldProps) => {
+const StyledTextField = ({ id, sx, onChange, value }: StyledTextFieldProps) => {
   return (
     <Box
       display="flex"

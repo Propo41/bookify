@@ -66,7 +66,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     setFirstRender(true);
   }, []);
 
-  // todo: fix it so that this hook is not called multiple times on initial page load
   useEffect(() => {
     if (firstRender) {
       console.log('changed');

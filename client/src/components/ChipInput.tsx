@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TextField, Chip, Box, SxProps, Theme } from '@mui/material';
+import { useState } from 'react';
+import { TextField, Chip, Box } from '@mui/material';
 
 interface ChipInputProps {
   id: string;
