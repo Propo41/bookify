@@ -27,6 +27,9 @@ import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import { secrets } from '../../config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 
+const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = true;
+
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any>;
@@ -376,6 +379,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
   return (
     <Dialog
       fullWidth
+      fullScreen={isChromeExt}
       hideBackdrop
       PaperProps={{
         sx: {
@@ -386,11 +390,11 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
           [theme.breakpoints.down('sm')]: {
             width: '450px',
           },
-          height: '750px',
-          mx: 1.5,
+          height: isChromeExt ? '100%' : '750px',
+          mx: isChromeExt ? 0 : 1.5,
+          borderRadius: isChromeExt ? 0 : 3.5,
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: 3.5,
           backgroundColor: 'white',
           // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
         },

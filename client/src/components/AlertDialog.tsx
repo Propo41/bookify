@@ -8,6 +8,10 @@ import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import { Box, useTheme } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
+import { secrets } from '../config/secrets';
+
+const isChromeExt = secrets.appEnvironment === 'chrome';
+// const isChromeExt = true;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -31,6 +35,7 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
     <Dialog
       fullWidth
       hideBackdrop
+      fullScreen={isChromeExt}
       PaperProps={{
         sx: {
           width: '100%',
@@ -40,12 +45,12 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
           [theme.breakpoints.down('sm')]: {
             width: '450px',
           },
-          height: '750px',
-          mx: 1.5,
+          height: isChromeExt ? '100%' : '750px',
+          mx: isChromeExt ? 0 : 1.5,
+          borderRadius: isChromeExt ? 0 : 3.5,
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: 3.5,
           bgcolor: 'white',
           // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
         },

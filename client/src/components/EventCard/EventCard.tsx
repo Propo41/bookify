@@ -61,7 +61,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<EditRoomFields>({
     duration: 30,
@@ -113,7 +112,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
     if (!event?.eventId || !event?.roomEmail) return;
 
     console.log('edit room:', formData);
-    setLoading(true);
 
     const res = await new Api().updateRoomDuration(event.eventId, event.roomEmail, formData.duration);
 
@@ -126,14 +124,12 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
     if (res?.status === 'error') {
       res.message && toast.error(res.message);
-      setLoading(false);
       return;
     }
 
     if (event.eventId) {
       onEdit(event.eventId, res?.data);
 
-      setLoading(false);
       setEditDialogOpen(false);
     }
   };
