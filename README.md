@@ -4,9 +4,9 @@
     <br />
     <br />
     <a href="">
-      <img src="https://github.com/user-attachments/assets/ca1b9aaf-e251-48f2-82bd-985afc9a9d36" alt="Bookify" width="30%" height="560px">
-      <img src="https://github.com/user-attachments/assets/4f48568a-b5f6-4150-9e05-7d8684425677" alt="Bookify" width="30%" height="560px">
-      <img src="https://github.com/user-attachments/assets/4354c8bc-c104-49bd-8438-b22295fe6c6c" alt="Bookify" width="30%" height="560px">
+      <img src="https://github.com/user-attachments/assets/177fa715-1f7c-45e3-bfff-5f71810011e4" alt="Bookify" width="30%" height="560px">
+      <img src="https://github.com/user-attachments/assets/a1e0ac04-ad1f-4fcb-8773-d29f842d14d9" alt="Bookify" width="30%" height="560px">
+      <img src="https://github.com/user-attachments/assets/af6e1476-99d2-4f90-bd86-0f4ac5569c5e" alt="Bookify" width="30%" height="560px">
     </a>
   </h1>
 </div>
