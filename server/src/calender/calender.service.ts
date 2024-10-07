@@ -1,9 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
-import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
-import { extractRoomByEmail, extractRoomName, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
+import { extractRoomByEmail, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
 import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
@@ -56,8 +56,6 @@ export class CalenderService {
     }
 
     // room.seat should be as closer to user's preferred minSeat value
-    const pickedRoom = rooms[0];
-    const event: calendar_v3.Schema$Event = {
     const pickedRoom = extractRoomByEmail(rooms, room);
 
     if (!pickedRoom) {
