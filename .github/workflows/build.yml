@@ -4,10 +4,16 @@ on:
   push:
     branches:
       - develop
+      - main
     paths-ignore:
       - '**/*.md'
       - '**/*.json'
-      - '**/*.yml'
+  pull_request:
+    branches:
+      - develop
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.json'
 
 env:
   AZURE_WEBAPP_NAME: bookify
