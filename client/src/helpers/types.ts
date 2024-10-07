@@ -2,7 +2,8 @@ export interface FormData {
   startTime: string;
   duration: number;
   seats: number;
-  floor: string;
+  room?: string;
+  floor?: string;
   title?: string;
   attendees?: string[];
   conference?: boolean;

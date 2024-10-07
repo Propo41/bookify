@@ -32,6 +32,31 @@ export function populateTimeOptions() {
   return timeOptions;
 }
 
+export function populateDurationOptions(start: number, end: number) {
+  let mins = start;
+  const options = [];
+
+  while (mins < end) {
+    options.push(mins.toString());
+    mins += 15;
+  }
+
+  return options;
+}
+
+// TODO: fetch from database
+export function populateRoomCapacity() {
+  const options = [];
+  let capacity = 1;
+
+  while (capacity < 15) {
+    options.push(capacity.toString());
+    capacity += 1;
+  }
+
+  return options;
+}
+
 export function toMinutesSinceMidnight(hours: number, minutes: number) {
   return hours * 60 + minutes;
 }
@@ -90,8 +115,8 @@ export function convertToLocaleTime(dateStr?: string) {
   return date.toLocaleTimeString('en-US', options);
 }
 
-export const createDropdownOptions = (options: string[]) => {
-  return (options || []).map((option) => ({ value: option, text: option }));
+export const createDropdownOptions = (options: string[], type: 'time' | 'default' = 'default') => {
+  return (options || []).map((option) => ({ value: option, text: type === 'time' ? formatMinsToHM(Number(option), 'm') : option }));
 };
 
 export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunction) => {
@@ -109,4 +134,18 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
 
     return;
   }
+};
+
+export const formatMinsToHM = (value: number, decorator?: string) => {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+
+  let result = '';
+  if (hours > 0) {
+    result += `${hours} hr${hours > 1 ? 's' : ''} `;
+  }
+  if (minutes > 0 || hours === 0) {
+    result += `${minutes}${decorator ? decorator : ''}`;
+  }
+  return result.trim();
 };

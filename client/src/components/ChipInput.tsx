@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { TextField, Chip, Box, SxProps, Theme } from '@mui/material';
+import { useState } from 'react';
+import { TextField, Chip, Box } from '@mui/material';
 
 interface ChipInputProps {
   id: string;
-  sx?: SxProps<Theme>;
-  value?: string;
+  sx?: any;
+  value?: any[];
   disabled?: boolean;
   onChange: (id: string, value: string[]) => void;
 }
 
-export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
+export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
   const [inputValue, setInputValue] = useState('');
-  const [chips, setChips] = useState<any[]>([]);
+  const [chips, setChips] = useState<any[]>(value || []);
 
   const handleKeyDown = (event: any) => {
     if (event.key === ' ' && inputValue.trim() !== '') {
@@ -24,7 +24,9 @@ export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
   };
 
   const handleDelete = (chipToDelete: any[]) => {
-    setChips(chips.filter((chip) => chip !== chipToDelete));
+    const newChips = chips.filter((chip) => chip !== chipToDelete);
+    setChips(newChips);
+    onChange(id, newChips);
   };
 
   return (
@@ -37,11 +39,11 @@ export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
           gap: '8px',
           padding: '10px',
           borderRadius: 1,
-          backgroundColor: '#ECECEC',
-          mt: 1,
+          backgroundColor: theme.palette.common.white,
           '&:focus-within': {
-            border: `2px solid ${theme.palette.primary.dark}`,
+            border: 'none',
           },
+          ...sx,
         }),
       ]}
     >
@@ -64,7 +66,7 @@ export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Invite attendees"
+        placeholder={value && value.length > 0 ? '' : 'Invite attendees'}
         slotProps={{
           input: {
             disableUnderline: true,
@@ -74,9 +76,8 @@ export default function ChipInput({ id, sx, onChange }: ChipInputProps) {
           (theme) => ({
             flex: 1,
             py: 0,
-            px: 1,
             '& .MuiInputBase-input': {
-              fontSize: theme.typography.subtitle2,
+              fontSize: theme.typography.subtitle1,
             },
             '& .MuiInputBase-input::placeholder': {
               color: theme.palette.primary,

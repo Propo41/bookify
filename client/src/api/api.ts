@@ -1,4 +1,4 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, LoginResponse } from '@bookify/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, LoginResponse } from '@bookify/shared';
 import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '../config/secrets';
@@ -148,6 +148,26 @@ export default class Api {
     };
   }
 
+  async getAvailableRooms(startTime: string, duration: number, timeZone: string, seats: number, floor?: string) {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/available-rooms', {
+        headers,
+        params: {
+          startTime,
+          duration,
+          timeZone,
+          seats,
+          floor,
+        },
+      });
+
+      return res.data as ApiResponse<IConferenceRoom[]>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
   async getRooms(startTime: string, endTime: string, timeZone: string) {
     try {
       const headers = await this.getHeaders();
@@ -179,20 +199,6 @@ export default class Api {
     }
   }
 
-  async updateRoomId(eventId: string, roomId: string, requestedAt: Date) {
-    try {
-      const data = { eventId, roomId, requestedAt };
-      const headers = await this.getHeaders();
-      const res = await this.client.put('/room/id', data, {
-        headers,
-      });
-
-      return res.data as ApiResponse<EventUpdateResponse>;
-    } catch (error: any) {
-      return this.handleError(error);
-    }
-  }
-
   async updateRoomDuration(eventId: string, roomId: string, duration: number) {
     try {
       const data = { eventId, roomId, duration };
@@ -216,6 +222,19 @@ export default class Api {
       });
 
       return res.data as ApiResponse<DeleteResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
+  async getMaxSeatCount() {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/highest-seat-count', {
+        headers,
+      });
+
+      return res.data as ApiResponse<number>;
     } catch (error: any) {
       return this.handleError(error);
     }

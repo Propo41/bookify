@@ -13,6 +13,9 @@ export class BookRoomDto {
   @IsString()
   timeZone: string;
 
+  @IsString()
+  room: string;
+
   @IsOptional()
   @IsBoolean()
   createConference?: boolean;

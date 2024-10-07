@@ -1,5 +1,3 @@
-import { IConferenceRoom } from 'interfaces';
-
 export interface EventResponse {
   eventId?: string;
   summary?: string;
@@ -11,5 +9,4 @@ export interface EventResponse {
   roomEmail?: string;
   roomId?: string;
   seats?: number;
-  availableRooms?: IConferenceRoom[];
 }

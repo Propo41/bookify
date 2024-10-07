@@ -4,7 +4,8 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@bookify/shared';
+import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()
 export class CalenderController {
@@ -25,33 +26,47 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
+  @Get('/available-rooms')
+  async getAvailableRooms(
+    @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
+    @Query('startTime') startTime: string,
+    @Query('duration') duration: number,
+    @Query('timeZone') timeZone: string,
+    @Query('seats') seats: number,
+    @Query('floor') floor: string,
+  ): Promise<ApiResponse<IConferenceRoom[]>> {
+    const startDate = new Date(startTime);
+    startDate.setMinutes(startDate.getMinutes() + Number(duration));
+    const endTime = startDate.toISOString();
+
+    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
+    return createResponse(rooms);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/highest-seat-count')
+  async getMaxSeatCapacity(@_User('domain') domain: string): Promise<ApiResponse<number>> {
+    return await this.calenderService.getHighestSeatCapacity(domain);
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OAuthInterceptor)
   @Post('/room')
   async bookRoom(
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventResponse>> {
-    const { startTime, duration, seats, timeZone, createConference, title, floor, attendees } = bookRoomDto;
+    const { startTime, duration, seats, timeZone, createConference, title, floor, attendees, room } = bookRoomDto;
 
     // end time
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, seats, timeZone, createConference, title, floor, attendees);
+    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, createConference, title, attendees, room);
     return event;
-  }
-
-  @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Put('/room/id')
-  async updateEventRoom(
-    @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
-    @Body('eventId') eventId: string,
-    @Body('roomId') roomId?: string,
-  ): Promise<ApiResponse<EventUpdateResponse>> {
-    return await this.calenderService.updateEventRoom(client, domain, eventId, roomId);
   }
 
   @UseGuards(AuthGuard)
