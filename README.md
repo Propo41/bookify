@@ -1,27 +1,24 @@
-<div align="center">
   <h1 align="center">
     Bookify
     <br />
     <br />
     <a href="">
-      <img src="https://github.com/user-attachments/assets/617c3453-f99b-4a93-a9a8-770ecaffd581" alt="Bookify" width="30%">
-      <img src="https://github.com/user-attachments/assets/49b984c9-fede-4c86-b166-c483e46fd6da" alt="Bookify" width="30%">
-      <img src="https://github.com/user-attachments/assets/35c12a11-ab5b-4235-b3a5-6a31ce4a75c0" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/d5b40ed0-285b-4c70-88ed-a9706ef15dfb" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/839cb957-e66a-4698-a973-501068befaa5" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/a7d1906f-55a8-446a-90b7-e01ee2cf9cba" alt="Bookify" width="30%">
     </a>
   </h1>
 </div>
 
 <p align="center">
-  <a href="https://github.com/Propo41/bookify/actions/workflows/main.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/main.yml/badge.svg" alt="GitHub Actions status"></a>
+  <a href="https://github.com/Propo41/bookify/actions/workflows/build.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/build.yml/badge.svg" alt="GitHub Actions status"></a>
   <a href="https://github.com/Propo41/bookify/actions/workflows/deploy.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/deploy.yml/badge.svg" alt="GitHub Actions status"></a>
   <a href="README.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
   <a href= "https://github.com/prettier/prettier"><img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg"></a>
   <a href="#license"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
 </p>
 
-
 Bookify enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
-
 
 ### Key Features:
 - **Quick Meeting Setup**: Book a room in seconds by selecting start time, seat requirements, and an optional floor preference.
