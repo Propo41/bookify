@@ -89,34 +89,54 @@ export class GoogleApiMockService implements IGoogleApiService {
       }
     }
 
-    return Promise.resolve(
-      busySchedule as {
-        [key: string]: calendar_v3.Schema$FreeBusyCalendar;
-      },
-    );
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(
+          busySchedule as {
+            [key: string]: calendar_v3.Schema$FreeBusyCalendar;
+          },
+        );
+      }, 1000);
+    });
   }
 
   async getCalenderEvents(oauth2Client: OAuth2Client, start: string, end: string, timeZone: string, limit = 30): Promise<calendar_v3.Schema$Event[]> {
     console.log(`Mock getCalenderEvents called with start: ${start}, end: ${end}, limit: ${limit}`);
     const events = this.db.listEvents(start, end, limit);
-    return Promise.resolve(events);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(events);
+      }, 1000);
+    });
   }
 
   async getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event> {
     console.log(`Mock getCalenderEvent called with id: ${id}`);
     const event = this.db.getEvent(id);
-    return Promise.resolve(event);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(event);
+      }, 1000);
+    });
   }
 
   async updateCalenderEvent(oauth2Client: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
     console.log(`Mock updateCalenderEvent called with id: ${id}, event: ${event.summary}`);
     const updatedEvent = this.db.updateEvent(id, event);
-    return Promise.resolve(updatedEvent);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(updatedEvent);
+      }, 1000);
+    });
   }
 
   async deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void> {
     console.log(`Mock deleteEvent called with id: ${id}`);
     this.db.deleteEvent(id);
-    return Promise.resolve();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
   }
 }

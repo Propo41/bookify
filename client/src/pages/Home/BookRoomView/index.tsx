@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Grid from '@mui/material/Grid2';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { convertToRFC3339, createDropdownOptions, getTimeZoneString, renderError } from '../../../helpers/utility';
@@ -45,6 +44,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const api = new Api();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
@@ -64,6 +64,13 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
   useEffect(() => {
     setPreferences();
     setFirstRender(true);
+
+    // abort pending requests on component unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -114,11 +121,20 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
     setRoomLoading(true);
 
-    const res = await api.getAvailableRooms(formattedStartTime, duration, getTimeZoneString(), seats, floor);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    const res = await api.getAvailableRooms(abortControllerRef.current.signal, formattedStartTime, duration, getTimeZoneString(), seats, floor);
 
     setRoomLoading(false);
 
-    if (res.status !== 'success') {
+    if (res.status === 'ignore') {
+      return;
+    }
+
+    if (res.status === 'error') {
       return renderError(res, navigate);
     }
 
@@ -189,19 +205,11 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
   };
 
   return (
-    <Box mx={2}>
-      <Grid
-        container
-        spacing={0}
-        columns={16}
-        px={0}
-        mt={1}
+    <Box mx={2} mt={2}>
+      <Box
         sx={{
           backgroundColor: 'rgba(0, 0, 0, 0.08)',
-          borderBottomLeftRadius: 10,
-          borderBottomRightRadius: 10,
-          borderTopLeftRadius: 10,
-          borderTopRightRadius: 10,
+          borderRadius: 2,
         }}
       >
         <Dropdown
@@ -224,7 +232,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           }
         />
 
-        <Grid size={8}>
+        <Box sx={{ display: 'flex' }}>
           <Dropdown
             id="duration"
             options={durationOptions}
@@ -240,8 +248,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
               />
             }
           />
-        </Grid>
-        <Grid size={8}>
+
           <Dropdown
             id="seats"
             options={roomCapacityOptions}
@@ -257,7 +264,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
               />
             }
           />
-        </Grid>
+        </Box>
 
         <RoomsDropdown
           id="room"
@@ -282,8 +289,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           }
         />
 
-        <Grid
-          size={16}
+        <Box
           sx={{
             display: 'flex',
             px: 2,
@@ -308,9 +314,9 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
               }),
             ]}
           />
-        </Grid>
-      </Grid>
-      <Box flexGrow={1} />
+        </Box>
+        <Box flexGrow={1} />
+      </Box>
 
       <Box
         sx={{
@@ -330,6 +336,8 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           variant="contained"
           disabled={roomLoading || !formData.room ? true : false}
           disableElevation
+          loadingPosition="start"
+          startIcon={<></>}
           sx={[
             (theme) => ({
               py: 2,

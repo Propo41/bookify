@@ -1,25 +1,12 @@
-import { AppBar, Box, Button, Dialog, Divider, IconButton, Slide, Typography, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Divider, IconButton, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect } from 'react';
-import { TransitionProps } from '@mui/material/transitions';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { createDropdownOptions } from '../../helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import { EditRoomFields } from './util';
 import { availableDurations } from '../../pages/Home/shared';
-import { secrets } from '../../config/secrets';
-
-const isChromeExt = secrets.appEnvironment === 'chrome';
-// const isChromeExt = true;
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="left" ref={ref} {...props} />;
-});
+import { LoadingButton } from '@mui/lab';
 
 interface EditDialogProps {
   open: boolean;
@@ -27,11 +14,11 @@ interface EditDialogProps {
   onChange: (id: string, value: string | number | string[] | boolean) => void;
   data: EditRoomFields;
   onEditRoomClick: () => void;
+  loading?: boolean;
 }
 
-export default function EditDialog({ open, setOpen, onChange, data, onEditRoomClick }: EditDialogProps) {
+export default function EditDialog({ open, setOpen, onChange, data, onEditRoomClick, loading }: EditDialogProps) {
   const [durationOptions, setDurationOptions] = React.useState<DropdownOption[]>([]);
-  const theme = useTheme();
 
   useEffect(() => {
     if (open) {
@@ -43,33 +30,22 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
     setOpen(false);
   };
 
+  if (!open) return <></>;
+
   return (
-    <Dialog
-      hideBackdrop
-      fullScreen={isChromeExt}
-      PaperProps={{
-        sx: {
-          width: '100%',
-          [theme.breakpoints.up('sm')]: {
-            maxWidth: '412px',
-          },
-          [theme.breakpoints.down('sm')]: {
-            width: '450px',
-          },
-          height: isChromeExt ? '100%' : '750px',
-          mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 2.8,
-          boxShadow: 'none',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'white',
-          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
-        },
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '100%',
+        zIndex: 10,
+        boxShadow: 'none',
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
       }}
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={Transition}
     >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
@@ -131,25 +107,30 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
         <Divider />
       </Box>
 
-      <Box flexGrow={1} />
       <Box
         sx={{
           mx: 4,
           mb: 3,
           textAlign: 'center',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
       >
-        <Button
+        <LoadingButton
           onClick={onEditRoomClick}
           fullWidth
           variant="contained"
           disableElevation
+          loading={loading}
+          loadingPosition="start"
+          startIcon={<></>}
           sx={[
             (theme) => ({
               py: 2,
               backgroundColor: theme.palette.common.white,
               borderRadius: 15,
-
               color: theme.palette.common.black,
             }),
           ]}
@@ -157,7 +138,8 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           <Typography variant="h6" fontWeight={700}>
             Save changes
           </Typography>
-        </Button>
+        </LoadingButton>
+
         <Button
           variant="text"
           onClick={handleClose}
@@ -182,6 +164,6 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           </Typography>
         </Button>
       </Box>
-    </Dialog>
+    </Box>
   );
 }

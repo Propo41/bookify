@@ -14,6 +14,7 @@ export const brand = {
 };
 
 export const gray = {
+  10: '#FCFCFC',
   50: '#C8C8C8',
   100: '#E1E1E1',
   200: '#8B8B8B',

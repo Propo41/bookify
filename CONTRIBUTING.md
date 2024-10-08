@@ -170,11 +170,9 @@ All pull requests should be opened against the `main` branch.
 
 See how a minor change to your commit message style can make you a better programmer.
 
-Format: `<type>(<scope>): <subject>`
+Format: `<type>/<subject>`
 
-`<scope>` is optional. If your change is specific to one/two packages, consider adding the scope. Scopes should be brief but recognizable, e.g. `content-docs`, `theme-classic`, `core`
-
-The various types of commits:
+The various *types* of commits:
 
 - `feat`: a new API or behavior **for the end user**.
 - `fix`: a bug fix **for the end user**.
@@ -183,6 +181,8 @@ The various types of commits:
 - `test`: adding missing tests, refactoring tests; no production code change.
 - `chore`: upgrading dependencies, releasing new versions... Chores that are **regularly done** for maintenance purposes.
 - `misc`: anything else that doesn't change production code, yet is not `test` or `chore`. e.g. updating GitHub actions workflow.
+
+The *subject* name should be written as "issue-" followed by the issue number, for example: `feat/issue-71: added new button`
 
 ### Breaking Changes
 

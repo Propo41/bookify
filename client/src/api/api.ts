@@ -148,7 +148,7 @@ export default class Api {
     };
   }
 
-  async getAvailableRooms(startTime: string, duration: number, timeZone: string, seats: number, floor?: string) {
+  async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string) {
     try {
       const headers = await this.getHeaders();
       const res = await this.client.get('/available-rooms', {
@@ -160,6 +160,7 @@ export default class Api {
           seats,
           floor,
         },
+        signal: signal,
       });
 
       return res.data as ApiResponse<IConferenceRoom[]>;
@@ -254,6 +255,14 @@ export default class Api {
   }
 
   handleError(error: any) {
+    if (error.code === 'ERR_CANCELED') {
+      return {
+        status: 'ignore',
+        message: 'Pending request aborted',
+        data: null,
+      } as ApiResponse<any>;
+    }
+
     console.error(error);
     const res: ApiResponse<any> = error?.response?.data;
     if (res) {

@@ -122,7 +122,7 @@ export class AuthService {
     return result.map((row) => row.floor);
   }
 
-  async getCalenderResources(domain: string) {
+  async getDirectoryResources(domain: string) {
     const resources = await this.conferenceRoomsRepository.find({
       where: {
         domain,

@@ -16,6 +16,10 @@ export class GoogleAPIErrorMapper {
    * @param callback an optional callback method to fire for special cases
    */
   static handleError(err: GaxiosError, callback?: (status?: number) => void): void {
+    if (err.message === 'No refresh token is set.') {
+      throw new UnauthorizedException(`Unauthorized. You might need to refresh your credentials.`);
+    }
+
     if (!err.response) {
       throw new InternalServerErrorException('Network error or no response received');
     }
@@ -26,8 +30,10 @@ export class GoogleAPIErrorMapper {
       callback(status);
     }
 
-    if (data?.error === 'invalid_grant') {
-      throw new UnauthorizedException(`Unauthorized: ${data?.error}. You might need to refresh your credentials.`);
+    switch (data?.error) {
+      case 'No refresh token is set.':
+      case 'invalid_grant':
+        throw new UnauthorizedException(`Unauthorized: ${data?.error}. You might need to refresh your credentials.`);
     }
 
     switch (status) {

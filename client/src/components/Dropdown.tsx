@@ -20,7 +20,7 @@ export interface DropdownOption {
 }
 
 export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon, placeholder, loading }: DropdownProps) {
-  const height = '58px';
+  const height = '60px';
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);

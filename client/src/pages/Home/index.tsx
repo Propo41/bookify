@@ -140,6 +140,7 @@ export default function Home() {
         flexGrow: 1,
         overflowY: 'auto',
         paddingBottom: '56px',
+        position: 'relative',
       }}
     >
       <Box display={'flex'} alignItems={'center'}>

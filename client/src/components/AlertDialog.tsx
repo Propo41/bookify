@@ -1,26 +1,9 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import { secrets } from '../config/secrets';
-
-const isChromeExt = secrets.appEnvironment === 'chrome';
-// const isChromeExt = true;
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="left" ref={ref} {...props} />;
-});
 
 interface AlertDialogProps {
   handleNegativeClick: () => void;
@@ -29,36 +12,21 @@ interface AlertDialogProps {
 }
 
 export default function AlertDialog({ open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
-  const theme = useTheme();
+  if (!open) return <></>;
 
   return (
-    <Dialog
-      fullWidth
-      hideBackdrop
-      fullScreen={isChromeExt}
-      PaperProps={{
-        sx: {
-          width: '100%',
-          [theme.breakpoints.up('sm')]: {
-            maxWidth: '412px',
-          },
-          [theme.breakpoints.down('sm')]: {
-            width: '450px',
-          },
-          height: isChromeExt ? '100%' : '750px',
-          mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 2.8,
-          boxShadow: 'none',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'white',
-          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
-        },
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        height: '100%',
+        zIndex: 10,
+        width: '100%',
+        boxShadow: 'none',
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
       }}
-      open={open}
-      onClose={handleNegativeClick}
-      TransitionComponent={Transition}
     >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
@@ -147,6 +115,6 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
         </Box>
       </Box>
       <Box flexGrow={1} />
-    </Dialog>
+    </Box>
   );
 }

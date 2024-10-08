@@ -60,7 +60,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-
+  const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<EditRoomFields>({
     duration: 30,
@@ -113,7 +113,11 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
     console.log('edit room:', formData);
 
+    setEditLoading(true);
+
     const res = await new Api().updateRoomDuration(event.eventId, event.roomEmail, formData.duration);
+
+    setEditLoading(false);
 
     if (res?.redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
@@ -250,7 +254,14 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         })}
       </Box>
 
-      <EditDialog open={editDialogOpen} setOpen={setEditDialogOpen} onChange={handleInputChange} data={formData} onEditRoomClick={onEditRoomClick} />
+      <EditDialog
+        open={editDialogOpen}
+        setOpen={setEditDialogOpen}
+        onChange={handleInputChange}
+        data={formData}
+        loading={editLoading}
+        onEditRoomClick={onEditRoomClick}
+      />
     </Box>
   );
 };
