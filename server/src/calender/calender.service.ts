@@ -124,12 +124,15 @@ export class CalenderService {
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getCalenderResources(domain);
-    console.log(typeof minSeats);
 
     for (const room of rooms) {
       if (room.seats >= Number(minSeats) && (floor === undefined || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
       }
+    }
+
+    if (filteredRoomEmails.length === 0) {
+      return [];
     }
 
     const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
