@@ -392,7 +392,8 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
           },
           height: isChromeExt ? '100%' : '750px',
           mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 3.5,
+          borderRadius: isChromeExt ? 0 : 2.8,
+          boxShadow: 'none',
           position: 'relative',
           overflow: 'hidden',
           backgroundColor: 'white',
@@ -404,7 +405,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
       TransitionComponent={Transition}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 2, boxShadow: 'none' }}
+        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
       >
         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
           <ArrowBackIosRoundedIcon

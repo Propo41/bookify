@@ -51,8 +51,9 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
           },
           height: isChromeExt ? '100%' : '750px',
           mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 3.5,
+          borderRadius: isChromeExt ? 0 : 2.8,
           justifyContent: 'center',
+          boxShadow: 'none',
           position: 'relative',
           overflow: 'hidden',
           bgcolor: 'white',
@@ -64,7 +65,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
       TransitionComponent={Transition}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 2, boxShadow: 'none' }}
+        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
       >
         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
           <ArrowBackIosRoundedIcon

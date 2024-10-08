@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 
 const defaultTheme = createTheme();
 
-export const FONT_PRIMARY = 'Josefin Sans, sans-serif';
+export const FONT_PRIMARY = 'inter-variable, sans-serif';
 
 const typography = {
   fontFamily: FONT_PRIMARY,

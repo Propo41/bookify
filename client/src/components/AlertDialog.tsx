@@ -47,7 +47,8 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
           },
           height: isChromeExt ? '100%' : '750px',
           mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 3.5,
+          borderRadius: isChromeExt ? 0 : 2.8,
+          boxShadow: 'none',
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
@@ -60,7 +61,7 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
       TransitionComponent={Transition}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 2, boxShadow: 'none' }}
+        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
       >
         <IconButton edge="start" color="inherit" onClick={handleNegativeClick} aria-label="close">
           <ArrowBackIosRoundedIcon

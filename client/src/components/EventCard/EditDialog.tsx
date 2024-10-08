@@ -58,7 +58,8 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           },
           height: isChromeExt ? '100%' : '750px',
           mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 3.5,
+          borderRadius: isChromeExt ? 0 : 2.8,
+          boxShadow: 'none',
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
@@ -71,7 +72,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
       TransitionComponent={Transition}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 4, boxShadow: 'none' }}
+        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
       >
         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
           <ArrowBackIosRoundedIcon
@@ -154,7 +155,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Save
+            Save changes
           </Typography>
         </Button>
         <Button
