@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-export type StatusTypes = 'success' | 'error';
+export type StatusTypes = 'success' | 'error' | 'ignore';
 
 export interface ApiResponse<T> {
   status: StatusTypes;

@@ -1,12 +1,9 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import { Box, Divider, useTheme } from '@mui/material';
+import { Box, Divider } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import Dropdown, { DropdownOption } from '../../components/Dropdown';
 import { ROUTES } from '../../config/routes';
@@ -27,18 +24,6 @@ import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import { secrets } from '../../config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 
-const isChromeExt = secrets.appEnvironment === 'chrome';
-// const isChromeExt = true;
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="left" ref={ref} {...props} />;
-});
-
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
   paddingBottom: theme.spacing(1.5),
@@ -49,7 +34,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   textAlign: 'center',
 }));
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
   backgroundColor: '#f9f9f9',
   borderRadius: 30,
 }));
@@ -69,7 +54,7 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   },
 }));
 
-const SettingsButton = styled(Button)(({ theme }) => ({
+const SettingsButton = styled(Button)(({ theme: _ }) => ({
   boxShadow: 'none',
   '&:hover': {
     boxShadow: 'none',
@@ -359,7 +344,6 @@ const tabs = [
 ];
 
 export default function SettingsDialog({ open, handleClose, onSave }: SettingsDialogProps) {
-  const theme = useTheme();
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -376,33 +360,25 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
     }
   };
 
+  if (!open) {
+    return <></>;
+  }
+
   return (
-    <Dialog
-      fullWidth
-      fullScreen={isChromeExt}
-      hideBackdrop
-      PaperProps={{
-        sx: {
-          width: '100%',
-          [theme.breakpoints.up('sm')]: {
-            maxWidth: '412px',
-          },
-          [theme.breakpoints.down('sm')]: {
-            width: '450px',
-          },
-          height: isChromeExt ? '100%' : '750px',
-          mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 2.8,
-          boxShadow: 'none',
-          position: 'relative',
-          overflow: 'hidden',
-          backgroundColor: 'white',
-          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
-        },
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        height: '100%',
+        zIndex: 10,
+        width: '100%',
+        boxShadow: 'none',
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
       }}
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={Transition}
     >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
@@ -455,6 +431,6 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
       </Box>
 
       {tabs[tabIndex].component({ onSave: () => onSave() })}
-    </Dialog>
+    </Box>
   );
 }

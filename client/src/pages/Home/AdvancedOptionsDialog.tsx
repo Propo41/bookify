@@ -1,29 +1,12 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import { Box, Checkbox, Divider, useTheme } from '@mui/material';
+import { Box, Checkbox, Divider } from '@mui/material';
 import StyledTextField from '../../components/StyledTextField';
 import ChipInput from '../../components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { FormData } from '../../helpers/types';
-import { secrets } from '../../config/secrets';
-
-const isChromeExt = secrets.appEnvironment === 'chrome';
-// const isChromeExt = true;
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="left" ref={ref} {...props} />;
-});
 
 interface AdvancedOptionsDialogProps {
   handleInputChange: (id: string, value: string | number | string[] | boolean) => void;
@@ -33,36 +16,22 @@ interface AdvancedOptionsDialogProps {
 }
 
 export default function AdvancedOptionsDialog({ handleInputChange, open, handleClose, formData }: AdvancedOptionsDialogProps) {
-  const theme = useTheme();
+  if (!open) return <></>;
 
   return (
-    <Dialog
-      fullWidth
-      fullScreen={isChromeExt}
-      hideBackdrop
-      PaperProps={{
-        sx: {
-          width: '100%',
-          [theme.breakpoints.up('sm')]: {
-            maxWidth: '412px',
-          },
-          [theme.breakpoints.down('sm')]: {
-            width: '450px',
-          },
-          height: isChromeExt ? '100%' : '750px',
-          mx: isChromeExt ? 0 : 1.5,
-          borderRadius: isChromeExt ? 0 : 2.8,
-          justifyContent: 'center',
-          boxShadow: 'none',
-          position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'white',
-          // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
-        },
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        height: '100%',
+        zIndex: 10,
+        boxShadow: 'none',
+        overflow: 'hidden',
+        backgroundColor: 'white',
+        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
       }}
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={Transition}
     >
       <AppBar
         sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
@@ -133,11 +102,14 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
           <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
         </Box>
       </Box>
-      <Box flexGrow={1} />
       <Box
         sx={{
           mx: 2,
           mb: 3,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
         }}
       >
         <Button
@@ -159,6 +131,6 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
           </Typography>
         </Button>
       </Box>
-    </Dialog>
+    </Box>
   );
 }

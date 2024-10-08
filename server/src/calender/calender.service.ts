@@ -28,7 +28,7 @@ export class CalenderService {
     attendees?: string[],
     room?: string, //todo: this is a required field. change BookRoomDto
   ): Promise<ApiResponse<EventResponse>> {
-    const rooms = await this.authService.getCalenderResources(domain);
+    const rooms = await this.authService.getDirectoryResources(domain);
 
     const attendeeList = [];
     if (attendees?.length) {
@@ -63,7 +63,7 @@ export class CalenderService {
     }
 
     var event: calendar_v3.Schema$Event = {
-      summary: eventTitle?.trim() || 'Quick Meeting | Bookify',
+      summary: eventTitle?.trim() || 'Quick Meeting',
       location: pickedRoom.name,
       description: 'A quick meeting created by Bookify',
       start: {
@@ -102,7 +102,7 @@ export class CalenderService {
   }
 
   async getHighestSeatCapacity(domain: string) {
-    const rooms = await this.authService.getCalenderResources(domain);
+    const rooms = await this.authService.getDirectoryResources(domain);
     let max = -1;
     for (const room of rooms) {
       if (room.seats > max) {
@@ -123,7 +123,7 @@ export class CalenderService {
     floor?: string,
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
-    const rooms = await this.authService.getCalenderResources(domain);
+    const rooms = await this.authService.getDirectoryResources(domain);
 
     for (const room of rooms) {
       if (room.seats >= Number(minSeats) && (floor === undefined || room.floor === floor)) {
@@ -172,7 +172,7 @@ export class CalenderService {
   }
 
   async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
-    const rooms = await this.authService.getCalenderResources(domain);
+    const rooms = await this.authService.getDirectoryResources(domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
     const formattedEvents = events.map((event) => {
