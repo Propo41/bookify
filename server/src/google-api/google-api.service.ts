@@ -134,7 +134,7 @@ export class GoogleApiService implements IGoogleApiService {
       GoogleAPIErrorMapper.handleError(err);
     }
 
-    return roomsFreeBusy.data.calendars;
+    return roomsFreeBusy.data.calendars || {};
   }
 
   async getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event> {
