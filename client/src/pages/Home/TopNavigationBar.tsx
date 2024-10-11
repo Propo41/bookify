@@ -1,4 +1,4 @@
-import { Box, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -13,8 +13,16 @@ const TopBar = styled(Box)(({ theme }) => ({
 }));
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
-  backgroundColor: '#f9f9f9',
   borderRadius: 30,
+  '& .MuiToggleButtonGroup-grouped': {
+    border: 'none',
+    '&:not(:first-of-type)': {
+      borderRadius: 30,
+    },
+    '&:first-of-type': {
+      borderRadius: 30,
+    },
+  },
 }));
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
@@ -22,13 +30,17 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   border: 'none',
   textTransform: 'none',
   padding: '15px',
+  fontWeight: 600,
+  color: theme.palette.text.disabled,
+  '&:hover': {
+    backgroundColor: 'inherit',
+  },
   '&.Mui-selected': {
     border: 'none',
-    backgroundColor: theme.palette.grey[100],
+    boxShadow: 'inset 0px 2px 5px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#F2F2F2',
+    fontWeight: 600,
     color: theme.palette.text.primary,
-    '&:hover': {
-      backgroundColor: theme.palette.grey[100],
-    },
   },
 }));
 
@@ -48,10 +60,10 @@ const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) 
     <TopBar>
       <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleChange} aria-label="event tabs" fullWidth={true}>
         <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
-          <Typography variant="subtitle2">New Event</Typography>
+          New Event
         </StyledToggleButton>
         <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
-          <Typography variant="subtitle2">My Events</Typography>
+          My Events
         </StyledToggleButton>
       </StyledToggleButtonGroup>
     </TopBar>

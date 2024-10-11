@@ -26,7 +26,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
         right: 0,
         left: 0,
         height: '100%',
-        zIndex: 10,
+        zIndex: 100,
         boxShadow: 'none',
         overflow: 'hidden',
         backgroundColor: 'white',
@@ -65,7 +65,8 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
         mx={2}
         mt={2}
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          background: 'rgba(242, 242, 242, 0.5)',
+          backdropFilter: 'blur(100px)',
           borderBottomLeftRadius: 10,
           borderBottomRightRadius: 10,
           borderTopLeftRadius: 10,
@@ -93,7 +94,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
             display: 'flex',
             mx: 2,
             alignItems: 'center',
-            pb: 1,
+            pb: 2,
             my: 1,
             mt: 2,
           }}

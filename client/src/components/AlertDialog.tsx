@@ -49,7 +49,7 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
           textAlign: 'center',
           pb: 1,
           my: 1,
-          mt: 15,
+          mt: 10,
         }}
       >
         <Typography variant="h4" fontWeight={700}>

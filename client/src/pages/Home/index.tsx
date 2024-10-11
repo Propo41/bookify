@@ -36,8 +36,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   alignSelf: 'center',
   textAlign: 'center',
   width: '100%',
-  maxHeight: '750px',
-  height: '750px',
+  maxHeight: '550px',
   borderRadius: 20,
   boxShadow: '0 8px 20px 0 rgba(0,0,0,0.1)', // Adjusted for better visibility with transparent background
   background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)',

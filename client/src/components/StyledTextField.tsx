@@ -30,7 +30,7 @@ const StyledTextField = ({ id, sx, onChange, value }: StyledTextFieldProps) => {
         onChange={(e) => onChange(id, e.target.value)}
         variant="standard"
         value={value}
-        placeholder="Enter title"
+        placeholder="Add title"
         slotProps={{
           input: {
             disableUnderline: true,

@@ -208,7 +208,8 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     <Box mx={2} mt={2}>
       <Box
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          background: 'rgba(242, 242, 242, 0.5)',
+          backdropFilter: 'blur(100px)',
           borderRadius: 2,
         }}
       >
