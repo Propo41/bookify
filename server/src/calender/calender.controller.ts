@@ -4,7 +4,17 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@bookify/shared';
+import {
+  ApiResponse,
+  BookRoomDto,
+  UpdateEventDurationDto,
+  ListRoomsQueryDto,
+  GetAvailableRoomsQueryDto,
+  DeleteResponse,
+  EventResponse,
+  EventUpdateResponse,
+  IConferenceRoom,
+} from '@bookify/shared';
 import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()
@@ -17,10 +27,9 @@ export class CalenderController {
   async listRooms(
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
-    @Query('startTime') startTime: string,
-    @Query('endTime') endTime: string,
-    @Query('timeZone') timeZone: string,
+    @Query() listRoomsQueryDto: ListRoomsQueryDto,
   ): Promise<ApiResponse<EventResponse[]>> {
+    const { startTime, endTime, timeZone } = listRoomsQueryDto;
     return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
   }
 
@@ -30,12 +39,9 @@ export class CalenderController {
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
-    @Query('startTime') startTime: string,
-    @Query('duration') duration: number,
-    @Query('timeZone') timeZone: string,
-    @Query('seats') seats: number,
-    @Query('floor') floor: string,
+    @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
+    const { startTime, duration, timeZone, seats, floor } = getAvailableRoomsQueryDto;
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
@@ -74,10 +80,9 @@ export class CalenderController {
   @Put('/room/duration')
   async updateEventDuration(
     @_OAuth2Client() client: OAuth2Client,
-    @Body('eventId') eventId: string,
-    @Body('roomId') roomId?: string,
-    @Body('duration') duration?: number, // in mins
+    @Body() updateEventDurationDto: UpdateEventDurationDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
+    const { eventId, roomId, duration } = updateEventDurationDto;
     return await this.calenderService.updateEventDuration(client, eventId, roomId, duration);
   }
 
