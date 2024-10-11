@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Divider, IconButton, Typography } from '@mui/material';
+import { AppBar, Box, Button, IconButton, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';

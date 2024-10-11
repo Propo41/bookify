@@ -1,4 +1,4 @@
-import { Box, Button, styled, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
