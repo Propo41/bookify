@@ -2,7 +2,7 @@ import { AppBar, Box, Button, IconButton, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import { convertToRFC3339, createDropdownOptions, getTimeZoneString, renderError } from '../../helpers/utility';
+import { convertToLocaleTime, convertToRFC3339, createDropdownOptions, getTimeZoneString, populateTimeOptions, renderError } from '../../helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import { EditRoomFields } from './util';
 import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../../pages/Home/shared';
@@ -25,36 +25,29 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
 
 interface EditDialogProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
-  onChange: (id: string, value: string | number | string[] | boolean) => void;
-  data: EditRoomFields;
+  handleClose: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   onEditRoomClick: () => void;
   loading?: boolean;
+  currentRoom: IConferenceRoom;
 }
 
-export default function EditDialog({ open, setOpen, onChange, data, onEditRoomClick, loading }: EditDialogProps) {
+export default function EditDialog({ open, handleClose, formData, setFormData, currentRoom, onEditRoomClick, loading }: EditDialogProps) {
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
   const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
   const [roomLoading, setRoomLoading] = useState(false);
   const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
+
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const [firstRender, setFirstRender] = useState(false);
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<FormData>({
-    startTime: '',
-    duration: 30,
-    seats: 1,
-  });
-
   useEffect(() => {
-    setPreferences();
-    setFirstRender(true);
-
     // abort pending requests on component unmount
     return () => {
       if (abortControllerRef.current) {
@@ -64,22 +57,15 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
   }, []);
 
   useEffect(() => {
+    console.log('formData', formData);
     if (open) {
-      setDurationOptions(createDropdownOptions(availableDurations, 'time'));
+      setPreferences();
     }
   }, [open]);
 
   useEffect(() => {
-    if (firstRender) {
-      console.log('changed');
-
-      setAvailableRooms();
-    }
-  }, [firstRender, formData.startTime, formData.duration, formData.seats]);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+    setAvailableRooms();
+  }, [formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
@@ -117,42 +103,31 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
     }
 
     const data = res.data as IConferenceRoom[];
-    let roomEmail: string | undefined;
     let roomOptions: RoomsDropdownOption[] = [];
 
     if (data.length > 0) {
-      roomEmail = data[0].email;
       roomOptions = createRoomDropdownOptions(data);
     }
 
-    setFormData({
-      ...formData,
-      room: roomEmail,
-    });
-
     setAvailableRoomOptions(roomOptions);
+    setFormData((prev) => {
+      return {
+        ...prev,
+        room: roomOptions[0].value,
+      };
+    });
   }
 
   async function setPreferences() {
-    setTimeOptions(createDropdownOptions(availableStartTimeOptions));
+    const date = new Date(Date.now()).toISOString().split('T')[0];
+    console.log(' formData.startTime', formData.startTime);
+
+    const formattedStartTime = convertToRFC3339(date, formData.startTime);
+    const timeOptions = populateTimeOptions(formattedStartTime);
+
+    setTimeOptions(createDropdownOptions(timeOptions));
     setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
-
-    const initializeFormData = async () => {
-      const duration = await cacheService.get('duration');
-      const seats = await cacheService.get('seats');
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        startTime: availableStartTimeOptions[0],
-        seats: Number(seats || availableRoomCapacities[0]),
-        duration: parseInt(duration || availableDurations[0]),
-      }));
-    };
-
-    initializeFormData().then(() => {
-      setFirstRender(true);
-    });
   }
 
   const handleAdvancedOptionsDialogOpen = () => {
@@ -276,6 +251,7 @@ export default function EditDialog({ open, setOpen, onChange, data, onEditRoomCl
           options={availableRoomOptions}
           value={formData.room || ''}
           loading={roomLoading}
+          currentRoom={createRoomDropdownOptions([currentRoom])[0]}
           disabled={!availableRoomOptions.length}
           onChange={handleInputChange}
           placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}

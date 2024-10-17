@@ -200,6 +200,23 @@ export default class Api {
     }
   }
 
+  async updateRoom(eventId: string, payload: BookRoomDto) {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.put(
+        '/room',
+        { eventId, ...payload },
+        {
+          headers,
+        },
+      );
+
+      return res.data as ApiResponse<EventResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
   async updateRoomDuration(eventId: string, roomId: string, duration: number) {
     try {
       const data = { eventId, roomId, duration };
