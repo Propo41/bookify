@@ -58,7 +58,7 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventResponse>> {
-    const { startTime, duration, seats, timeZone, createConference, title, floor, attendees, room } = bookRoomDto;
+    const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
 
     // end time
     const startDate = new Date(startTime);
@@ -71,14 +71,21 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
-  @Put('/room/duration')
-  async updateEventDuration(
+  @Put('/room')
+  async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
+    @_User('domain') domain: string,
     @Body('eventId') eventId: string,
-    @Body('roomId') roomId?: string,
-    @Body('duration') duration?: number, // in mins
+    @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
-    return await this.calenderService.updateEventDuration(client, eventId, roomId, duration);
+    const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
+
+    // end time
+    const startDate = new Date(startTime);
+    startDate.setMinutes(startDate.getMinutes() + duration);
+    const endTime = startDate.toISOString();
+
+    return await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
   }
 
   @UseGuards(AuthGuard)

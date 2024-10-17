@@ -4,17 +4,17 @@ import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { EventResponse } from '@bookify/shared';
+import { BookRoomDto, EventResponse } from '@bookify/shared';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditDialog from './EditDialog';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { EditRoomFields } from './util';
 import { ROUTES } from '../../config/routes';
 import Api from '../../api/api';
-import { convertToLocaleTime } from '../../helpers/utility';
+import { convertToLocaleTime, convertToRFC3339, getTimeZoneString } from '../../helpers/utility';
+import { FormData } from '../../helpers/types';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -56,14 +56,27 @@ interface ChipData {
   type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
 }
 
+const calcDuration = (start: string, end: string) => {
+  const _start = new Date(start);
+  const _end = new Date(end);
+
+  const duration = (_end.getTime() - _start.getTime()) / (1000 * 60);
+  return duration;
+};
+
 const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<EditRoomFields>({
-    duration: 30,
+  const api = new Api();
+
+  const [formData, setFormData] = useState<FormData>({
+    startTime: convertToLocaleTime(event!.start!),
+    duration: calcDuration(event!.start!, event!.end!),
+    seats: event!.seats!,
+    room: event!.room,
   });
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -71,6 +84,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
   useEffect(() => {
     if (event) {
+      console.log(event);
       const startInMs = new Date(event.start!).getTime();
       const endInMs = new Date(event.end!).getTime();
       const currentTimeInMs = Date.now();
@@ -80,14 +94,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
       } else {
         setIsOngoingEvent(false);
       }
-
-      const duration = (endInMs - startInMs) / (1000 * 60);
-      setFormData((prev) => {
-        return {
-          ...prev,
-          duration,
-        };
-      });
 
       const _chips: ChipData[] = createChips(event);
 
@@ -115,7 +121,30 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
     setEditLoading(true);
 
-    const res = await new Api().updateRoomDuration(event.eventId, event.roomEmail, formData.duration);
+    const { startTime, duration, seats, conference, attendees, title, room } = formData;
+
+    if (!room) {
+      return;
+    }
+
+    const date = new Date(Date.now()).toISOString().split('T')[0];
+    const formattedStartTime = convertToRFC3339(date, startTime);
+
+    const payload: BookRoomDto = {
+      startTime: formattedStartTime,
+      duration: duration,
+      timeZone: getTimeZoneString(),
+      seats: seats,
+      createConference: conference,
+      title,
+      room: room,
+      attendees,
+    };
+
+    const res = await new Api().updateRoom(event.eventId, payload);
+    const { data, status } = res;
+
+    console.log(res);
 
     setEditLoading(false);
 
@@ -138,18 +167,20 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
     }
   };
 
-  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
-
-    console.log(formData);
-  };
-
   const handleEditClick = () => {
     setEditDialogOpen(true);
     setAnchorEl(null);
+  };
+
+  const handleDialogClose = () => {
+    setEditDialogOpen(false);
+
+    setFormData({
+      startTime: convertToLocaleTime(event!.start!),
+      duration: calcDuration(event!.start!, event!.end!),
+      seats: event!.seats!,
+      room: event!.room,
+    });
   };
 
   const handleDeleteClick = () => {
@@ -254,14 +285,22 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
         })}
       </Box>
 
-      <EditDialog
-        open={editDialogOpen}
-        setOpen={setEditDialogOpen}
-        onChange={handleInputChange}
-        data={formData}
-        loading={editLoading}
-        onEditRoomClick={onEditRoomClick}
-      />
+      {editDialogOpen && (
+        <EditDialog
+          open={editDialogOpen}
+          handleClose={handleDialogClose}
+          formData={formData}
+          setFormData={setFormData}
+          loading={editLoading}
+          currentRoom={{
+            email: event?.roomEmail,
+            name: event?.room,
+            seats: event?.seats,
+            floor: event?.floor,
+          }}
+          onEditRoomClick={onEditRoomClick}
+        />
+      )}
     </Box>
   );
 };

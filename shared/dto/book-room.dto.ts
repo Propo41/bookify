@@ -11,7 +11,7 @@ export class BookRoomDto {
   seats: number;
 
   @IsString()
-  timeZone: string;
+  timeZone: string; // todo: mark it optional
 
   @IsString()
   room: string;

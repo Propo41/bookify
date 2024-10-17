@@ -31,8 +31,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   textAlign: 'center',
   width: '100%',
   gap: theme.spacing(2),
-  maxHeight: '750px',
-  height: '750px',
+  maxHeight: '550px',
   borderRadius: 20,
   boxShadow: '0 8px 20px 0 rgba(0,0,0,0.1)', // Adjusted for better visibility with transparent background
   background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)',
@@ -151,15 +150,6 @@ const Login = () => {
             Sign in
           </Button>
         </Box>
-        {/* login bottom asset */}
-        {!isChromeExt && (
-          <>
-            <Box sx={{ flexGrow: 1 }} />
-            <Box>
-              <Box component="img" alt="The house from the offer." src="./branding_asset.png" />
-            </Box>
-          </>
-        )}
       </Box>
     </>
   );

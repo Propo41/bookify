@@ -75,8 +75,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
   useEffect(() => {
     if (firstRender) {
-      console.log('changed');
-
       setAvailableRooms();
     }
   }, [firstRender, formData.startTime, formData.duration, formData.seats]);
@@ -116,7 +114,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
     const floor = (await cacheService.get('floor')) || undefined;
 
     setRoomLoading(true);

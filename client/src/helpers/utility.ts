@@ -4,10 +4,15 @@ import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import { CacheService, CacheServiceFactory } from './cache';
 
-export function populateTimeOptions() {
+/**
+ * @param start time in utc format
+ */
+export function populateTimeOptions(start?: string) {
   const timeOptions = [];
 
-  const now = new Date();
+  console.log(start);
+
+  const now = start ? new Date(start) : new Date();
   let currentHours = now.getHours();
   let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
 
@@ -107,7 +112,7 @@ export function convertToLocaleTime(dateStr?: string) {
   const date = new Date(dateStr);
 
   const options: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
     hour12: true,
   };

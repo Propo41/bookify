@@ -34,9 +34,17 @@ const TopBar = styled(Box)(({ theme }) => ({
   textAlign: 'center',
 }));
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
-  backgroundColor: '#f9f9f9',
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   borderRadius: 30,
+  '& .MuiToggleButtonGroup-grouped': {
+    border: 'none',
+    '&:not(:first-of-type)': {
+      borderRadius: 30,
+    },
+    '&:first-of-type': {
+      borderRadius: 30,
+    },
+  },
 }));
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
@@ -44,13 +52,17 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   border: 'none',
   textTransform: 'none',
   padding: '15px',
+  fontWeight: 600,
+  color: theme.palette.text.disabled,
+  '&:hover': {
+    backgroundColor: 'inherit',
+  },
   '&.Mui-selected': {
     border: 'none',
-    backgroundColor: theme.palette.grey[100],
+    boxShadow: 'inset 0px 2px 5px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#F2F2F2',
+    fontWeight: 600,
     color: theme.palette.text.primary,
-    '&:hover': {
-      backgroundColor: theme.palette.grey[100],
-    },
   },
 }));
 
@@ -297,7 +309,6 @@ const SupportView = () => {
           bgcolor: 'white',
           borderRadius: 10,
           textAlign: 'left',
-          pt: 2,
         }}
       >
         <SettingsButton
@@ -381,7 +392,17 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
       }}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
+        sx={{
+          bgcolor: 'transparent',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'row',
+          pt: 2,
+          pb: 1,
+          alignItems: 'center',
+          px: 3,
+          boxShadow: 'none',
+        }}
       >
         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
           <ArrowBackIosRoundedIcon
@@ -415,10 +436,10 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
           <TopBar>
             <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
               <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
-                <Typography variant="subtitle2">Preferences</Typography>
+                Preferences
               </StyledToggleButton>
               <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
-                <Typography variant="subtitle2">Support</Typography>
+                Support
               </StyledToggleButton>
             </StyledToggleButtonGroup>
           </TopBar>
