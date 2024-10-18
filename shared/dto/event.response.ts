@@ -9,5 +9,6 @@ export interface EventResponse {
   roomEmail?: string;
   roomId?: string;
   seats?: number;
+  attendees?: string[];
   createdAt?: number;
 }

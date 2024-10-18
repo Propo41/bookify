@@ -43,10 +43,12 @@ export const createChips = (event: EventResponse) => {
 
 interface EventCardProps {
   sx?: SxProps<Theme>;
-  event?: EventResponse;
+  event: EventResponse;
   onDelete: (id?: string) => void;
   disabled?: boolean;
   onEdit: (id: string, data: any) => void;
+  editDialogOpen: boolean;
+  setEditDialogOpen: (val: boolean) => void;
 }
 
 interface ChipData {
@@ -64,51 +66,52 @@ const calcDuration = (start: string, end: string) => {
   return duration;
 };
 
-const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) => {
+const initFormData = (event: EventResponse) => {
+  return {
+    startTime: convertToLocaleTime(event.start!),
+    duration: calcDuration(event.start!, event.end!),
+    seats: event.seats!,
+    room: event.roomEmail,
+    attendees: event.attendees,
+    title: event.summary,
+    conference: Boolean(event.meet),
+  } as FormData;
+};
+
+const EventCard = ({ sx, event, onDelete, setEditDialogOpen, editDialogOpen, disabled, onEdit }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
-  const api = new Api();
-
-  const [formData, setFormData] = useState<FormData>({
-    startTime: convertToLocaleTime(event!.start!),
-    duration: calcDuration(event!.start!, event!.end!),
-    seats: event!.seats!,
-    room: event!.room,
-  });
-
+  const [formData, setFormData] = useState<FormData>(initFormData(event));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [currentRoom, setCurrentRoom] = useState({});
 
   useEffect(() => {
-    if (event) {
-      console.log(event);
-      const startInMs = new Date(event.start!).getTime();
-      const endInMs = new Date(event.end!).getTime();
-      const currentTimeInMs = Date.now();
+    console.log('event', event);
+    const startInMs = new Date(event.start!).getTime();
+    const endInMs = new Date(event.end!).getTime();
+    const currentTimeInMs = Date.now();
 
-      if (currentTimeInMs >= startInMs && currentTimeInMs <= endInMs) {
-        setIsOngoingEvent(true);
-      } else {
-        setIsOngoingEvent(false);
-      }
-
-      const _chips: ChipData[] = createChips(event);
-
-      if (event.meet) {
-        _chips.push({
-          label: event.meet,
-          type: 'conference',
-          icon: <InsertLinkRoundedIcon />,
-          color: '#99D2FF',
-        });
-      }
-
-      setChips(_chips);
+    if (currentTimeInMs >= startInMs && currentTimeInMs <= endInMs) {
+      setIsOngoingEvent(true);
+    } else {
+      setIsOngoingEvent(false);
     }
-  }, [event]);
+
+    const _chips: ChipData[] = createChips(event);
+
+    if (event.meet) {
+      _chips.push({
+        label: event.meet,
+        type: 'conference',
+        icon: <InsertLinkRoundedIcon />,
+      });
+    }
+
+    setChips(_chips);
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -142,8 +145,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
     };
 
     const res = await new Api().updateRoom(event.eventId, payload);
-    const { data, status } = res;
-
     console.log(res);
 
     setEditLoading(false);
@@ -162,31 +163,44 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
 
     if (event.eventId) {
       onEdit(event.eventId, res?.data);
-
       setEditDialogOpen(false);
     }
   };
 
   const handleEditClick = () => {
+    // setCurrentRoom();
     setEditDialogOpen(true);
     setAnchorEl(null);
   };
 
   const handleDialogClose = () => {
     setEditDialogOpen(false);
-
-    setFormData({
-      startTime: convertToLocaleTime(event!.start!),
-      duration: calcDuration(event!.start!, event!.end!),
-      seats: event!.seats!,
-      room: event!.room,
-    });
+    setFormData(initFormData(event));
   };
 
   const handleDeleteClick = () => {
     onDelete(event!.eventId);
     setAnchorEl(null);
   };
+
+  if (editDialogOpen) {
+    return (
+      <EditDialog
+        open={editDialogOpen}
+        handleClose={handleDialogClose}
+        formData={formData}
+        setFormData={setFormData}
+        loading={editLoading}
+        currentRoom={{
+          email: event.roomEmail,
+          name: event.room,
+          seats: event.seats,
+          floor: event.floor,
+        }}
+        onEditRoomClick={onEditRoomClick}
+      />
+    );
+  }
 
   return (
     <Box
@@ -284,23 +298,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
           );
         })}
       </Box>
-
-      {editDialogOpen && (
-        <EditDialog
-          open={editDialogOpen}
-          handleClose={handleDialogClose}
-          formData={formData}
-          setFormData={setFormData}
-          loading={editLoading}
-          currentRoom={{
-            email: event?.roomEmail,
-            name: event?.room,
-            seats: event?.seats,
-            floor: event?.floor,
-          }}
-          onEditRoomClick={onEditRoomClick}
-        />
-      )}
     </Box>
   );
 };

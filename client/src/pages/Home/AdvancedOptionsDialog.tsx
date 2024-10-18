@@ -18,6 +18,8 @@ interface AdvancedOptionsDialogProps {
 export default function AdvancedOptionsDialog({ handleInputChange, open, handleClose, formData }: AdvancedOptionsDialogProps) {
   if (!open) return <></>;
 
+  console.log(formData);
+
   return (
     <Box
       sx={{
@@ -34,7 +36,16 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
       }}
     >
       <AppBar
-        sx={{ bgcolor: 'transparent', position: 'relative', display: 'flex', flexDirection: 'row', py: 2, alignItems: 'center', px: 3, boxShadow: 'none' }}
+        sx={{
+          bgcolor: 'transparent',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'row',
+          py: 2,
+          alignItems: 'center',
+          px: 3,
+          boxShadow: 'none',
+        }}
       >
         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
           <ArrowBackIosRoundedIcon
@@ -100,7 +111,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
           }}
         >
           <Typography variant="subtitle1">Create meet link: </Typography>
-          <Checkbox onChange={(e) => handleInputChange('conference', e.target.checked)} />
+          <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
         </Box>
       </Box>
       <Box

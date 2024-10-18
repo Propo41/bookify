@@ -9,9 +9,6 @@ import { CacheService, CacheServiceFactory } from './cache';
  */
 export function populateTimeOptions(start?: string) {
   const timeOptions = [];
-
-  console.log(start);
-
   const now = start ? new Date(start) : new Date();
   let currentHours = now.getHours();
   let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;

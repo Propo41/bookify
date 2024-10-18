@@ -42,7 +42,6 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
   const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
-  const [firstRender, setFirstRender] = useState(false);
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
@@ -57,17 +56,21 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
   }, []);
 
   useEffect(() => {
-    console.log('formData', formData);
-    if (open) {
-      setPreferences();
-    }
-  }, [open]);
+    console.log('currentRoom', currentRoom);
+    setPreferences();
+  }, []);
 
   useEffect(() => {
     setAvailableRooms();
   }, [formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+    // let seats: Partial<FormData>;
+    // if (value === currentRoom.email) {
+    //   seats = {
+    //     seats: currentRoom.seats,
+    //   };
+    // }
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -76,7 +79,6 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
-    console.log('room fetch');
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
@@ -105,22 +107,20 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
     const data = res.data as IConferenceRoom[];
     let roomOptions: RoomsDropdownOption[] = [];
 
+    console.log(data);
+
     if (data.length > 0) {
-      roomOptions = createRoomDropdownOptions(data);
+      const filteredRooms = data.filter((item) => item.email !== currentRoom.email);
+      roomOptions = createRoomDropdownOptions(filteredRooms);
+      const currentRoomOption = createRoomDropdownOptions([currentRoom])[0];
+      roomOptions.unshift(currentRoomOption);
     }
 
     setAvailableRoomOptions(roomOptions);
-    setFormData((prev) => {
-      return {
-        ...prev,
-        room: roomOptions[0].value,
-      };
-    });
   }
 
   async function setPreferences() {
     const date = new Date(Date.now()).toISOString().split('T')[0];
-    console.log(' formData.startTime', formData.startTime);
 
     const formattedStartTime = convertToRFC3339(date, formData.startTime);
     const timeOptions = populateTimeOptions(formattedStartTime);
@@ -140,6 +140,12 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
 
   if (!open) return <></>;
 
+  if (advOptionsOpen) {
+    return (
+      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -148,7 +154,7 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
         left: 0,
         right: 0,
         height: '100%',
-        zIndex: 10,
+        zIndex: 1,
         boxShadow: 'none',
         overflow: 'hidden',
         backgroundColor: 'white',
@@ -251,7 +257,7 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
           options={availableRoomOptions}
           value={formData.room || ''}
           loading={roomLoading}
-          currentRoom={createRoomDropdownOptions([currentRoom])[0]}
+          currentRoom={currentRoom}
           disabled={!availableRoomOptions.length}
           onChange={handleInputChange}
           placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
@@ -356,9 +362,6 @@ export default function EditDialog({ open, handleClose, formData, setFormData, c
           </Typography>
         </Button>
       </Box>
-      {advOptionsOpen && (
-        <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
-      )}
     </Box>
   );
 }
