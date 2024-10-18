@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { TextField, Chip, Box } from '@mui/material';
+import { validateEmail } from '../helpers/utility';
+import { toast } from 'react-hot-toast';
 
 interface ChipInputProps {
   id: string;
@@ -14,12 +16,16 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
   const [chips, setChips] = useState<any[]>(value || []);
 
   const handleKeyDown = (event: any) => {
-    if (event.key === ' ' && inputValue.trim() !== '') {
-      const newChips = [...chips, inputValue.trim()];
-      setChips(newChips);
-      setInputValue('');
+    if ((event.key === 'Enter' || event.key === ' ') && inputValue.trim() !== '') {
+      if (validateEmail(inputValue.trim())) {
+        const newChips = [...chips, inputValue.trim()];
+        setChips(newChips);
+        setInputValue('');
 
-      onChange(id, newChips);
+        onChange(id, newChips);
+      } else {
+        toast.error('Invalid email address');
+      }
     }
   };
 
