@@ -1,6 +1,7 @@
 import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { IConferenceRoom } from '@bookify/shared';
 
 interface DropdownProps {
   id: string;
@@ -12,7 +13,7 @@ interface DropdownProps {
   icon?: ReactElement;
   placeholder?: string;
   loading?: boolean;
-  currentRoom?: RoomsDropdownOption;
+  currentRoom?: IConferenceRoom;
 }
 
 export interface RoomsDropdownOption {
@@ -22,63 +23,12 @@ export interface RoomsDropdownOption {
   floor: string;
 }
 
-const SelectMenuItem = ({ option, selected }: { option: RoomsDropdownOption; selected?: boolean }) => {
-  console.log(selected);
-
-  return (
-    <MenuItem value={option.value} key={option.value}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-        }}
-      >
-        {/* Left section */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Typography variant="subtitle1">{option.text}</Typography>
-          {selected && <CheckCircleIcon color="success" sx={{ ml: 1 }} />}
-        </Box>
-
-        {/* Right section */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[200],
-              }),
-            ]}
-          >
-            {option.seats} {option.seats > 1 ? 'persons' : 'person'}
-          </Typography>
-          <Typography variant="body2">{option.floor}</Typography>
-        </Box>
-      </Box>
-    </MenuItem>
-  );
-};
-
 export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, options, onChange, icon, placeholder, loading }: DropdownProps) {
   const height = '58px';
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
   };
-
-  console.log('currentRoom', currentRoom);
 
   return (
     <Select
@@ -207,9 +157,50 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
           <em>{placeholder}</em>
         </MenuItem>
       )}
+      {options?.map((option, i) => (
+        <MenuItem value={option.value} key={i}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
+          >
+            {/* Left section */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography variant="subtitle1">{option.text}</Typography>
+              {currentRoom && option.value === currentRoom.email && <CheckCircleIcon color="success" sx={{ ml: 1 }} />}
+            </Box>
 
-      {currentRoom && <SelectMenuItem option={currentRoom} selected={true} />}
-      {options?.map((option) => <SelectMenuItem key={option.value} option={option} />)}
+            {/* Right section */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[200],
+                  }),
+                ]}
+              >
+                {option.seats} {option.seats > 1 ? 'persons' : 'person'}
+              </Typography>
+              <Typography variant="body2">{option.floor}</Typography>
+            </Box>
+          </Box>
+        </MenuItem>
+      ))}
     </Select>
   );
 }

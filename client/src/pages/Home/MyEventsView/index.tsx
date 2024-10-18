@@ -14,6 +14,7 @@ export default function MyEventsView() {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const api = new Api();
 
@@ -74,7 +75,9 @@ export default function MyEventsView() {
   const onEdit = (id: string, data: any) => {
     if (data) {
       const { start, end } = data;
-      setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === id ? { ...event, start, end } : event)));
+      console.log('onedit', data);
+
+      setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === id ? { ...event, ...data, meet: data.meet } : event)));
       toast.success('Room has been updated');
     } else {
       //todo: add proper message from backend
@@ -82,7 +85,7 @@ export default function MyEventsView() {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
       <Box mx={3}>
         <Stack spacing={2} mt={3}>
@@ -91,9 +94,19 @@ export default function MyEventsView() {
         </Stack>
       </Box>
     );
+  }
+
+  if (dialogOpen) {
+    return <AlertDialog open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />;
+  }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        height: editDialogOpen ? '200px' : 'auto',
+        overflow: 'hidden',
+      }}
+    >
       {events.length === 0 ? (
         <Typography mt={3} variant="h6">
           No events to show
@@ -114,15 +127,20 @@ export default function MyEventsView() {
         >
           {events.map((event, i) => (
             <React.Fragment key={i}>
-              <EventCard key={i} event={event} onEdit={onEdit} disabled={loading} onDelete={() => event.eventId && handleDeleteClick(event.eventId)} />
+              <EventCard
+                key={i}
+                event={event}
+                editDialogOpen={editDialogOpen}
+                setEditDialogOpen={setEditDialogOpen}
+                onEdit={onEdit}
+                disabled={loading}
+                onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
+              />
               {i !== events.length - 1 && <Divider />}
             </React.Fragment>
           ))}
         </Box>
       )}
-
-      {/* Confirmation Dialog */}
-      <AlertDialog open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />
     </Box>
   );
 }

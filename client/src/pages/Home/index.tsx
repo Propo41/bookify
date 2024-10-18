@@ -152,19 +152,23 @@ export default function Home() {
       </Box>
 
       {loading ? <LinearProgress /> : tabs[tabIndex].component({ refresh, setRefresh: (val: boolean) => setRefresh(val) })}
-      <SettingsDialog open={settingsDialogOpen} handleClose={handleSettingsClose} onSave={() => setRefresh(true)} />
     </Box>
   );
 
+  let innerComponent = common;
   // web view
   if (!isChromeExt) {
+    if (settingsDialogOpen) {
+      innerComponent = <SettingsDialog open={settingsDialogOpen} handleClose={handleSettingsClose} onSave={() => setRefresh(true)} />;
+    }
+
     return (
       <RootContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">{common}</Card>
+        <Card variant="outlined">{innerComponent}</Card>
       </RootContainer>
     );
   }
 
   // chrome view
-  return <Container>{common}</Container>;
+  return <Container>{innerComponent}</Container>;
 }

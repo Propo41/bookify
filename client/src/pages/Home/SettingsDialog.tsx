@@ -51,6 +51,7 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   borderRadius: 30,
   border: 'none',
   textTransform: 'none',
+  width: '140px',
   padding: '15px',
   fontWeight: 600,
   color: theme.palette.text.disabled,
@@ -391,50 +392,21 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
         // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
       }}
     >
-      <AppBar
-        sx={{
-          bgcolor: 'transparent',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'row',
-          pt: 2,
-          pb: 1,
-          alignItems: 'center',
-          px: 3,
-          boxShadow: 'none',
-        }}
-      >
-        <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
-          <ArrowBackIosRoundedIcon
-            fontSize="small"
-            sx={[
-              (theme) => ({
-                color: theme.palette.common.black,
-              }),
-            ]}
-          />
-        </IconButton>
-        <Typography
-          sx={[
-            (theme) => ({
-              textAlign: 'center',
-              flex: 1,
-              color: theme.palette.common.black,
-              fontWeight: 700,
-            }),
-          ]}
-          variant="h5"
-          component={'div'}
-        >
-          Settings
-        </Typography>
-      </AppBar>
-
       {/* inner nav bar */}
-      <Box display={'flex'} alignItems={'center'} mx={2}>
+      <Box display={'flex'} alignItems={'center'} mx={3}>
         <Box sx={{ width: '100%' }}>
           <TopBar>
-            <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
+            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+              <ArrowBackIosRoundedIcon
+                fontSize="small"
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.common.black,
+                  }),
+                ]}
+              />
+            </IconButton>
+            <StyledToggleButtonGroup sx={{ ml: 2 }} value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
               <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
                 Preferences
               </StyledToggleButton>

@@ -178,6 +178,13 @@ export class CalenderService {
     const formattedEvents = events.map((event) => {
       const room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
+      let attendees: string[] = [];
+      for (const attendee of event.attendees) {
+        if (attendee.email !== room.email) {
+          attendees.push(attendee.email);
+        }
+      }
+
       const _event: EventResponse = {
         meet: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
         room: room.name,
@@ -187,6 +194,7 @@ export class CalenderService {
         floor: room.floor,
         summary: event.summary,
         start: event.start.dateTime,
+        attendees: attendees,
         end: event.end.dateTime,
         createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
       };
@@ -286,26 +294,28 @@ export class CalenderService {
       const newStartTime = new Date(startTime).getTime();
       const newEndTime = new Date(endTime).getTime();
 
+      const { timeZone } = event.start;
+
       if (newStartTime < currentStartTime) {
-        const isAvailable = await this.isRoomAvailable(client, startTime, event.start.dateTime, room, event.start.timeZone);
+        const isAvailable = await this.isRoomAvailable(client, startTime, event.start.dateTime, room, timeZone);
         if (!isAvailable) {
           throw new ConflictException('Room is not available within the set duration');
         }
       }
 
       if (newEndTime > currentEndTime) {
-        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, endTime, room, event.start.timeZone);
+        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, endTime, room, timeZone);
         if (!isAvailable) {
           throw new ConflictException('Room is not available within the set duration');
         }
       }
 
-      if (!(newStartTime >= currentStartTime && newEndTime <= currentEndTime)) {
-        const isAvailable = await this.isRoomAvailable(client, startTime, endTime, room, event.start.timeZone);
-        if (!isAvailable) {
-          throw new ConflictException('Room is not available within the set duration');
-        }
-      }
+      // if (!(newStartTime >= currentStartTime && newEndTime <= currentEndTime)) {
+      //   const isAvailable = await this.isRoomAvailable(client, startTime, endTime, room, timeZone);
+      //   if (!isAvailable) {
+      //     throw new ConflictException('Room is not available within the set duration');
+      //   }
+      // }
     }
 
     const attendeeList = [];
@@ -330,6 +340,10 @@ export class CalenderService {
             },
           },
         },
+      };
+    } else {
+      conference = {
+        conferenceData: null,
       };
     }
 
@@ -361,7 +375,7 @@ export class CalenderService {
     const data: EventResponse = {
       eventId: updatedEvent.id,
       summary: updatedEvent.summary,
-      meet: updatedEvent.hangoutLink,
+      meet: result.hangoutLink ? result.hangoutLink.split('/').pop() : undefined,
       start: updatedEvent.start.dateTime,
       end: updatedEvent.end.dateTime,
       room: pickedRoom.name,
