@@ -45,10 +45,8 @@ interface EventCardProps {
   sx?: SxProps<Theme>;
   event: EventResponse;
   onDelete: (id?: string) => void;
+  handleEditClick: (id: string) => void;
   disabled?: boolean;
-  onEdit: (id: string, data: any) => void;
-  editDialogOpen: boolean;
-  setEditDialogOpen: (val: boolean) => void;
 }
 
 interface ChipData {
@@ -58,32 +56,11 @@ interface ChipData {
   type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
 }
 
-const calcDuration = (start: string, end: string) => {
-  const _start = new Date(start);
-  const _end = new Date(end);
-
-  const duration = (_end.getTime() - _start.getTime()) / (1000 * 60);
-  return duration;
-};
-
-const initFormData = (event: EventResponse) => {
-  return {
-    startTime: convertToLocaleTime(event.start!),
-    duration: calcDuration(event.start!, event.end!),
-    seats: event.seats!,
-    room: event.roomEmail,
-    attendees: event.attendees,
-    title: event.summary,
-    conference: Boolean(event.meet),
-  } as FormData;
-};
-
-const EventCard = ({ sx, event, onDelete, setEditDialogOpen, editDialogOpen, disabled, onEdit }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>(initFormData(event));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [currentRoom, setCurrentRoom] = useState({});
@@ -111,96 +88,21 @@ const EventCard = ({ sx, event, onDelete, setEditDialogOpen, editDialogOpen, dis
     }
 
     setChips(_chips);
-  }, []);
+  }, [event]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const onEditRoomClick = async () => {
-    if (!event?.eventId || !event?.roomEmail) return;
-
-    console.log('edit room:', formData);
-
-    setEditLoading(true);
-
-    const { startTime, duration, seats, conference, attendees, title, room } = formData;
-
-    if (!room) {
-      return;
-    }
-
-    const date = new Date(Date.now()).toISOString().split('T')[0];
-    const formattedStartTime = convertToRFC3339(date, startTime);
-
-    const payload: BookRoomDto = {
-      startTime: formattedStartTime,
-      duration: duration,
-      timeZone: getTimeZoneString(),
-      seats: seats,
-      createConference: conference,
-      title,
-      room: room,
-      attendees,
-    };
-
-    const res = await new Api().updateRoom(event.eventId, payload);
-    console.log(res);
-
-    setEditLoading(false);
-
-    if (res?.redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
-      setTimeout(() => {
-        navigate(ROUTES.signIn);
-      }, 1000);
-    }
-
-    if (res?.status === 'error') {
-      res.message && toast.error(res.message);
-      return;
-    }
-
-    if (event.eventId) {
-      onEdit(event.eventId, res?.data);
-      setEditDialogOpen(false);
-    }
-  };
-
-  const handleEditClick = () => {
-    // setCurrentRoom();
-    setEditDialogOpen(true);
+  const onEditClick = () => {
+    handleEditClick(event.eventId!);
     setAnchorEl(null);
-  };
-
-  const handleDialogClose = () => {
-    setEditDialogOpen(false);
-    setFormData(initFormData(event));
   };
 
   const handleDeleteClick = () => {
     onDelete(event!.eventId);
     setAnchorEl(null);
   };
-
-  if (editDialogOpen) {
-    return (
-      <EditDialog
-        open={editDialogOpen}
-        handleClose={handleDialogClose}
-        formData={formData}
-        setFormData={setFormData}
-        loading={editLoading}
-        currentRoom={{
-          email: event.roomEmail,
-          name: event.room,
-          seats: event.seats,
-          floor: event.floor,
-        }}
-        onEditRoomClick={onEditRoomClick}
-      />
-    );
-  }
 
   return (
     <Box
@@ -260,7 +162,7 @@ const EventCard = ({ sx, event, onDelete, setEditDialogOpen, editDialogOpen, dis
             },
           }}
         >
-          <MenuItem onClick={handleEditClick}>Edit</MenuItem>
+          <MenuItem onClick={onEditClick}>Edit</MenuItem>
           <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
         </Menu>
       </Box>
