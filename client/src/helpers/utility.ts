@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import { CacheService, CacheServiceFactory } from './cache';
+import { secrets } from '../config/secrets';
 
 /**
  * @param start time in utc format
@@ -159,3 +160,13 @@ export const validateEmail = (email: string) => {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 };
+
+export const chromeBackground = {
+  backgroundImage: 'url(/background.png)', // Reference your image from the public folder
+  backgroundSize: 'cover', // Ensures the image covers the entire card
+  backgroundPosition: 'center', // Centers the image
+  backgroundRepeat: 'no-repeat', // Prevents the image from repeating
+};
+
+// export const isChromeExt = secrets.appEnvironment === 'chrome';
+export const isChromeExt = true;

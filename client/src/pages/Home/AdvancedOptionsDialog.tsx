@@ -7,6 +7,7 @@ import StyledTextField from '../../components/StyledTextField';
 import ChipInput from '../../components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { FormData } from '../../helpers/types';
+import { chromeBackground, isChromeExt } from '../../helpers/utility';
 
 interface AdvancedOptionsDialogProps {
   handleInputChange: (id: string, value: string | number | string[] | boolean) => void;
@@ -20,6 +21,8 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
 
   console.log(formData);
 
+  const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 100%)' };
+
   return (
     <Box
       sx={{
@@ -31,8 +34,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
         zIndex: 100,
         boxShadow: 'none',
         overflow: 'hidden',
-        backgroundColor: 'white',
-        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+        ...background,
       }}
     >
       <AppBar
@@ -76,7 +78,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
         mx={2}
         mt={2}
         sx={{
-          background: 'rgba(242, 242, 242, 0.5)',
+          background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
           backdropFilter: 'blur(100px)',
           borderBottomLeftRadius: 10,
           borderBottomRightRadius: 10,
@@ -86,32 +88,38 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
       >
         <Box
           sx={{
-            pt: 1,
-            px: 2,
-            bgcolor: 'white',
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-            borderBottomLeftRadius: 15,
-            borderBottomRightRadius: 15,
+            px: 1,
+            py: 1,
           }}
         >
-          <StyledTextField value={formData.title} id="title" onChange={handleInputChange} />
-          <Divider />
+          <Box
+            sx={{
+              pt: 1,
+              px: 2,
+              bgcolor: 'white',
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              borderBottomLeftRadius: 15,
+              borderBottomRightRadius: 15,
+            }}
+          >
+            <StyledTextField value={formData.title} id="title" onChange={handleInputChange} />
+            <Divider />
 
-          <ChipInput sx={{ mt: 1 }} id="attendees" onChange={handleInputChange} value={formData.attendees} />
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            mx: 2,
-            alignItems: 'center',
-            pb: 2,
-            my: 1,
-            mt: 2,
-          }}
-        >
-          <Typography variant="subtitle1">Create meet link: </Typography>
-          <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
+            <ChipInput sx={{ mt: 1 }} id="attendees" onChange={handleInputChange} value={formData.attendees} />
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              mx: 2,
+              alignItems: 'center',
+              my: 1,
+              mt: 2,
+            }}
+          >
+            <Typography variant="subtitle1">Create meet link: </Typography>
+            <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
+          </Box>
         </Box>
       </Box>
       <Box

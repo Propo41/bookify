@@ -108,10 +108,9 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
     <Box
       sx={{
         py: 3,
-        px: 1,
       }}
     >
-      <Box display={'flex'} alignItems="center">
+      <Box display={'flex'} alignItems="center" pl={2}>
         <Typography
           variant="h5"
           component="div"
@@ -177,6 +176,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
           p: 0,
           m: 0,
           mt: 1,
+          px: 2,
         }}
       >
         {chips.map((chip, i) => {

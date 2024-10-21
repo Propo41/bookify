@@ -119,7 +119,6 @@ export default function MyEventsView() {
     if (res?.status === 'error') {
       res.message && toast.error(res.message);
       setLoading(false);
-      setEditDialog(null);
       return;
     }
 
@@ -165,7 +164,7 @@ export default function MyEventsView() {
         open={!!editDialog}
         handleClose={handleDialogClose}
         event={editDialog}
-        loading={false} // todo
+        loading={loading}
         currentRoom={currentRoom}
         onEditConfirmed={onEditConfirmed}
       />
@@ -175,8 +174,9 @@ export default function MyEventsView() {
   return (
     <Box
       sx={{
-        height: editDialog ? '200px' : 'auto',
+        display: 'flex',
         overflow: 'hidden',
+        justifyContent: 'center',
       }}
     >
       {events.length === 0 ? (
@@ -195,6 +195,7 @@ export default function MyEventsView() {
             mx: 2,
             mt: 1,
             bgcolor: 'white',
+            zIndex: 100,
           }}
         >
           {events.map((event, i) => (

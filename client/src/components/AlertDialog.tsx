@@ -44,7 +44,7 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
       </AppBar>
       <Box
         sx={{
-          mx: 2,
+          mx: 3,
           alignItems: 'center',
           textAlign: 'center',
           pb: 1,
