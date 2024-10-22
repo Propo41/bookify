@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { chromeBackground, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
+import { convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';

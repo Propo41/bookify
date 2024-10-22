@@ -1,4 +1,4 @@
-import { Box, IconButton, LinearProgress, Stack, styled, useTheme } from '@mui/material';
+import { Box, IconButton, LinearProgress, Stack, styled } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -78,7 +78,6 @@ export default function Home() {
   const [refresh, setRefresh] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const theme = useTheme();
 
   useEffect(() => {
     cacheService.get('access_token').then((token) => {

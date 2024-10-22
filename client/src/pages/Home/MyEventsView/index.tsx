@@ -1,7 +1,7 @@
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@bookify/shared';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { convertToLocaleTime, convertToRFC3339, getTimeZoneString, renderError } from '../../../helpers/utility';
+import { convertToRFC3339, getTimeZoneString, renderError } from '../../../helpers/utility';
 import Api from '../../../api/api';
 import toast from 'react-hot-toast';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
@@ -10,7 +10,6 @@ import AlertDialog from '../../../components/AlertDialog';
 import EditDialog from '../../../components/EventCard/EditDialog';
 import { FormData } from '../../../helpers/types';
 import { ROUTES } from '../../../config/routes';
-import { CacheService, CacheServiceFactory } from '../../../helpers/cache';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);

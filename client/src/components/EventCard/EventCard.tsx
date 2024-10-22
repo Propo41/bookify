@@ -2,7 +2,6 @@ import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuIt
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { useNavigate } from 'react-router-dom';
 import { EventResponse } from '@bookify/shared';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
@@ -54,11 +53,8 @@ interface ChipData {
 const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const [currentRoom, setCurrentRoom] = useState({});
 
   useEffect(() => {
     console.log('event', event);

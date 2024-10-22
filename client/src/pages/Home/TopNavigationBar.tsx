@@ -1,4 +1,4 @@
-import { Box, Button, styled, SxProps, Theme, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, styled, SxProps, Theme, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
