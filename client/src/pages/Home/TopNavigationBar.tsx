@@ -1,4 +1,4 @@
-import { Box, styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, Button, styled, SxProps, Theme, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -47,9 +47,10 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 interface TopNavigationBarProps {
   handleTabChange: (tabIndex: number) => void;
   tabIndex: number;
+  sx?: SxProps<Theme>;
 }
 
-const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) => {
+const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarProps) => {
   const handleChange = (event: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       handleTabChange(newValue);
@@ -57,15 +58,29 @@ const TopNavigationBar = ({ tabIndex, handleTabChange }: TopNavigationBarProps) 
   };
 
   return (
-    <TopBar>
-      <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleChange} aria-label="event tabs" fullWidth={true}>
-        <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
-          New Event
-        </StyledToggleButton>
-        <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
-          My Events
-        </StyledToggleButton>
-      </StyledToggleButtonGroup>
+    <TopBar
+      sx={{
+        ...sx,
+      }}
+    >
+      <Box
+        sx={{
+          bgcolor: 'white',
+          py: 0.5,
+          px: 0.5,
+          width: '100%',
+          borderRadius: 30,
+        }}
+      >
+        <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleChange} aria-label="event tabs" fullWidth={true}>
+          <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
+            New Event
+          </StyledToggleButton>
+          <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
+            My Events
+          </StyledToggleButton>
+        </StyledToggleButtonGroup>
+      </Box>
     </TopBar>
   );
 };

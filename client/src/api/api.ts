@@ -148,7 +148,7 @@ export default class Api {
     };
   }
 
-  async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string) {
+  async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {
     try {
       const headers = await this.getHeaders();
       const res = await this.client.get('/available-rooms', {
@@ -159,6 +159,7 @@ export default class Api {
           timeZone,
           seats,
           floor,
+          eventId,
         },
         signal: signal,
       });
@@ -193,6 +194,23 @@ export default class Api {
       const res = await this.client.post('/room', payload, {
         headers,
       });
+
+      return res.data as ApiResponse<EventResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateRoom(eventId: string, payload: BookRoomDto) {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.put(
+        '/room',
+        { eventId, ...payload },
+        {
+          headers,
+        },
+      );
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {

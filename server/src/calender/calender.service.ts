@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
@@ -121,6 +121,7 @@ export class CalenderService {
     minSeats: number,
     timeZone: string,
     floor?: string,
+    eventId?: string,
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getDirectoryResources(domain);
@@ -145,6 +146,19 @@ export class CalenderService {
       if (isAvailable) {
         room = rooms.find((room) => room.email === roomEmail);
         availableRooms.push(room);
+      }
+    }
+
+    if (eventId) {
+      const event = await this.googleApiService.getCalenderEvent(client, eventId);
+      const requestStart = new Date(start);
+      const requestEnd = new Date(end);
+
+      const isWithinRange = new Date(event.start.dateTime) >= requestStart && new Date(event.end.dateTime) <= requestEnd;
+      if (isWithinRange) {
+        const attendee = event.attendees.find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
+        const currentRoom = extractRoomByEmail(rooms, attendee.email);
+        availableRooms.unshift(currentRoom);
       }
     }
 
@@ -178,6 +192,13 @@ export class CalenderService {
     const formattedEvents = events.map((event) => {
       const room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
 
+      let attendees: string[] = [];
+      for (const attendee of event.attendees) {
+        if (attendee.email !== room.email) {
+          attendees.push(attendee.email);
+        }
+      }
+
       const _event: EventResponse = {
         meet: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
         room: room.name,
@@ -187,6 +208,7 @@ export class CalenderService {
         floor: room.floor,
         summary: event.summary,
         start: event.start.dateTime,
+        attendees: attendees,
         end: event.end.dateTime,
         createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
       };
@@ -254,6 +276,128 @@ export class CalenderService {
     const data: EventUpdateResponse = {
       start: result.start.dateTime,
       end: result.end.dateTime,
+    };
+
+    return createResponse(data, 'Room has been updated');
+  }
+
+  async updateEvent(
+    client: OAuth2Client,
+    domain: string,
+    eventId: string,
+    startTime: string,
+    endTime: string,
+    createConference?: boolean,
+    eventTitle?: string,
+    attendees?: string[],
+    room?: string,
+  ): Promise<ApiResponse<EventUpdateResponse>> {
+    const event = await this.googleApiService.getCalenderEvent(client, eventId);
+    const rooms = await this.authService.getDirectoryResources(domain);
+
+    const pickedRoom = extractRoomByEmail(rooms, room);
+    if (!pickedRoom) {
+      throw new NotFoundException('Incorrect room picked!');
+    }
+
+    // if selected room email is same as event's room
+    if (event.attendees.some((attendee) => attendee.email === room)) {
+      const currentStartTime = new Date(event.start.dateTime).getTime();
+      const currentEndTime = new Date(event.end.dateTime).getTime();
+
+      const newStartTime = new Date(startTime).getTime();
+      const newEndTime = new Date(endTime).getTime();
+
+      const { timeZone } = event.start;
+
+      if (newStartTime < currentStartTime) {
+        const isAvailable = await this.isRoomAvailable(client, startTime, event.start.dateTime, room, timeZone);
+        if (!isAvailable) {
+          throw new ConflictException('Room is not available within the set duration');
+        }
+      }
+
+      if (newEndTime > currentEndTime) {
+        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, endTime, room, timeZone);
+        if (!isAvailable) {
+          throw new ConflictException('Room is not available within the set duration');
+        }
+      }
+
+      // if (!(newStartTime >= currentStartTime && newEndTime <= currentEndTime)) {
+      //   const isAvailable = await this.isRoomAvailable(client, startTime, endTime, room, timeZone);
+      //   if (!isAvailable) {
+      //     throw new ConflictException('Room is not available within the set duration');
+      //   }
+      // }
+    }
+
+    const attendeeList = [];
+    if (attendees?.length) {
+      for (const attendee of attendees) {
+        if (validateEmail(attendee)) {
+          attendeeList.push({ email: attendee });
+        } else {
+          throw new BadRequestException('Invalid attendee email provided: ' + attendee);
+        }
+      }
+    }
+
+    let conference = {};
+    if (createConference) {
+      conference = {
+        conferenceData: {
+          createRequest: {
+            requestId: Math.random().toString(36).substring(7),
+            conferenceSolutionKey: {
+              type: 'hangoutsMeet',
+            },
+          },
+        },
+      };
+    } else {
+      conference = {
+        conferenceData: null,
+      };
+    }
+
+    var updatedEvent: calendar_v3.Schema$Event = {
+      ...event,
+      summary: eventTitle?.trim() || 'Quick Meeting',
+      location: pickedRoom.name,
+      description: 'A quick meeting created by Bookify',
+      start: {
+        dateTime: startTime,
+      },
+      end: {
+        dateTime: endTime,
+      },
+      attendees: [...attendeeList, { email: pickedRoom.email }],
+      colorId: '3',
+      extendedProperties: {
+        private: {
+          createdAt: new Date().toISOString(), // Adding custom createdAt timestamp to order events
+        },
+      },
+      ...conference,
+    };
+
+    const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
+    const attendeeEmails = result.attendees.map((attendee) => attendee.email).filter((email) => !email.endsWith('resource.calendar.google.com'));
+
+    console.log('Room has been updated', result);
+
+    const data: EventResponse = {
+      eventId: updatedEvent.id,
+      summary: updatedEvent.summary,
+      meet: result.hangoutLink ? result.hangoutLink.split('/').pop() : undefined,
+      start: updatedEvent.start.dateTime,
+      end: updatedEvent.end.dateTime,
+      room: pickedRoom.name,
+      roomEmail: pickedRoom.email,
+      roomId: pickedRoom.id,
+      seats: pickedRoom.seats,
+      attendees: attendeeEmails,
     };
 
     return createResponse(data, 'Room has been updated');

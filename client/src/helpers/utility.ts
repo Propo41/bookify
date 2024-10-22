@@ -3,11 +3,14 @@ import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../config/routes';
 import { CacheService, CacheServiceFactory } from './cache';
+import { secrets } from '../config/secrets';
 
-export function populateTimeOptions() {
+/**
+ * @param start time in utc format
+ */
+export function populateTimeOptions(start?: string) {
   const timeOptions = [];
-
-  const now = new Date();
+  const now = start ? new Date(start) : new Date();
   let currentHours = now.getHours();
   let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
 
@@ -107,7 +110,7 @@ export function convertToLocaleTime(dateStr?: string) {
   const date = new Date(dateStr);
 
   const options: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
     hour12: true,
   };
@@ -157,3 +160,13 @@ export const validateEmail = (email: string) => {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 };
+
+export const chromeBackground = {
+  backgroundImage: 'url(/background.png)', // Reference your image from the public folder
+  backgroundSize: 'cover', // Ensures the image covers the entire card
+  backgroundPosition: 'center', // Centers the image
+  backgroundRepeat: 'no-repeat', // Prevents the image from repeating
+};
+
+export const isChromeExt = secrets.appEnvironment === 'chrome';
+// export const isChromeExt = true;

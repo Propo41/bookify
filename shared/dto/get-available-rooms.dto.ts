@@ -4,7 +4,7 @@ import {
   IsString,
   IsDateString,
   IsTimeZone,
-} from "class-validator";
+} from 'class-validator';
 
 export class GetAvailableRoomsQueryDto {
   @IsDateString()
@@ -22,4 +22,8 @@ export class GetAvailableRoomsQueryDto {
   @IsOptional()
   @IsString()
   floor?: string;
+
+  @IsOptional()
+  @IsString()
+  eventId: string;
 }

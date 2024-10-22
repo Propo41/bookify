@@ -7,4 +7,5 @@ export interface FormData {
   title?: string;
   attendees?: string[];
   conference?: boolean;
+  eventId?: string;
 }

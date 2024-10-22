@@ -3,6 +3,7 @@ export default function Button() {
     MuiButton: {
       styleOverrides: {
         root: {
+          lineHeight: 0,
           boxShadow: '0 3px 10px 0 rgba(0,0,0,0.0), 0 3px 10px 0 rgba(0,0,0,0.2)',
           '&:hover': {
             boxShadow: '0 3px 10px 0 rgba(0,0,0,0.0), 0 3px 10px 0 rgba(0,0,0,0.2)',

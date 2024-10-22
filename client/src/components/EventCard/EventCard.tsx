@@ -2,18 +2,13 @@ import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuIt
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { EventResponse } from '@bookify/shared';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EditDialog from './EditDialog';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { EditRoomFields } from './util';
-import { ROUTES } from '../../config/routes';
-import Api from '../../api/api';
 import { convertToLocaleTime } from '../../helpers/utility';
 
 const ListItem = styled('li')(({ theme }) => ({
@@ -43,10 +38,10 @@ export const createChips = (event: EventResponse) => {
 
 interface EventCardProps {
   sx?: SxProps<Theme>;
-  event?: EventResponse;
+  event: EventResponse;
   onDelete: (id?: string) => void;
+  handleEditClick: (id: string) => void;
   disabled?: boolean;
-  onEdit: (id: string, data: any) => void;
 }
 
 interface ChipData {
@@ -56,99 +51,46 @@ interface ChipData {
   type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
 }
 
-const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<EditRoomFields>({
-    duration: 30,
-  });
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [currentRoom, setCurrentRoom] = useState({});
 
   useEffect(() => {
-    if (event) {
-      const startInMs = new Date(event.start!).getTime();
-      const endInMs = new Date(event.end!).getTime();
-      const currentTimeInMs = Date.now();
+    console.log('event', event);
+    const startInMs = new Date(event.start!).getTime();
+    const endInMs = new Date(event.end!).getTime();
+    const currentTimeInMs = Date.now();
 
-      if (currentTimeInMs >= startInMs && currentTimeInMs <= endInMs) {
-        setIsOngoingEvent(true);
-      } else {
-        setIsOngoingEvent(false);
-      }
-
-      const duration = (endInMs - startInMs) / (1000 * 60);
-      setFormData((prev) => {
-        return {
-          ...prev,
-          duration,
-        };
-      });
-
-      const _chips: ChipData[] = createChips(event);
-
-      if (event.meet) {
-        _chips.push({
-          label: event.meet,
-          type: 'conference',
-          icon: <InsertLinkRoundedIcon />,
-          color: '#99D2FF',
-        });
-      }
-
-      setChips(_chips);
+    if (currentTimeInMs >= startInMs && currentTimeInMs <= endInMs) {
+      setIsOngoingEvent(true);
+    } else {
+      setIsOngoingEvent(false);
     }
+
+    const _chips: ChipData[] = createChips(event);
+
+    if (event.meet) {
+      _chips.push({
+        label: event.meet,
+        type: 'conference',
+        icon: <InsertLinkRoundedIcon />,
+      });
+    }
+
+    setChips(_chips);
   }, [event]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const onEditRoomClick = async () => {
-    if (!event?.eventId || !event?.roomEmail) return;
-
-    console.log('edit room:', formData);
-
-    setEditLoading(true);
-
-    const res = await new Api().updateRoomDuration(event.eventId, event.roomEmail, formData.duration);
-
-    setEditLoading(false);
-
-    if (res?.redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
-      setTimeout(() => {
-        navigate(ROUTES.signIn);
-      }, 1000);
-    }
-
-    if (res?.status === 'error') {
-      res.message && toast.error(res.message);
-      return;
-    }
-
-    if (event.eventId) {
-      onEdit(event.eventId, res?.data);
-
-      setEditDialogOpen(false);
-    }
-  };
-
-  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
-
-    console.log(formData);
-  };
-
-  const handleEditClick = () => {
-    setEditDialogOpen(true);
+  const onEditClick = () => {
+    handleEditClick(event.eventId!);
     setAnchorEl(null);
   };
 
@@ -160,11 +102,10 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
   return (
     <Box
       sx={{
-        py: 3,
-        px: 1,
+        ...sx,
       }}
     >
-      <Box display={'flex'} alignItems="center">
+      <Box display={'flex'} alignItems="center" pl={2}>
         <Typography
           variant="h5"
           component="div"
@@ -215,7 +156,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
             },
           }}
         >
-          <MenuItem onClick={handleEditClick}>Edit</MenuItem>
+          <MenuItem onClick={onEditClick}>Edit</MenuItem>
           <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
         </Menu>
       </Box>
@@ -230,6 +171,7 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
           p: 0,
           m: 0,
           mt: 1,
+          px: 2,
         }}
       >
         {chips.map((chip, i) => {
@@ -253,15 +195,6 @@ const EventCard = ({ sx, event, onDelete, disabled, onEdit }: EventCardProps) =>
           );
         })}
       </Box>
-
-      <EditDialog
-        open={editDialogOpen}
-        setOpen={setEditDialogOpen}
-        onChange={handleInputChange}
-        data={formData}
-        loading={editLoading}
-        onEditRoomClick={onEditRoomClick}
-      />
     </Box>
   );
 };

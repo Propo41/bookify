@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { convertToRFC3339, createDropdownOptions, getTimeZoneString, renderError } from '../../../helpers/utility';
+import { chromeBackground, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
@@ -75,8 +75,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
   useEffect(() => {
     if (firstRender) {
-      console.log('changed');
-
       setAvailableRooms();
     }
   }, [firstRender, formData.startTime, formData.duration, formData.seats]);
@@ -116,7 +114,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
     const floor = (await cacheService.get('floor')) || undefined;
 
     setRoomLoading(true);
@@ -167,6 +164,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     const formattedStartTime = convertToRFC3339(date, startTime);
 
     const floor = await cacheService.get('floor');
+    const preferredTitle = (await cacheService.get('title')) || undefined;
 
     const payload: BookRoomDto = {
       startTime: formattedStartTime,
@@ -175,7 +173,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
       floor: floor || undefined,
       timeZone: getTimeZoneString(),
       createConference: conference,
-      title,
+      title: title || preferredTitle,
       room: room,
       attendees,
     };
@@ -204,43 +202,40 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     setAdvOptionsOpen(false);
   };
 
+  if (advOptionsOpen) {
+    return (
+      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
+    );
+  }
+
   return (
-    <Box mx={2} mt={2}>
+    <Box mx={2} mt={2} display={'flex'}>
       <Box
         sx={{
-          background: 'rgba(242, 242, 242, 0.5)',
+          background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
           backdropFilter: 'blur(100px)',
           borderRadius: 2,
+          zIndex: 100,
+          width: '100%',
         }}
       >
-        <Dropdown
-          id="startTime"
-          options={timeOptions}
-          value={formData.startTime}
-          onChange={handleInputChange}
+        <Box
           sx={{
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
+            px: 1,
+            pt: 1,
           }}
-          icon={
-            <AccessTimeFilledRoundedIcon
-              sx={[
-                (theme) => ({
-                  color: theme.palette.grey[50],
-                }),
-              ]}
-            />
-          }
-        />
-
-        <Box sx={{ display: 'flex' }}>
+        >
           <Dropdown
-            id="duration"
-            options={durationOptions}
-            value={formData.duration.toString()}
+            id="startTime"
+            options={timeOptions}
+            value={formData.startTime}
             onChange={handleInputChange}
+            sx={{
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+            }}
             icon={
-              <HourglassBottomRoundedIcon
+              <AccessTimeFilledRoundedIcon
                 sx={[
                   (theme) => ({
                     color: theme.palette.grey[50],
@@ -250,13 +245,54 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
             }
           />
 
-          <Dropdown
-            id="seats"
-            options={roomCapacityOptions}
-            value={formData.seats.toString()}
+          <Box sx={{ display: 'flex' }}>
+            <Dropdown
+              id="duration"
+              options={durationOptions}
+              value={formData.duration.toString()}
+              onChange={handleInputChange}
+              icon={
+                <HourglassBottomRoundedIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                />
+              }
+            />
+
+            <Dropdown
+              id="seats"
+              options={roomCapacityOptions}
+              value={formData.seats.toString()}
+              onChange={handleInputChange}
+              icon={
+                <PeopleRoundedIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                />
+              }
+            />
+          </Box>
+
+          <RoomsDropdown
+            id="room"
+            options={availableRoomOptions}
+            value={formData.room || ''}
+            loading={roomLoading}
+            disabled={!availableRoomOptions.length}
             onChange={handleInputChange}
+            placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
+            sx={{
+              borderBottomLeftRadius: 15,
+              borderBottomRightRadius: 15,
+            }}
             icon={
-              <PeopleRoundedIcon
+              <MeetingRoomRoundedIcon
                 sx={[
                   (theme) => ({
                     color: theme.palette.grey[50],
@@ -266,29 +302,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
             }
           />
         </Box>
-
-        <RoomsDropdown
-          id="room"
-          options={availableRoomOptions}
-          value={formData.room || ''}
-          loading={roomLoading}
-          disabled={!availableRoomOptions.length}
-          onChange={handleInputChange}
-          placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
-          sx={{
-            borderBottomLeftRadius: 15,
-            borderBottomRightRadius: 15,
-          }}
-          icon={
-            <MeetingRoomRoundedIcon
-              sx={[
-                (theme) => ({
-                  color: theme.palette.grey[50],
-                }),
-              ]}
-            />
-          }
-        />
 
         <Box
           sx={{
@@ -328,6 +341,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           right: 0,
           mb: 3,
           mx: 2,
+          zIndex: 100,
         }}
       >
         <LoadingButton
@@ -354,8 +368,6 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           </Typography>
         </LoadingButton>
       </Box>
-
-      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
     </Box>
   );
 }

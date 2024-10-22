@@ -3,6 +3,7 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { StyledEngineProvider } from '@mui/material/styles';
 import { secrets } from './config/secrets';
+import './styles.css';
 
 //  import the styles
 if (secrets.appEnvironment === 'chrome') {

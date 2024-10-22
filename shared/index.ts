@@ -1,7 +1,6 @@
 export {
   ApiResponse,
   BookRoomDto,
-  UpdateEventDurationDto,
   GetAvailableRoomsQueryDto,
   ListRoomsQueryDto,
   DeleteResponse,

@@ -184,6 +184,7 @@ export class GoogleApiService implements IGoogleApiService {
         eventId: id,
         calendarId: 'primary',
         requestBody: event,
+        conferenceDataVersion: 1,
       }),
     );
 

@@ -7,7 +7,6 @@ import { OAuthInterceptor } from '../auth/oauth.interceptor';
 import {
   ApiResponse,
   BookRoomDto,
-  UpdateEventDurationDto,
   ListRoomsQueryDto,
   GetAvailableRoomsQueryDto,
   DeleteResponse,
@@ -41,12 +40,12 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
-    const { startTime, duration, timeZone, seats, floor } = getAvailableRoomsQueryDto;
+    const { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
-    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor);
+    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor, eventId);
     return createResponse(rooms);
   }
 
@@ -64,7 +63,7 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventResponse>> {
-    const { startTime, duration, seats, timeZone, createConference, title, floor, attendees, room } = bookRoomDto;
+    const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
 
     // end time
     const startDate = new Date(startTime);
@@ -77,13 +76,21 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
-  @Put('/room/duration')
-  async updateEventDuration(
+  @Put('/room')
+  async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
-    @Body() updateEventDurationDto: UpdateEventDurationDto,
+    @_User('domain') domain: string,
+    @Body('eventId') eventId: string,
+    @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
-    const { eventId, roomId, duration } = updateEventDurationDto;
-    return await this.calenderService.updateEventDuration(client, eventId, roomId, duration);
+    const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
+
+    // end time
+    const startDate = new Date(startTime);
+    startDate.setMinutes(startDate.getMinutes() + duration);
+    const endTime = startDate.toISOString();
+
+    return await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
   }
 
   @UseGuards(AuthGuard)
