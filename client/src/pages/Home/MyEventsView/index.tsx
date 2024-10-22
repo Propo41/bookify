@@ -10,9 +10,11 @@ import AlertDialog from '../../../components/AlertDialog';
 import EditDialog from '../../../components/EventCard/EditDialog';
 import { FormData } from '../../../helpers/types';
 import { ROUTES } from '../../../config/routes';
+import { CacheService, CacheServiceFactory } from '../../../helpers/cache';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
+  const [editLoading, setEditLoading] = useState(false);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -84,7 +86,7 @@ export default function MyEventsView() {
 
     console.log('onedit', data);
 
-    setLoading(true);
+    setEditLoading(true);
 
     const { startTime, duration, seats, conference, attendees, title, room, eventId } = data;
 
@@ -118,14 +120,14 @@ export default function MyEventsView() {
 
     if (res?.status === 'error') {
       res.message && toast.error(res.message);
-      setLoading(false);
+      setEditLoading(false);
       return;
     }
 
     setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === data.eventId ? { ...event, ...res.data } : event)));
     toast.success('Room has been updated');
     setEditDialog(null);
-    setLoading(false);
+    setEditLoading(false);
   };
 
   const handleEditClick = (eventId: string) => {
@@ -164,7 +166,7 @@ export default function MyEventsView() {
         open={!!editDialog}
         handleClose={handleDialogClose}
         event={editDialog}
-        loading={loading}
+        loading={editLoading}
         currentRoom={currentRoom}
         onEditConfirmed={onEditConfirmed}
       />
@@ -193,7 +195,7 @@ export default function MyEventsView() {
             pb: 1,
             px: 1.5,
             mx: 2,
-            mt: 1,
+            mt: 2,
             bgcolor: 'white',
             zIndex: 100,
           }}
@@ -202,6 +204,10 @@ export default function MyEventsView() {
             <React.Fragment key={i}>
               <EventCard
                 key={i}
+                sx={{
+                  pt: i === 0 ? 0 : 2,
+                  pb: 3,
+                }}
                 event={event}
                 handleEditClick={handleEditClick}
                 disabled={loading}

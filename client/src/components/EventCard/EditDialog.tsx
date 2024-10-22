@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, IconButton, Typography } from '@mui/material';
+import { AppBar, Box, Button, IconButton, Skeleton, Stack, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import React, { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -115,7 +115,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
     }
 
     abortControllerRef.current = new AbortController();
-    const res = await api.getAvailableRooms(abortControllerRef.current.signal, formattedStartTime, duration, getTimeZoneString(), seats, floor);
+    const res = await api.getAvailableRooms(abortControllerRef.current.signal, formattedStartTime, duration, getTimeZoneString(), seats, floor, event.eventId);
 
     setRoomLoading(false);
 
@@ -130,12 +130,17 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
     const data = res.data as IConferenceRoom[];
     let roomOptions: RoomsDropdownOption[] = [];
 
-    console.log(data);
-
     if (data.length > 0) {
       const filteredRooms = data.filter((item) => item.email !== currentRoom.email);
       roomOptions = createRoomDropdownOptions(filteredRooms);
+
+      const isCurrentRoomAvailable = data.some((room) => room.email === currentRoom.email);
       const currentRoomOption = createRoomDropdownOptions([currentRoom])[0];
+
+      if (!isCurrentRoomAvailable) {
+        currentRoomOption.isBusy = true;
+      }
+
       roomOptions.unshift(currentRoomOption);
     }
 
@@ -143,7 +148,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
   }
 
   async function setPreferences() {
-    setTimeOptions(createDropdownOptions(populateTimeOptions()));
+    setTimeOptions(createDropdownOptions(populateTimeOptions(event.start)));
     setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
   }
@@ -169,10 +174,6 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
   }
 
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)' };
-
-  if (loading) {
-    // todo: return skeleton
-  }
 
   return (
     <Box
@@ -217,125 +218,134 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
         </Typography>
       </AppBar>
 
-      <Box
-        sx={{
-          mx: 2,
-        }}
-      >
+      {loading ? (
+        <Box mx={3}>
+          <Stack spacing={2} mt={3}>
+            <Skeleton animation="wave" variant="rounded" height={80} />
+            <Skeleton animation="wave" variant="rounded" height={80} />
+          </Stack>
+        </Box>
+      ) : (
         <Box
           sx={{
-            px: 1,
-            background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
-            backdropFilter: 'blur(100px)',
-            py: 1,
-            borderRadius: 2,
+            mx: 2,
           }}
         >
-          <Dropdown
-            id="startTime"
-            options={timeOptions}
-            value={formData.startTime}
-            onChange={handleInputChange}
-            sx={{
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-            }}
-            icon={
-              <AccessTimeFilledRoundedIcon
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[50],
-                  }),
-                ]}
-              />
-            }
-          />
-          <Box sx={{ display: 'flex' }}>
-            <Dropdown
-              id="duration"
-              options={durationOptions}
-              value={formData.duration.toString()}
-              onChange={handleInputChange}
-              icon={
-                <HourglassBottomRoundedIcon
-                  sx={[
-                    (theme) => ({
-                      color: theme.palette.grey[50],
-                    }),
-                  ]}
-                />
-              }
-            />
-
-            <Dropdown
-              id="seats"
-              options={roomCapacityOptions}
-              value={formData.seats.toString()}
-              onChange={handleInputChange}
-              icon={
-                <PeopleRoundedIcon
-                  sx={[
-                    (theme) => ({
-                      color: theme.palette.grey[50],
-                    }),
-                  ]}
-                />
-              }
-            />
-          </Box>
-          <RoomsDropdown
-            id="room"
-            options={availableRoomOptions}
-            value={formData.room || ''}
-            loading={roomLoading}
-            currentRoom={currentRoom}
-            disabled={!availableRoomOptions.length}
-            onChange={handleInputChange}
-            placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
-            sx={{
-              borderBottomLeftRadius: 15,
-              borderBottomRightRadius: 15,
-            }}
-            icon={
-              <MeetingRoomRoundedIcon
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[50],
-                  }),
-                ]}
-              />
-            }
-          />
           <Box
             sx={{
-              display: 'flex',
-              px: 2,
-              py: 3,
-              cursor: 'pointer',
-              WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation',
+              px: 1,
+              background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
+              backdropFilter: 'blur(100px)',
+              py: 1,
+              borderRadius: 2,
             }}
-            onClick={handleAdvancedOptionsDialogOpen}
           >
-            <Typography variant="subtitle1">Additional options</Typography>
+            <Dropdown
+              id="startTime"
+              options={timeOptions}
+              value={formData.startTime}
+              onChange={handleInputChange}
+              sx={{
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+              }}
+              icon={
+                <AccessTimeFilledRoundedIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                />
+              }
+            />
+            <Box sx={{ display: 'flex' }}>
+              <Dropdown
+                id="duration"
+                options={durationOptions}
+                value={formData.duration.toString()}
+                onChange={handleInputChange}
+                icon={
+                  <HourglassBottomRoundedIcon
+                    sx={[
+                      (theme) => ({
+                        color: theme.palette.grey[50],
+                      }),
+                    ]}
+                  />
+                }
+              />
+
+              <Dropdown
+                id="seats"
+                options={roomCapacityOptions}
+                value={formData.seats.toString()}
+                onChange={handleInputChange}
+                icon={
+                  <PeopleRoundedIcon
+                    sx={[
+                      (theme) => ({
+                        color: theme.palette.grey[50],
+                      }),
+                    ]}
+                  />
+                }
+              />
+            </Box>
+            <RoomsDropdown
+              id="room"
+              options={availableRoomOptions}
+              value={formData.room || ''}
+              loading={roomLoading}
+              currentRoom={currentRoom}
+              disabled={!availableRoomOptions.length}
+              onChange={handleInputChange}
+              placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
+              sx={{
+                borderBottomLeftRadius: 15,
+                borderBottomRightRadius: 15,
+              }}
+              icon={
+                <MeetingRoomRoundedIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                />
+              }
+            />
             <Box
               sx={{
-                flexGrow: 1,
+                display: 'flex',
+                px: 2,
+                py: 3,
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
               }}
-            />
-            <PlayArrowIcon
-              fontSize="small"
-              sx={[
-                (theme) => ({
-                  color: theme.palette.grey[50],
-                }),
-              ]}
-            />
+              onClick={handleAdvancedOptionsDialogOpen}
+            >
+              <Typography variant="subtitle1">Additional options</Typography>
+              <Box
+                sx={{
+                  flexGrow: 1,
+                }}
+              />
+              <PlayArrowIcon
+                fontSize="small"
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        <Box flexGrow={1} />
-      </Box>
+          <Box flexGrow={1} />
+        </Box>
+      )}
 
       <Box
         sx={{

@@ -1,13 +1,16 @@
 import { Box, TextField } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface StyledTextFieldProps {
   id: string;
   sx?: any;
   value?: string;
+  placeholder?: string;
+  startIcon?: ReactElement;
   onChange: (id: string, value: string) => void;
 }
 
-const StyledTextField = ({ id, sx, onChange, value }: StyledTextFieldProps) => {
+const StyledTextField = ({ id, sx, startIcon, onChange, value, placeholder }: StyledTextFieldProps) => {
   return (
     <Box
       display="flex"
@@ -26,11 +29,12 @@ const StyledTextField = ({ id, sx, onChange, value }: StyledTextFieldProps) => {
         }),
       ]}
     >
+      {startIcon}
       <TextField
         onChange={(e) => onChange(id, e.target.value)}
         variant="standard"
         value={value}
-        placeholder="Add title"
+        placeholder={placeholder}
         slotProps={{
           input: {
             disableUnderline: true,

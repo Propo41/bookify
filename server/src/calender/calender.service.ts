@@ -121,6 +121,7 @@ export class CalenderService {
     minSeats: number,
     timeZone: string,
     floor?: string,
+    eventId?: string,
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getDirectoryResources(domain);
@@ -145,6 +146,19 @@ export class CalenderService {
       if (isAvailable) {
         room = rooms.find((room) => room.email === roomEmail);
         availableRooms.push(room);
+      }
+    }
+
+    if (eventId) {
+      const event = await this.googleApiService.getCalenderEvent(client, eventId);
+      const requestStart = new Date(start);
+      const requestEnd = new Date(end);
+
+      const isWithinRange = new Date(event.start.dateTime) >= requestStart && new Date(event.end.dateTime) <= requestEnd;
+      if (isWithinRange) {
+        const attendee = event.attendees.find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
+        const currentRoom = extractRoomByEmail(rooms, attendee.email);
+        availableRooms.unshift(currentRoom);
       }
     }
 
@@ -369,6 +383,7 @@ export class CalenderService {
     };
 
     const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
+    const attendeeEmails = result.attendees.map((attendee) => attendee.email).filter((email) => !email.endsWith('resource.calendar.google.com'));
 
     console.log('Room has been updated', result);
 
@@ -382,6 +397,7 @@ export class CalenderService {
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
+      attendees: attendeeEmails,
     };
 
     return createResponse(data, 'Room has been updated');

@@ -21,6 +21,7 @@ export interface RoomsDropdownOption {
   value: string; // the main value used for api calls
   seats: number;
   floor: string;
+  isBusy?: boolean;
 }
 
 export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, options, onChange, icon, placeholder, loading }: DropdownProps) {
@@ -29,6 +30,8 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
   };
+
+  console.log(options);
 
   return (
     <Select
@@ -174,7 +177,14 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
                 alignItems: 'center',
               }}
             >
-              <Typography variant="subtitle1">{option.text}</Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  textDecoration: option.isBusy ? 'line-through' : 'inherit',
+                }}
+              >
+                {option.text}
+              </Typography>
               {currentRoom && option.value === currentRoom.email && <CheckCircleIcon color="success" sx={{ ml: 1 }} />}
             </Box>
 

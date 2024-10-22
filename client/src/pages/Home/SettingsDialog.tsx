@@ -22,6 +22,8 @@ import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import { secrets } from '../../config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
+import StyledTextField from '../../components/StyledTextField';
+import TitleIcon from '@mui/icons-material/Title';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -94,6 +96,7 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
     floor: '',
     duration: '30',
     seats: 1,
+    title: '',
   });
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
@@ -105,16 +108,21 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
 
   useEffect(() => {
     const init = async (floors: string[]) => {
-      setFloorOptions(createDropdownOptions(floors));
+      const floorOptions = createDropdownOptions(floors);
+      floorOptions.unshift({ text: 'No preference', value: '' });
+
+      setFloorOptions(floorOptions);
       setDurationOptions(createDropdownOptions(availableDurations, 'time'));
 
       const floor = await cacheService.get('floor');
       const duration = await cacheService.get('duration');
       const seats = await cacheService.get('seats');
+      const title = await cacheService.get('title');
 
       setFormData({
         ...formData,
         floor: floor || '',
+        title: title || '',
         duration: duration || availableDurations[0],
         seats: Number(seats) || 1,
       });
@@ -143,22 +151,18 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
   }, []);
 
   const handleInputChange = (id: string, value: string | number) => {
-    console.log('value', value);
-
-    if (value === '') {
-      // remove the id
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [id]: value,
-      }));
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
   };
 
   const onSaveClick = async () => {
     await cacheService.save('floor', formData.floor);
     await cacheService.save('duration', formData.duration);
     await cacheService.save('seats', formData.seats.toString());
+    await cacheService.save('title', formData.title.toString());
+
     toast.success('Saved successfully!');
     onSave();
   };
@@ -204,6 +208,22 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
                 ]}
               />
             }
+          />
+
+          <StyledTextField
+            value={formData.title}
+            startIcon={
+              <TitleIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
+            id="title"
+            placeholder="Add preferred title"
+            onChange={handleInputChange}
           />
 
           {/* <Divider sx={{ mx: 2 }} /> */}

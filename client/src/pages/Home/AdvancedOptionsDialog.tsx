@@ -103,7 +103,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
               borderBottomRightRadius: 15,
             }}
           >
-            <StyledTextField value={formData.title} id="title" onChange={handleInputChange} />
+            <StyledTextField value={formData.title} placeholder="Add title" id="title" onChange={handleInputChange} />
             <Divider />
 
             <ChipInput sx={{ mt: 1 }} id="attendees" onChange={handleInputChange} value={formData.attendees} />

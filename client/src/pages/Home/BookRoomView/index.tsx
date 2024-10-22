@@ -164,6 +164,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     const formattedStartTime = convertToRFC3339(date, startTime);
 
     const floor = await cacheService.get('floor');
+    const preferredTitle = (await cacheService.get('title')) || undefined;
 
     const payload: BookRoomDto = {
       startTime: formattedStartTime,
@@ -172,7 +173,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
       floor: floor || undefined,
       timeZone: getTimeZoneString(),
       createConference: conference,
-      title,
+      title: title || preferredTitle,
       room: room,
       attendees,
     };

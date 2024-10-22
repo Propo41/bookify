@@ -168,5 +168,5 @@ export const chromeBackground = {
   backgroundRepeat: 'no-repeat', // Prevents the image from repeating
 };
 
-// export const isChromeExt = secrets.appEnvironment === 'chrome';
-export const isChromeExt = true;
+export const isChromeExt = secrets.appEnvironment === 'chrome';
+// export const isChromeExt = true;

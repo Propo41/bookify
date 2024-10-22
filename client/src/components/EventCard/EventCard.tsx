@@ -2,19 +2,14 @@ import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuIt
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { BookRoomDto, EventResponse } from '@bookify/shared';
+import { EventResponse } from '@bookify/shared';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EditDialog from './EditDialog';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { ROUTES } from '../../config/routes';
-import Api from '../../api/api';
-import { convertToLocaleTime, convertToRFC3339, getTimeZoneString } from '../../helpers/utility';
-import { FormData } from '../../helpers/types';
+import { convertToLocaleTime } from '../../helpers/utility';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -107,7 +102,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
   return (
     <Box
       sx={{
-        py: 3,
+        ...sx,
       }}
     >
       <Box display={'flex'} alignItems="center" pl={2}>
