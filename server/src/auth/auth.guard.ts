@@ -35,8 +35,12 @@ export class AuthGuard implements CanActivate {
     }
 
     let user = await this.authService.getUser(payload.sub);
-    request['user'] = user;
 
+    if (Date.now() > user.auth.expiryDate) {
+      throw new UnauthorizedException('Session expired');
+    }
+
+    request['user'] = user;
     return true;
   }
 

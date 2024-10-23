@@ -128,9 +128,9 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
     if (statusCode === 401) {
       const cacheService: CacheService = CacheServiceFactory.getCacheService();
       await cacheService.remove('access_token');
-      navigate(ROUTES.signIn, { state: { message } });
+      navigate(ROUTES.signIn);
     } else if (redirect) {
-      navigate(ROUTES.signIn, { state: { message: message + ' | Try re-logging in' } });
+      navigate(ROUTES.signIn);
     } else {
       message && toast.error(message);
     }
