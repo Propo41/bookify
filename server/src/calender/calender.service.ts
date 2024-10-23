@@ -125,7 +125,6 @@ export class CalenderService {
   ): Promise<ConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getDirectoryResources(domain);
-
     for (const room of rooms) {
       if (room.seats >= Number(minSeats) && (floor === undefined || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
@@ -151,13 +150,34 @@ export class CalenderService {
 
     if (eventId) {
       const event = await this.googleApiService.getCalenderEvent(client, eventId);
-      const requestStart = new Date(start);
-      const requestEnd = new Date(end);
 
-      const isWithinRange = new Date(event.start.dateTime) >= requestStart && new Date(event.end.dateTime) <= requestEnd;
-      if (isWithinRange) {
-        const attendee = event.attendees.find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
-        const currentRoom = extractRoomByEmail(rooms, attendee.email);
+      const currentStartTime = new Date(event.start.dateTime).getTime();
+      const currentEndTime = new Date(event.end.dateTime).getTime();
+
+      const requestStart = new Date(start).getTime();
+      const requestEnd = new Date(end).getTime();
+
+      const attendee = event.attendees.find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
+      const currentRoom = extractRoomByEmail(rooms, attendee.email);
+
+      const { timeZone } = event.start;
+
+      let isEventRoomAvailable = true;
+      if (requestStart < currentStartTime) {
+        const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, attendee.email, timeZone);
+        if (!isAvailable) {
+          isEventRoomAvailable = false;
+        }
+      }
+
+      if (requestEnd > currentEndTime) {
+        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, end, attendee.email, timeZone);
+        if (!isAvailable) {
+          isEventRoomAvailable = false;
+        }
+      }
+
+      if (isEventRoomAvailable) {
         availableRooms.unshift(currentRoom);
       }
     }

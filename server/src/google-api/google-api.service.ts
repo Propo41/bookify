@@ -121,6 +121,7 @@ export class GoogleApiService implements IGoogleApiService {
           timeMin: start,
           timeMax: end,
           timeZone,
+          calendarExpansionMax: 100,
           items: rooms.map((email) => {
             return {
               id: email,

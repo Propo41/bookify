@@ -295,7 +295,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
             <RoomsDropdown
               id="room"
               options={availableRoomOptions}
-              value={formData.room || ''}
+              value={formData.room || (availableRoomOptions.length > 0 ? availableRoomOptions[0].value : '')}
               loading={roomLoading}
               currentRoom={currentRoom}
               disabled={!availableRoomOptions.length}

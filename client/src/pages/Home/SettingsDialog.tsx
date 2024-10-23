@@ -46,6 +46,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
       borderRadius: 30,
     },
   },
+  justifyContent: 'center',
 }));
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
@@ -441,12 +442,12 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
               borderRadius: 100,
               backgroundColor: 'white',
               py: 1,
-              px: 1,
+              px: 0,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
               textAlign: 'center',
-              mr: 1,
+              mr: 0,
             }}
           >
             <IconButton aria-label="settings" sx={{ backgroundColor: 'white' }} onClick={handleClose}>
@@ -471,6 +472,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
               px: 0.5,
               width: '100%',
               borderRadius: 30,
+              textAlign: 'center',
             }}
           >
             <StyledToggleButtonGroup sx={{ mx: 0 }} value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
@@ -482,33 +484,33 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
               </StyledToggleButton>
             </StyledToggleButtonGroup>
           </Box>
+          {/* logout icon */}
+          <Box
+            sx={{
+              borderRadius: 100,
+              backgroundColor: 'white',
+              py: 1,
+              px: 0,
+              display: 'flex',
+              // width: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              ml: 0,
+            }}
+          >
+            <IconButton aria-label="settings" sx={{ mr: 0, backgroundColor: 'white' }} onClick={onLogoutClick}>
+              <ExitToAppRoundedIcon
+                fontSize="small"
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.common.black,
+                  }),
+                ]}
+              />
+            </IconButton>
+          </Box>
         </TopBar>
-        {/* logout icon */}
-        <Box
-          sx={{
-            borderRadius: 100,
-            backgroundColor: 'white',
-            py: 1,
-            px: 1,
-            display: 'flex',
-            // width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            ml: 1,
-          }}
-        >
-          <IconButton aria-label="settings" sx={{ mr: 0, backgroundColor: 'white' }} onClick={onLogoutClick}>
-            <ExitToAppRoundedIcon
-              fontSize="small"
-              sx={[
-                (theme) => ({
-                  color: theme.palette.common.black,
-                }),
-              ]}
-            />
-          </IconButton>
-        </Box>
       </Box>
 
       {tabs[tabIndex].component({ onSave: () => onSave() })}

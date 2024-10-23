@@ -282,7 +282,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
           <RoomsDropdown
             id="room"
             options={availableRoomOptions}
-            value={formData.room || ''}
+            value={formData.room || (availableRoomOptions.length > 0 ? availableRoomOptions[0].value : '')}
             loading={roomLoading}
             disabled={!availableRoomOptions.length}
             onChange={handleInputChange}
