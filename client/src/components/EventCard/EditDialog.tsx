@@ -148,7 +148,12 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
   }
 
   async function setPreferences() {
-    setTimeOptions(createDropdownOptions(populateTimeOptions(event.start)));
+    const eventTime = new Date(event.start!);
+    const currentTime = new Date(new Date().toUTCString());
+
+    const minTime = eventTime < currentTime ? eventTime : currentTime;
+
+    setTimeOptions(createDropdownOptions(populateTimeOptions(minTime.toISOString())));
     setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
   }
