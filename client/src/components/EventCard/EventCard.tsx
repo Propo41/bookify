@@ -3,36 +3,53 @@ import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { EventResponse } from '@bookify/shared';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { convertToLocaleTime } from '../../helpers/utility';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
 }));
 
 export const createChips = (event: EventResponse) => {
-  return [
-    {
-      label: convertToLocaleTime(event?.start) + ' - ' + convertToLocaleTime(event?.end),
-      icon: <AccessTimeFilledRoundedIcon />,
-    },
-    {
-      label: event?.seats + '' || '-',
-      icon: <PeopleRoundedIcon />,
-    },
-    {
-      label: event?.room || '-',
-      icon: <MeetingRoomRoundedIcon />,
-    },
-    {
-      label: event?.floor || '-',
-      icon: <StairsIcon />,
-    },
-  ];
+  const chips = [];
+
+  if (!event) {
+    return [];
+  }
+
+  if (event.start && event.end) {
+    chips.push({
+      label: convertToLocaleTime(event.start) + ' - ' + convertToLocaleTime(event.end),
+      icon: <AccessTimeFilledRoundedIcon fontSize="small" />,
+    });
+  }
+
+  if (event.seats) {
+    chips.push({
+      label: event.seats.toString(),
+      icon: <PeopleRoundedIcon fontSize="small" />,
+    });
+  }
+
+  if (event.room) {
+    chips.push({
+      label: event.room,
+      icon: <MeetingRoomRoundedIcon fontSize="small" />,
+    });
+  }
+
+  if (event.floor) {
+    chips.push({
+      label: event.floor,
+      icon: <StairsIcon fontSize="small" />,
+    });
+  }
+
+  return chips;
 };
 
 interface EventCardProps {
@@ -74,7 +91,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
       _chips.push({
         label: event.meet,
         type: 'conference',
-        icon: <InsertLinkRoundedIcon />,
+        icon: <InsertLinkRoundedIcon fontSize="small" />,
       });
     }
 
@@ -105,11 +122,15 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
         <Typography
           variant="h5"
           component="div"
-          sx={{
-            textAlign: 'left',
-          }}
+          sx={[
+            (theme) => ({
+              textAlign: 'left',
+              color: event.summary ?? theme.palette.grey[400],
+              fontStyle: event.summary ?? 'italic',
+            }),
+          ]}
         >
-          {event?.summary}
+          {event?.summary || 'No title'}
         </Typography>
         {isOngoingEvent && <FiberManualRecordIcon fontSize="small" sx={{ pl: 1 }} color="success" />}
         <Box flexGrow={1} />
@@ -123,9 +144,9 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
-          sx={{ p: 0 }}
+          sx={{ p: 0, mr: 1 }}
         >
-          <MoreVertIcon />
+          <MoreHorizIcon />
         </IconButton>
 
         <Menu
@@ -178,7 +199,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
                 label={chip.label}
                 sx={{
                   fontSize: 15,
-                  backgroundColor: chip.color,
+                  backgroundColor: '#EFEFEF',
                   cursor: chip.type === 'conference' ? 'pointer' : 'auto',
                 }}
                 onClick={() => {

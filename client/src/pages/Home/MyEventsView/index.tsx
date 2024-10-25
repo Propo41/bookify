@@ -19,7 +19,7 @@ export default function MyEventsView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
   const [editDialog, setEditDialog] = useState<EventResponse | null>(null);
-  const [currentRoom, setCurrentRoom] = useState<IConferenceRoom>({});
+  const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
 
   const api = new Api();
 
@@ -78,6 +78,8 @@ export default function MyEventsView() {
   };
 
   const onEditConfirmed = async (data: FormData) => {
+    console.log(data);
+
     if (!data || !data.eventId || !data.room) {
       toast.error('Room was not updated');
       return;
@@ -98,9 +100,9 @@ export default function MyEventsView() {
 
     const payload: BookRoomDto = {
       startTime: formattedStartTime,
-      duration: duration,
+      duration: Number(duration),
       timeZone: getTimeZoneString(),
-      seats: seats,
+      seats: Number(seats),
       createConference: conference,
       title,
       room: room,
@@ -132,12 +134,14 @@ export default function MyEventsView() {
   const handleEditClick = (eventId: string) => {
     const eventData = events.find((ev) => ev.eventId === eventId) || ({} as EventResponse);
     setEditDialog(eventData);
-    setCurrentRoom({
-      email: eventData.roomEmail,
-      name: eventData.room,
-      seats: eventData.seats,
-      floor: eventData.floor,
-    });
+    if (eventData.roomEmail) {
+      setCurrentRoom({
+        email: eventData.roomEmail,
+        name: eventData.room,
+        seats: eventData.seats,
+        floor: eventData.floor,
+      });
+    }
   };
 
   const handleDialogClose = () => {
@@ -156,7 +160,8 @@ export default function MyEventsView() {
   }
 
   if (dialogOpen) {
-    return <AlertDialog open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />;
+    const event = events.find((e) => e.eventId === deleteEventId);
+    return <AlertDialog event={event} open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />;
   }
 
   if (editDialog) {
@@ -194,7 +199,7 @@ export default function MyEventsView() {
             pb: 1,
             px: 1.5,
             mx: 2,
-            mt: 2,
+            mt: 1,
             bgcolor: 'white',
             zIndex: 100,
           }}
@@ -204,7 +209,7 @@ export default function MyEventsView() {
               <EventCard
                 key={i}
                 sx={{
-                  pt: i === 0 ? 0 : 2,
+                  pt: 2,
                   pb: 3,
                 }}
                 event={event}

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
+import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
@@ -25,9 +25,10 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
 interface BookRoomViewProps {
   refresh?: boolean;
   setRefresh: (val: boolean) => void;
+  onAction: (action: Action) => void;
 }
 
-export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps) {
+export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoomViewProps) {
   const [loading, setLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
 
@@ -191,6 +192,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
     toast.success(`${roomName} has been booked!`);
 
     setAvailableRoomOptions([]);
+    onAction(Action.ROOM_BOOKED);
     await setAvailableRooms();
   }
 
@@ -360,6 +362,7 @@ export default function BookRoomView({ refresh, setRefresh }: BookRoomViewProps)
               backgroundColor: theme.palette.common.white,
               borderRadius: 15,
               color: theme.palette.common.black,
+              textTransform: 'none',
             }),
           ]}
         >

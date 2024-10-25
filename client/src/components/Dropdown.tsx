@@ -28,7 +28,7 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
 
   return (
     <Select
-      value={value}
+      value={value ?? '-'}
       onChange={handleChange}
       fullWidth
       displayEmpty
@@ -91,7 +91,7 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
                 ml: 2,
               }}
             >
-              {selectedOption ? selectedOption.text + (decorator || '') : ''}
+              {selectedOption ? selectedOption.text + (decorator || '') : '-'}
             </Typography>
           </Box>
         );

@@ -21,5 +21,8 @@
     "shared",
     "client",
     "server"
-  ]
+  ],
+  "dependencies": {
+    "class-transformer": "^0.5.1"
+  }
 }

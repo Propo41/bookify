@@ -1,4 +1,13 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, LoginResponse } from '@bookify/shared';
+import {
+  ApiResponse,
+  BookRoomDto,
+  DeleteResponse,
+  EventResponse,
+  EventUpdateResponse,
+  GetAvailableRoomsQueryDto,
+  IConferenceRoom,
+  LoginResponse,
+} from '@bookify/shared';
 import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '../config/secrets';
@@ -150,19 +159,9 @@ export default class Api {
 
   async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {
     try {
+      const params: GetAvailableRoomsQueryDto = { startTime, duration, timeZone, seats, floor, eventId };
       const headers = await this.getHeaders();
-      const res = await this.client.get('/available-rooms', {
-        headers,
-        params: {
-          startTime,
-          duration,
-          timeZone,
-          seats,
-          floor,
-          eventId,
-        },
-        signal: signal,
-      });
+      const res = await this.client.get('/available-rooms', { headers, params, signal });
 
       return res.data as ApiResponse<IConferenceRoom[]>;
     } catch (error: any) {
@@ -282,8 +281,10 @@ export default class Api {
     }
 
     console.error(error);
+
     const res: ApiResponse<any> = error?.response?.data;
     if (res) {
+      console.error(res);
       return res;
     }
 

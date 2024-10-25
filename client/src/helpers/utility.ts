@@ -170,3 +170,7 @@ export const chromeBackground = {
 
 export const isChromeExt = secrets.appEnvironment === 'chrome';
 // export const isChromeExt = true;
+
+export enum Action {
+  ROOM_BOOKED,
+}

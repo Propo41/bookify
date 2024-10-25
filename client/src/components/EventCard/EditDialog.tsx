@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, IconButton, Skeleton, Stack, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '../Dropdown';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import {
   chromeBackground,
@@ -43,7 +43,7 @@ const initFormData = (event: EventResponse) => {
   return {
     startTime: convertToLocaleTime(event.start!),
     duration: calcDuration(event.start!, event.end!),
-    seats: event.seats!,
+    seats: event.seats,
     room: event.roomEmail,
     attendees: event.attendees,
     title: event.summary,
@@ -58,7 +58,7 @@ interface EditDialogProps {
   event: EventResponse;
   onEditConfirmed: (data: FormData) => void;
   loading?: boolean;
-  currentRoom: IConferenceRoom;
+  currentRoom?: IConferenceRoom;
 }
 
 export default function EditDialog({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditDialogProps) {
@@ -94,6 +94,8 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
   }, [formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+    console.log(formData);
+
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -130,7 +132,12 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
     const data = res.data as IConferenceRoom[];
     let roomOptions: RoomsDropdownOption[] = [];
 
-    if (data.length > 0) {
+    if (!data || data.length === 0) {
+      setAvailableRoomOptions(roomOptions);
+      return;
+    }
+
+    if (currentRoom) {
       const filteredRooms = data.filter((item) => item.email !== currentRoom.email);
       roomOptions = createRoomDropdownOptions(filteredRooms);
 
@@ -142,6 +149,14 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
       }
 
       roomOptions.unshift(currentRoomOption);
+    } else {
+      roomOptions = createRoomDropdownOptions(data);
+      setFormData((prev) => {
+        return {
+          ...prev,
+          room: roomOptions[0].value,
+        };
+      });
     }
 
     setAvailableRoomOptions(roomOptions);
@@ -284,7 +299,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
               <Dropdown
                 id="seats"
                 options={roomCapacityOptions}
-                value={formData.seats.toString()}
+                value={formData.seats?.toString()}
                 onChange={handleInputChange}
                 icon={
                   <PeopleRoundedIcon
@@ -377,6 +392,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
               backgroundColor: theme.palette.common.white,
               borderRadius: 15,
               color: theme.palette.common.black,
+              textTransform: 'none',
             }),
           ]}
         >

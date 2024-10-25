@@ -1,12 +1,21 @@
-import { IsOptional, IsString, IsNumber, IsArray, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 
 export class BookRoomDto {
   @IsString()
   startTime: string; // A combined date-time value (formatted according to RFC3339A). Time zone offset is required
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   duration: number;
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   seats: number;
 

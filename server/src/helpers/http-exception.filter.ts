@@ -9,11 +9,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
 
+    const validationResponse = exception.getResponse();
     const errorResponse: ErrorResponse = {
       statusCode: status,
       status: 'error',
       message: exception.message,
     };
+
+    if (typeof validationResponse === 'object' && 'message' in validationResponse) {
+      errorResponse.error = (validationResponse as any).message;
+    }
 
     switch (status) {
       case HttpStatus.UNAUTHORIZED:

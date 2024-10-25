@@ -10,7 +10,7 @@ import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import SettingsDialog from './SettingsDialog';
-import { chromeBackground, isChromeExt } from '../../helpers/utility';
+import { Action, chromeBackground, isChromeExt } from '../../helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 
@@ -94,13 +94,17 @@ export default function Home() {
     });
   }, []);
 
+  const onAction = (action: Action) => {
+    if (action === Action.ROOM_BOOKED) {
+      setTabIndex(1);
+    }
+  };
+
   const handleTabChange = (newValue: number) => {
     setTabIndex(newValue);
   };
 
   const onSettingClick = () => {
-    console.log('settings');
-
     setSettingsDialogOpen(true);
   };
 
@@ -139,7 +143,6 @@ export default function Home() {
             py: 1,
             px: 1,
             display: 'flex',
-            // width: '100%',
             justifyContent: 'center',
             alignItems: 'center',
             textAlign: 'center',
@@ -152,7 +155,7 @@ export default function Home() {
         </Box>
       </Box>
 
-      {loading ? <LinearProgress /> : tabs[tabIndex].component({ refresh, setRefresh: (val: boolean) => setRefresh(val) })}
+      {loading ? <LinearProgress /> : tabs[tabIndex].component({ onAction, refresh, setRefresh: (val: boolean) => setRefresh(val) })}
     </Box>
   );
 

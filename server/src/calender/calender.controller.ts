@@ -41,11 +41,12 @@ export class CalenderController {
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
     const { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
+
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
-    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, seats, timeZone, floor, eventId);
+    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, timeZone, seats, floor, eventId);
     return createResponse(rooms);
   }
 

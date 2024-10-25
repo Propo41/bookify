@@ -118,8 +118,8 @@ export class CalenderService {
     domain: string,
     start: string,
     end: string,
-    minSeats: number,
     timeZone: string,
+    minSeats: number,
     floor?: string,
     eventId?: string,
   ): Promise<ConferenceRoom[]> {
@@ -150,35 +150,37 @@ export class CalenderService {
 
     if (eventId) {
       const event = await this.googleApiService.getCalenderEvent(client, eventId);
+      const roomEmail = (event.attendees || []).find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
 
-      const currentStartTime = new Date(event.start.dateTime).getTime();
-      const currentEndTime = new Date(event.end.dateTime).getTime();
+      if (roomEmail) {
+        const currentStartTime = new Date(event.start.dateTime).getTime();
+        const currentEndTime = new Date(event.end.dateTime).getTime();
 
-      const requestStart = new Date(start).getTime();
-      const requestEnd = new Date(end).getTime();
+        const requestStart = new Date(start).getTime();
+        const requestEnd = new Date(end).getTime();
 
-      const attendee = event.attendees.find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
-      const currentRoom = extractRoomByEmail(rooms, attendee.email);
+        const currentRoom = extractRoomByEmail(rooms, roomEmail.email);
 
-      const { timeZone } = event.start;
+        const { timeZone } = event.start;
 
-      let isEventRoomAvailable = true;
-      if (requestStart < currentStartTime) {
-        const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, attendee.email, timeZone);
-        if (!isAvailable) {
-          isEventRoomAvailable = false;
+        let isEventRoomAvailable = true;
+        if (requestStart < currentStartTime) {
+          const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, roomEmail.email, timeZone);
+          if (!isAvailable) {
+            isEventRoomAvailable = false;
+          }
         }
-      }
 
-      if (requestEnd > currentEndTime) {
-        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, end, attendee.email, timeZone);
-        if (!isAvailable) {
-          isEventRoomAvailable = false;
+        if (requestEnd > currentEndTime) {
+          const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, end, roomEmail.email, timeZone);
+          if (!isAvailable) {
+            isEventRoomAvailable = false;
+          }
         }
-      }
 
-      if (isEventRoomAvailable) {
-        availableRooms.unshift(currentRoom);
+        if (isEventRoomAvailable) {
+          availableRooms.unshift(currentRoom);
+        }
       }
     }
 
@@ -209,13 +211,19 @@ export class CalenderService {
     const rooms = await this.authService.getDirectoryResources(domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
-    const formattedEvents = events.map((event) => {
-      const room: ConferenceRoom = rooms.find((_room) => event.location.includes(_room.name));
+    const formattedEvents = [];
+    for (const event of events) {
+      let room: ConferenceRoom = {};
+      if (event.location) {
+        room = rooms.find((_room) => event.location.includes(_room.name));
+      }
 
       let attendees: string[] = [];
-      for (const attendee of event.attendees) {
-        if (attendee.email !== room.email) {
-          attendees.push(attendee.email);
+      if (event.attendees) {
+        for (const attendee of event.attendees) {
+          if (attendee.email !== room.email) {
+            attendees.push(attendee.email);
+          }
         }
       }
 
@@ -233,8 +241,8 @@ export class CalenderService {
         createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
       };
 
-      return _event;
-    });
+      formattedEvents.push(_event);
+    }
 
     const sortedEvents = formattedEvents.sort((a, b) => {
       const startA = new Date(a.start).getTime();
@@ -321,7 +329,7 @@ export class CalenderService {
     }
 
     // if selected room email is same as event's room
-    if (event.attendees.some((attendee) => attendee.email === room)) {
+    if (event.attendees?.some((attendee) => attendee.email === room)) {
       const currentStartTime = new Date(event.start.dateTime).getTime();
       const currentEndTime = new Date(event.end.dateTime).getTime();
 
@@ -343,13 +351,6 @@ export class CalenderService {
           throw new ConflictException('Room is not available within the set duration');
         }
       }
-
-      // if (!(newStartTime >= currentStartTime && newEndTime <= currentEndTime)) {
-      //   const isAvailable = await this.isRoomAvailable(client, startTime, endTime, room, timeZone);
-      //   if (!isAvailable) {
-      //     throw new ConflictException('Room is not available within the set duration');
-      //   }
-      // }
     }
 
     const attendeeList = [];

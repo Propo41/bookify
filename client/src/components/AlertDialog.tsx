@@ -2,16 +2,24 @@ import Button from '@mui/material/Button';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { Box } from '@mui/material';
+import { Box, Chip } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
+import { EventResponse } from '@bookify/shared';
+import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
+import StairsIcon from '@mui/icons-material/Stairs';
+import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import { convertToLocaleTime } from '../helpers/utility';
+import TitleIcon from '@mui/icons-material/Title';
 
 interface AlertDialogProps {
   handleNegativeClick: () => void;
   handlePositiveClick: () => void;
   open: boolean;
+  event?: EventResponse;
 }
 
-export default function AlertDialog({ open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
+export default function AlertDialog({ event, open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
   if (!open) return <></>;
 
   return (
@@ -53,16 +61,36 @@ export default function AlertDialog({ open, handleNegativeClick, handlePositiveC
         }}
       >
         <Typography variant="h4" fontWeight={700}>
-          Confirm delete
+          Confirm deletion
         </Typography>
+        {event && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              textAlign: 'center',
+              justifyContent: 'center',
+              mt: 2,
+              mx: 1,
+            }}
+          >
+            {event.summary && <Chip icon={<TitleIcon fontSize="small" />} label={event.summary} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
+            {event.room && <Chip icon={<MeetingRoomRoundedIcon fontSize="small" />} label={event.room} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
+            <Chip
+              icon={<AccessTimeFilledRoundedIcon fontSize="small" />}
+              label={convertToLocaleTime(event.start) + ' - ' + convertToLocaleTime(event.end)}
+              sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }}
+            />
+            {event.seats && <Chip icon={<PeopleRoundedIcon fontSize="small" />} label={event.seats} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
+            {event.floor && <Chip icon={<StairsIcon fontSize="small" />} label={event.floor} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
+          </Box>
+        )}
 
-        <Typography variant="h5" mt={2} fontWeight={400}>
-          Are you sure you want to delete this event?
-        </Typography>
         <Box
           sx={{
             mx: 2,
-            mt: 6,
+            mt: 4,
             mb: 3,
             textAlign: 'center',
           }}

@@ -143,6 +143,7 @@ export default function AdvancedOptionsDialog({ handleInputChange, open, handleC
               backgroundColor: theme.palette.common.white,
               borderRadius: 15,
               color: theme.palette.common.black,
+              textTransform: 'none',
             }),
           ]}
         >

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsNumber,
   IsOptional,
@@ -10,13 +11,14 @@ export class GetAvailableRoomsQueryDto {
   @IsDateString()
   startTime: string;
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   duration: number;
 
   @IsTimeZone()
   timeZone: string;
 
-  @IsNumber()
+  @Transform(({ value }) => Number(value))
   seats: number;
 
   @IsOptional()
@@ -25,5 +27,5 @@ export class GetAvailableRoomsQueryDto {
 
   @IsOptional()
   @IsString()
-  eventId: string;
+  eventId?: string;
 }

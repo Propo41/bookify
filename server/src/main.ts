@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { winstonInstance } from './config/winston.config';
 import { HttpExceptionFilter } from './helpers';
@@ -14,6 +14,7 @@ async function bootstrap() {
     }),
   });
 
+  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = app.get(ConfigService);

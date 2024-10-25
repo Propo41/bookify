@@ -211,22 +211,6 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
             }
           />
 
-          <StyledTextField
-            value={formData.title}
-            startIcon={
-              <TitleIcon
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[50],
-                  }),
-                ]}
-              />
-            }
-            id="title"
-            placeholder="Add preferred title"
-            onChange={handleInputChange}
-          />
-
           {/* <Divider sx={{ mx: 2 }} /> */}
           <Dropdown
             sx={{ height: '60px' }}
@@ -263,6 +247,22 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
               />
             }
           />
+
+          <StyledTextField
+            value={formData.title}
+            startIcon={
+              <TitleIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
+            id="title"
+            placeholder="Add preferred title"
+            onChange={handleInputChange}
+          />
         </Box>
       </Box>
 
@@ -287,7 +287,7 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
               py: 2,
               backgroundColor: theme.palette.common.white,
               borderRadius: 15,
-
+              textTransform: 'none',
               color: theme.palette.common.black,
             }),
           ]}
