@@ -36,6 +36,24 @@ export default class Api {
     });
   }
 
+  async validateSession() {
+    try {
+      const token = await this.cacheService.get('access_token');
+      if (!token) {
+        return;
+      }
+
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/session', {
+        headers,
+      });
+
+      return res.data as ApiResponse<LoginResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
   async handleOAuthCallback(code: string) {
     try {
       const payload = {

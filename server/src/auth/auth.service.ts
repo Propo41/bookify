@@ -100,6 +100,10 @@ export class AuthService {
     return existingUser;
   }
 
+  async validateSession() {
+    return createResponse(true);
+  }
+
   async logout(oauth2Client: OAuth2Client): Promise<ApiResponse<boolean>> {
     try {
       // const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
@@ -122,7 +126,7 @@ export class AuthService {
     return result.map((row) => row.floor);
   }
 
-  async getDirectoryResources(domain: string) {
+  async getDirectoryResources(domain: string): Promise<ConferenceRoom[]> {
     const resources = await this.conferenceRoomsRepository.find({
       where: {
         domain,
@@ -135,11 +139,11 @@ export class AuthService {
     return resources;
   }
 
-  async isCalenderResourceExist(domain: string) {
+  async isCalenderResourceExist(domain: string): Promise<boolean> {
     return await this.conferenceRoomsRepository.exists({ where: { domain } });
   }
 
-  async createCalenderResources(oauth2Client: OAuth2Client, domain: string) {
+  async createCalenderResources(oauth2Client: OAuth2Client, domain: string): Promise<void> {
     const { items } = await this.googleApiService.getCalendarResources(oauth2Client);
 
     const rooms: ConferenceRoom[] = [];

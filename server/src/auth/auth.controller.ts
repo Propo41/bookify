@@ -1,6 +1,6 @@
 import { ApiResponse, LoginResponse } from '@bookify/shared';
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Headers, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { _OAuth2Client } from './decorators';
@@ -20,5 +20,11 @@ export class AuthController {
   @Post('/logout')
   async logout(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<boolean>> {
     return await this.authService.logout(client);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/session')
+  validateSession(): Promise<ApiResponse<boolean>> {
+    return this.authService.validateSession();
   }
 }

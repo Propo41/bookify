@@ -50,11 +50,21 @@ function OAuth() {
 
 function App() {
   const { mode, setMode } = useColorScheme();
+  const api = new Api();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (mode) {
       setMode('light');
     }
+  }, []);
+
+  useEffect(() => {
+    api.validateSession().then((res) => {
+      if (res?.redirect) {
+        navigate(ROUTES.signIn);
+      }
+    });
   }, []);
 
   return (

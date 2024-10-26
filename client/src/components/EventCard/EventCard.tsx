@@ -201,6 +201,8 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
                   fontSize: 15,
                   backgroundColor: '#EFEFEF',
                   cursor: chip.type === 'conference' ? 'pointer' : 'auto',
+                  px: 0.5,
+                  py: 1,
                 }}
                 onClick={() => {
                   if (chip.type === 'conference') {

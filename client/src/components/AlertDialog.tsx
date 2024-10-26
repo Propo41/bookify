@@ -80,7 +80,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
             <Chip
               icon={<AccessTimeFilledRoundedIcon fontSize="small" />}
               label={convertToLocaleTime(event.start) + ' - ' + convertToLocaleTime(event.end)}
-              sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }}
+              sx={{ fontSize: 15, backgroundColor: '#EFEFEF', px: 0.5, py: 1 }}
             />
             {event.seats && <Chip icon={<PeopleRoundedIcon fontSize="small" />} label={event.seats} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
             {event.floor && <Chip icon={<StairsIcon fontSize="small" />} label={event.floor} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
@@ -109,7 +109,14 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
               }),
             ]}
           >
-            <Typography variant="h6" fontWeight={700} color="error">
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              color="error"
+              sx={{
+                textTransform: 'none',
+              }}
+            >
               Delete
             </Typography>
           </Button>
@@ -133,6 +140,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
                 '&:focus': {
                   boxShadow: 'none',
                 },
+                textTransform: 'none',
               }),
             ]}
           >

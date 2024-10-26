@@ -4,16 +4,8 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-import {
-  ApiResponse,
-  BookRoomDto,
-  ListRoomsQueryDto,
-  GetAvailableRoomsQueryDto,
-  DeleteResponse,
-  EventResponse,
-  EventUpdateResponse,
-  IConferenceRoom,
-} from '@bookify/shared';
+// prettier-ignore
+import { ApiResponse, BookRoomDto, ListRoomsQueryDto, GetAvailableRoomsQueryDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@bookify/shared';
 import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()
@@ -68,7 +60,7 @@ export class CalenderController {
 
     // end time
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + duration);
+    startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
     const event = await this.calenderService.createEvent(client, domain, startTime, endTime, createConference, title, attendees, room);
@@ -88,7 +80,7 @@ export class CalenderController {
 
     // end time
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + duration);
+    startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
     return await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
