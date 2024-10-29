@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '../../../components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
+import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, populateTimeOptions, renderError } from '../../../helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
@@ -163,6 +163,20 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
+
+    if (new Date() > new Date(formattedStartTime)) {
+      toast.error(`Time mismatch. Try again`);
+      setLoading(false);
+      const options = createDropdownOptions(populateTimeOptions());
+      setTimeOptions(options);
+      setFormData((prev) => {
+        return {
+          ...prev,
+          startTime: options[0].value,
+        };
+      });
+      return;
+    }
 
     const floor = await cacheService.get('floor');
     const preferredTitle = (await cacheService.get('title')) || undefined;
