@@ -2,14 +2,14 @@ import Button from '@mui/material/Button';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { Box, Chip } from '@mui/material';
+import { Box, Chip, SxProps, Theme } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { EventResponse } from '@bookify/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { convertToLocaleTime } from '../helpers/utility';
+import { chromeBackground, convertToLocaleTime, isChromeExt } from '../helpers/utility';
 import TitleIcon from '@mui/icons-material/Title';
 
 interface AlertDialogProps {
@@ -22,6 +22,7 @@ interface AlertDialogProps {
 export default function AlertDialog({ event, open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
   if (!open) return <></>;
 
+  const background: SxProps<Theme> = isChromeExt ? { ...chromeBackground } : { background: 'white' };
   return (
     <Box
       sx={{
@@ -32,8 +33,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
         width: '100%',
         boxShadow: 'none',
         overflow: 'hidden',
-        backgroundColor: 'white',
-        // background: 'linear-gradient(to bottom right, #ffffff, #fffbeb, #f0f9ff)',
+        ...background,
       }}
     >
       <AppBar
