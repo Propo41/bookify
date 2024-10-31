@@ -28,12 +28,8 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
   const height = '58px';
 
   const handleChange = (event: SelectChangeEvent) => {
-    console.log(event);
-
     onChange(id, event.target.value);
   };
-
-  console.log(options);
 
   return (
     <Select

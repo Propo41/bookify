@@ -50,7 +50,6 @@ const RootContainer = styled(Stack)(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
   ...chromeBackground,
-  // background: 'linear-gradient(to bottom right, #fff7e6, #e6fffa)',
 }));
 
 const Login = () => {
@@ -82,7 +81,7 @@ const Login = () => {
       if (data) {
         const cacheService: CacheService = CacheServiceFactory.getCacheService();
         await cacheService.save('access_token', data);
-        navigate(ROUTES.home);
+        navigate(ROUTES.home, { replace: true });
       }
     } else {
       await api.login();

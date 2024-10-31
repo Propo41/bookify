@@ -21,7 +21,7 @@ function OAuth() {
     const error = url.searchParams.get('error');
 
     if (error) {
-      navigate(ROUTES.signIn, { state: { message: error } });
+      navigate(ROUTES.signIn, { state: { message: error }, replace: true });
       return;
     }
 
@@ -31,7 +31,7 @@ function OAuth() {
 
         const { status, message, data } = res;
         if (status !== 'success') {
-          navigate(ROUTES.signIn, { state: { message: message || 'Something went wrong' } });
+          navigate(ROUTES.signIn, { state: { message: message || 'Something went wrong' }, replace: true });
           return;
         }
 
@@ -39,7 +39,7 @@ function OAuth() {
           console.log('Access Token:', data?.accessToken);
           const cacheService: CacheService = CacheServiceFactory.getCacheService();
           await cacheService.save('access_token', data.accessToken);
-          navigate(ROUTES.home);
+          navigate(ROUTES.home, { replace: true });
         }
       });
     }

@@ -2,15 +2,11 @@ import Button from '@mui/material/Button';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { Box, Chip, SxProps, Theme } from '@mui/material';
+import { Box, SxProps, Theme } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { EventResponse } from '@bookify/shared';
-import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
-import StairsIcon from '@mui/icons-material/Stairs';
-import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { chromeBackground, convertToLocaleTime, isChromeExt } from '../helpers/utility';
-import TitleIcon from '@mui/icons-material/Title';
+import { chromeBackground, isChromeExt } from '../helpers/utility';
+import { EventCard } from './EventCard';
 
 interface AlertDialogProps {
   handleNegativeClick: () => void;
@@ -22,7 +18,7 @@ interface AlertDialogProps {
 export default function AlertDialog({ event, open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
   if (!open) return <></>;
 
-  const background: SxProps<Theme> = isChromeExt ? { ...chromeBackground } : { background: 'white' };
+  const background: SxProps<Theme> = isChromeExt ? { ...chromeBackground } : { background: '#F8F8F8' };
   return (
     <Box
       sx={{
@@ -57,11 +53,11 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
           textAlign: 'center',
           pb: 1,
           my: 1,
-          mt: 10,
+          mt: 5,
         }}
       >
         <Typography variant="h4" fontWeight={700}>
-          Confirm deletion
+          Are you sure you want to permanently delete this event?
         </Typography>
         {event && (
           <Box
@@ -73,17 +69,12 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
               justifyContent: 'center',
               mt: 2,
               mx: 1,
+              py: 2,
+              backgroundColor: 'white',
+              borderRadius: 2,
             }}
           >
-            {event.summary && <Chip icon={<TitleIcon fontSize="small" />} label={event.summary} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
-            {event.room && <Chip icon={<MeetingRoomRoundedIcon fontSize="small" />} label={event.room} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
-            <Chip
-              icon={<AccessTimeFilledRoundedIcon fontSize="small" />}
-              label={convertToLocaleTime(event.start) + ' - ' + convertToLocaleTime(event.end)}
-              sx={{ fontSize: 15, backgroundColor: '#EFEFEF', px: 0.5, py: 1 }}
-            />
-            {event.seats && <Chip icon={<PeopleRoundedIcon fontSize="small" />} label={event.seats} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
-            {event.floor && <Chip icon={<StairsIcon fontSize="small" />} label={event.floor} sx={{ fontSize: 15, backgroundColor: '#EFEFEF' }} />}
+            <EventCard event={event} hideMenu={true} handleEditClick={() => {}} onDelete={() => {}} />
           </Box>
         )}
 

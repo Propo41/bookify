@@ -58,6 +58,7 @@ export default function MyEventsView() {
 
   const handleConfirmDelete = async () => {
     setDialogOpen(false);
+    setLoading(true);
 
     if (!deleteEventId) {
       toast.error('Please select the event to delete');
@@ -65,6 +66,9 @@ export default function MyEventsView() {
     }
 
     const res = await api.deleteRoom(deleteEventId);
+
+    setLoading(false);
+
     const { data, status } = res;
 
     if (status !== 'success') {
