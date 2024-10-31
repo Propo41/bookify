@@ -58,6 +58,7 @@ interface EventCardProps {
   onDelete: (id?: string) => void;
   handleEditClick: (id: string) => void;
   disabled?: boolean;
+  hideMenu?: boolean;
 }
 
 interface ChipData {
@@ -67,7 +68,7 @@ interface ChipData {
   type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
 }
 
-const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -137,17 +138,19 @@ const EventCard = ({ sx, event, onDelete, handleEditClick }: EventCardProps) => 
 
         {/* Options menu */}
 
-        <IconButton
-          aria-label="more"
-          id="basic-button"
-          aria-controls={open ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-          sx={{ p: 0, mr: 1 }}
-        >
-          <MoreHorizIcon />
-        </IconButton>
+        {!hideMenu && (
+          <IconButton
+            aria-label="more"
+            id="basic-button"
+            aria-controls={open ? 'basic-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+            sx={{ p: 0, mr: 1 }}
+          >
+            <MoreHorizIcon />
+          </IconButton>
+        )}
 
         <Menu
           id="basic-menu"

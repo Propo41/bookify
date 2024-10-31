@@ -1,13 +1,6 @@
 import { GaxiosError } from 'gaxios';
-import {
-  BadRequestException,
-  UnauthorizedException,
-  ForbiddenException,
-  NotFoundException,
-  InternalServerErrorException,
-  ServiceUnavailableException,
-  HttpException,
-} from '@nestjs/common';
+// prettier-ignore
+import { BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException, InternalServerErrorException, ServiceUnavailableException, HttpException } from '@nestjs/common';
 
 export class GoogleAPIErrorMapper {
   /**
