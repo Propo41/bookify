@@ -23,7 +23,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { FormData } from '../../helpers/types';
 import { CacheService, CacheServiceFactory } from '../../helpers/cache';
 import Api from '../../api/api';
-import { EventResponse, IConferenceRoom } from '@bookify/shared';
+import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import AdvancedOptionsDialog from '../../pages/Home/AdvancedOptionsDialog';
 

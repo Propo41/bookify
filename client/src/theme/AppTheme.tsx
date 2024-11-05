@@ -17,7 +17,7 @@ export default function AppTheme({ children }: AppThemeProps) {
       shape,
       cssVariables: {
         colorSchemeSelector: 'data-mui-color-scheme',
-        cssVarPrefix: 'bookify',
+        cssVarPrefix: 'quickmeet',
       },
     });
   }, []);

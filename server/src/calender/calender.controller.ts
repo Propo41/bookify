@@ -5,7 +5,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
 // prettier-ignore
-import { ApiResponse, BookRoomDto, ListRoomsQueryDto, GetAvailableRoomsQueryDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@bookify/shared';
+import { ApiResponse, BookRoomDto, ListRoomsQueryDto, GetAvailableRoomsQueryDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()

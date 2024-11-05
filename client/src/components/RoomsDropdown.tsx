@@ -1,7 +1,7 @@
 import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { IConferenceRoom } from '@bookify/shared';
+import { IConferenceRoom } from '@quickmeet/shared';
 
 interface DropdownProps {
   id: string;

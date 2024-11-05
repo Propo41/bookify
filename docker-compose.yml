@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  bookify-app:
+  quickmeet-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -26,4 +26,4 @@ services:
     ports:
       - '${APP_PORT}:${APP_PORT}'
     volumes:
-      - ./bookify_db.sqlite:/usr/src/data
+      - ./quickmeet.sqlite:/usr/src/data

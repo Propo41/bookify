@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { FormData } from '../../../helpers/types';
-import { BookRoomDto, EventResponse, IConferenceRoom } from '@bookify/shared';
+import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdvancedOptionsDialog from '../AdvancedOptionsDialog';

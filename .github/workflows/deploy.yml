@@ -17,15 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy the app (develop)
-        if: github.ref == 'refs/heads/develop'
-        uses: digitalocean/app_action/deploy@v2
-        with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
-          app_name: ${{ secrets.DIGITAL_OCEAN_APP_NAME }}
-
-      - name: Deploy the app (main)
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy the app
         uses: digitalocean/app_action/deploy@v2
         with:
           token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}

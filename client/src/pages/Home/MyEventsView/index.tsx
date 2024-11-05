@@ -1,4 +1,4 @@
-import { BookRoomDto, EventResponse, IConferenceRoom } from '@bookify/shared';
+import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { convertToRFC3339, getTimeZoneString, renderError } from '../../../helpers/utility';

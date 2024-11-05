@@ -1,4 +1,4 @@
-import { ApiResponse } from '@bookify/shared';
+import { ApiResponse } from '@quickmeet/shared';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../config/routes';

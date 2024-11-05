@@ -7,7 +7,7 @@ import {
   GetAvailableRoomsQueryDto,
   IConferenceRoom,
   LoginResponse,
-} from '@bookify/shared';
+} from '@quickmeet/shared';
 import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '../config/secrets';
