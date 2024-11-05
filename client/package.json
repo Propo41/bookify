@@ -4,13 +4,14 @@
   "private": true,
   "author": "Ali Ahnaf",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
-    "@quickmeet/shared": "1.0.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/lab": "^6.0.0-beta.9",
     "@mui/material": "^6.1.0",
+    "@quickmeet/shared": "1.0.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -24,18 +25,13 @@
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.26.2",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "npm run env -- react-scripts start",
-    "start:chrome": "npm run env:chrome -- react-scripts start",
-    "build": "react-scripts build",
-    "build:chrome": "npm run env:chrome -- react-scripts build",
-    "serve": "npx http-server build --port 3000",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite --port 3000",
+    "build": "tsc -b && vite build",
+    "build:chrome": "tsc -b && vite build --mode chrome",
+    "serve": "npx http-server dist --port 3000",
     "lint": "eslint \"{src}/**/*.ts\" --fix"
   },
   "eslintConfig": {
@@ -62,10 +58,12 @@
     "@types/lodash": "^4.17.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "env-cmd": "^10.1.0",
+    "@vitejs/plugin-react": "^4.3.3",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
   }
 }

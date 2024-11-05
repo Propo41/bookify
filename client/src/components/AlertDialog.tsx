@@ -117,7 +117,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
             variant="text"
             disableElevation
             sx={[
-              (theme) => ({
+              (_) => ({
                 py: 1,
                 px: 3,
                 mt: 2,

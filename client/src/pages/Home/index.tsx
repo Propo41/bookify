@@ -50,7 +50,7 @@ const Container = styled(MuiCard)(({ theme }) => ({
   borderRadius: isChromeExt ? 0 : 'auto',
 }));
 
-const RootContainer = styled(Stack)(({ theme }) => ({
+const RootContainer = styled(Stack)(({ theme: _ }) => ({
   textAlign: 'center',
   minHeight: '100vh',
   justifyContent: 'center',

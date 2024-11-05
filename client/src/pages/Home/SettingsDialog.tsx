@@ -35,7 +35,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   textAlign: 'center',
 }));
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
   borderRadius: 30,
   '& .MuiToggleButtonGroup-grouped': {
     border: 'none',
@@ -406,7 +406,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
     navigate(ROUTES.signIn);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent | null, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       setTabIndex(newValue);
     }

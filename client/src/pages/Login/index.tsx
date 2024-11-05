@@ -43,7 +43,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   },
 }));
 
-const RootContainer = styled(Stack)(({ theme }) => ({
+const RootContainer = styled(Stack)(({ theme: _ }) => ({
   textAlign: 'center',
   minHeight: '100vh',
   justifyContent: 'center',
