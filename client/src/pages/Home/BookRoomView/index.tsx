@@ -1,22 +1,23 @@
 import { Box, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Dropdown, { DropdownOption } from '../../../components/Dropdown';
+import Dropdown, { DropdownOption } from '@components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '../../../helpers/utility';
+import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { FormData } from '../../../helpers/types';
+import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import AdvancedOptionsDialog from '../AdvancedOptionsDialog';
-import { CacheService, CacheServiceFactory } from '../../../helpers/cache';
-import Api from '../../../api/api';
-import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
+import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
-import RoomsDropdown, { RoomsDropdownOption } from '../../../components/RoomsDropdown';
+import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
+import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
+import AdvancedOptionsDialog from '../AdvancedOptionsDialog';
+
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);

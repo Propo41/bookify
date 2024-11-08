@@ -1,5 +1,5 @@
 import { AppBar, Box, Button, IconButton, Skeleton, Stack, Typography } from '@mui/material';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { DropdownOption } from '@components/Dropdown';
 import { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import {
@@ -11,21 +11,21 @@ import {
   isChromeExt,
   populateTimeOptions,
   renderError,
-} from '../../helpers/utility';
+} from '@helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
-import { availableDurations, availableRoomCapacities } from '../../pages/Home/shared';
+import { availableDurations, availableRoomCapacities } from '@pages/Home/shared';
 import { LoadingButton } from '@mui/lab';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import RoomsDropdown, { RoomsDropdownOption } from '../RoomsDropdown';
+import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { FormData } from '../../helpers/types';
-import { CacheService, CacheServiceFactory } from '../../helpers/cache';
-import Api from '../../api/api';
+import { FormData } from '@helpers/types';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
+import Api from '@api/api';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
-import AdvancedOptionsDialog from '../../pages/Home/AdvancedOptionsDialog';
+import AdvancedOptionsDialog from '@pages/Home/AdvancedOptionsDialog';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);

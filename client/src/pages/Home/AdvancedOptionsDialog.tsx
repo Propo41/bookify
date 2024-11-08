@@ -3,11 +3,11 @@ import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { Box, Checkbox, Divider } from '@mui/material';
-import StyledTextField from '../../components/StyledTextField';
-import ChipInput from '../../components/ChipInput';
+import StyledTextField from '@components/StyledTextField';
+import ChipInput from '@components/ChipInput';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import { FormData } from '../../helpers/types';
-import { chromeBackground, isChromeExt } from '../../helpers/utility';
+import { FormData } from '@helpers/types';
+import { chromeBackground, isChromeExt } from '@helpers/utility';
 
 interface AdvancedOptionsDialogProps {
   handleInputChange: (id: string, value: string | number | string[] | boolean) => void;

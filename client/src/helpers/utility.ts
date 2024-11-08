@@ -1,9 +1,9 @@
 import { ApiResponse } from '@quickmeet/shared';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
-import { ROUTES } from '../config/routes';
+import { ROUTES } from '@config/routes';
 import { CacheService, CacheServiceFactory } from './cache';
-import { secrets } from '../config/secrets';
+import { secrets } from '@config/secrets';
 
 /**
  * @param start time in utc format

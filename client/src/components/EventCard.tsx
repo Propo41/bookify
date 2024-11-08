@@ -7,7 +7,7 @@ import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { convertToLocaleTime } from '../../helpers/utility';
+import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const ListItem = styled('li')(({ theme }) => ({

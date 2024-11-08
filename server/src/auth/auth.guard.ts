@@ -6,7 +6,6 @@ import { Request } from 'express';
 import { IJwtPayload } from './dto';
 import { AuthService } from './auth.service';
 import to from 'await-to-js';
-import { ApiResponse } from '@quickmeet/shared';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

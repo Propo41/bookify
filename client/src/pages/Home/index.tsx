@@ -3,14 +3,14 @@ import MuiCard from '@mui/material/Card';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { capitalize } from 'lodash';
-import { CacheService, CacheServiceFactory } from '../../helpers/cache';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import TopNavigationBar from './TopNavigationBar';
-import { ROUTES } from '../../config/routes';
+import { ROUTES } from '@config/routes';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import SettingsDialog from './SettingsDialog';
-import { Action, chromeBackground, isChromeExt } from '../../helpers/utility';
+import { Action, chromeBackground, isChromeExt } from '@helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 

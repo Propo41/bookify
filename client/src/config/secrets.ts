@@ -9,5 +9,3 @@ export const secrets = {
   appSlogan: import.meta.env.VITE_APP_SLOGAN,
   appTitle: import.meta.env.VITE_APP_TITLE,
 };
-
-console.log(secrets);

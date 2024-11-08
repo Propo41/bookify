@@ -5,6 +5,17 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@': '/src',
+        '@components': '/src/components',
+        '@api': '/src/api',
+        '@helpers': '/src/helpers',
+        '@pages': '/src/pages',
+        '@theme': '/src/theme',
+        '@config': '/src/config',
+      },
+    },
     build: {
       outDir: mode === 'chrome' ? 'build_chrome' : 'build_web',
       chunkSizeWarningLimit: 600,

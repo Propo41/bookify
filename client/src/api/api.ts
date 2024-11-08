@@ -10,8 +10,8 @@ import {
 } from '@quickmeet/shared';
 import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
 import { toast } from 'react-hot-toast';
-import { secrets } from '../config/secrets';
-import { CacheService, CacheServiceFactory } from '../helpers/cache';
+import { secrets } from '@config/secrets';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
 
 export const SCOPES = [
   'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',

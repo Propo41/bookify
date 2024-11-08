@@ -1,5 +1,5 @@
-import { DropdownOption } from '../../components/Dropdown';
-import { populateDurationOptions, populateRoomCapacity, populateTimeOptions } from '../../helpers/utility';
+import { DropdownOption } from '@components/Dropdown';
+import { populateDurationOptions, populateRoomCapacity, populateTimeOptions } from '@helpers/utility';
 
 export interface Event {
   room?: string;
