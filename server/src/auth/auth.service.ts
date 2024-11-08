@@ -1,5 +1,5 @@
-import { LoginResponse } from '@bookify/shared';
-import { ApiResponse } from '@bookify/shared';
+import { LoginResponse } from '@quickmeet/shared';
+import { ApiResponse } from '@quickmeet/shared';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Auth, ConferenceRoom, User } from './entities';
 import appConfig from '../config/env/app.config';

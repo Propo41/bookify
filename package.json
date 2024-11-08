@@ -1,5 +1,5 @@
 {
-  "name": "@bookify/root",
+  "name": "@quickmeet/root",
   "version": "1.0.0",
   "description": "",
   "author": "Ali Ahnaf",
@@ -15,7 +15,8 @@
     "start:dev": "npm run start:dev --w server",
     "start:client": "npm run start --w client",
     "migration:run": "npm run migration:run --w server",
-    "start:prod": "cd server && npm run start"
+    "start:prod": "cd server && npm run start",
+    "start:all": "npm-run-all2 -p start:client start:server"
   },
   "workspaces": [
     "shared",
@@ -24,5 +25,8 @@
   ],
   "dependencies": {
     "class-transformer": "^0.5.1"
+  },
+  "devDependencies": {
+    "npm-run-all2": "^7.0.1"
   }
 }

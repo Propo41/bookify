@@ -4,25 +4,25 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import Dropdown, { DropdownOption } from '../../components/Dropdown';
-import { ROUTES } from '../../config/routes';
+import Dropdown, { DropdownOption } from '@components/Dropdown';
+import { ROUTES } from '@config/routes';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
-import { CacheService, CacheServiceFactory } from '../../helpers/cache';
-import Api from '../../api/api';
-import { chromeBackground, createDropdownOptions, isChromeExt, renderError } from '../../helpers/utility';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
+import Api from '@api/api';
+import { chromeBackground, createDropdownOptions, isChromeExt, renderError } from '@helpers/utility';
 import { availableDurations, availableRoomCapacities } from './shared';
 import { capitalize } from 'lodash';
 import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
-import { secrets } from '../../config/secrets';
+import { secrets } from '@config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
-import StyledTextField from '../../components/StyledTextField';
+import StyledTextField from '@components/StyledTextField';
 import TitleIcon from '@mui/icons-material/Title';
 
 const TopBar = styled(Box)(({ theme }) => ({
@@ -35,7 +35,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   textAlign: 'center',
 }));
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
   borderRadius: 30,
   '& .MuiToggleButtonGroup-grouped': {
     border: 'none',
@@ -406,7 +406,7 @@ export default function SettingsDialog({ open, handleClose, onSave }: SettingsDi
     navigate(ROUTES.signIn);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent | null, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       setTabIndex(newValue);
     }

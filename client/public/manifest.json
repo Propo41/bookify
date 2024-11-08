@@ -1,12 +1,12 @@
 {
-  "name": "Bookify",
+  "name": "QuickMeet",
   "version": "1.0.0",
   "description": "Book meeting spaces with a simple click",
   "manifest_version": 3,
   "author": "Ali Ahnaf",
   "action": {
     "default_popup": "index.html",
-    "default_title": "Bookify"
+    "default_title": "QuickMeet"
   },
   "icons": {
     "16": "favicon-16x16.png",

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TextField, Chip, Box } from '@mui/material';
-import { validateEmail } from '../helpers/utility';
+import { validateEmail } from '@helpers/utility';
 import { toast } from 'react-hot-toast';
 
 interface ChipInputProps {

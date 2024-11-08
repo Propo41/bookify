@@ -10,8 +10,8 @@
         "outDir": "dist/logs"
       },
       {
-        "include": "../bookify_db.sqlite",
-        "outDir": "dist/bookify_db.sqlite"
+        "include": "../quickmeet.sqlite",
+        "outDir": "dist/quickmeet.sqlite"
       }
     ]
   }

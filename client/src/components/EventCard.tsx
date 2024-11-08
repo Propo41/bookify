@@ -2,12 +2,12 @@ import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuIt
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { EventResponse } from '@bookify/shared';
+import { EventResponse } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import { convertToLocaleTime } from '../../helpers/utility';
+import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const ListItem = styled('li')(({ theme }) => ({

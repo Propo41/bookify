@@ -1,14 +1,14 @@
 import { Box, Button, Stack, styled, Typography } from '@mui/material';
 import MuiCard from '@mui/material/Card';
 import { useEffect } from 'react';
-import { GoogleIcon } from '../../components/CustomIcons';
+import { GoogleIcon } from '@components/CustomIcons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CacheService, CacheServiceFactory } from '../../helpers/cache';
-import { secrets } from '../../config/secrets';
-import { ROUTES } from '../../config/routes';
+import { CacheService, CacheServiceFactory } from '@helpers/cache';
+import { secrets } from '@config/secrets';
+import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
-import Api from '../../api/api';
-import { chromeBackground, isChromeExt, renderError } from '../../helpers/utility';
+import Api from '@api/api';
+import { chromeBackground, isChromeExt, renderError } from '@helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();
@@ -43,7 +43,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   },
 }));
 
-const RootContainer = styled(Stack)(({ theme }) => ({
+const RootContainer = styled(Stack)(({ theme: _ }) => ({
   textAlign: 'center',
   minHeight: '100vh',
   justifyContent: 'center',

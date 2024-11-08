@@ -12,7 +12,7 @@ const TopBar = styled(Box)(({ theme }) => ({
   textAlign: 'center',
 }));
 
-const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
   borderRadius: 30,
   '& .MuiToggleButtonGroup-grouped': {
     border: 'none',
@@ -51,7 +51,7 @@ interface TopNavigationBarProps {
 }
 
 const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarProps) => {
-  const handleChange = (event: React.SyntheticEvent | null, newValue: number) => {
+  const handleChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       handleTabChange(newValue);
     }

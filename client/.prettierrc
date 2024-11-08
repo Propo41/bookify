@@ -1,5 +1,15 @@
 {
   "singleQuote": true,
   "trailingComma": "all",
-  "printWidth": 160
+  "printWidth": 160,
+  "plugins": [
+    "prettier-plugin-sort-imports"
+  ],
+  "importOrder": [
+    "^react",
+    "^@?\\w",
+    "^[./]",
+    "^@/components/(.*)$",
+    "^[./](.*).(scss|css)$"
+  ]
 }

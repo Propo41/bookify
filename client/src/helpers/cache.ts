@@ -1,4 +1,4 @@
-import { secrets } from '../config/secrets';
+import { secrets } from '@config/secrets';
 
 type CacheItems = 'access_token' | 'floor' | 'floors' | 'duration' | 'seats' | 'title';
 export interface CacheService {

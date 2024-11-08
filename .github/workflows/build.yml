@@ -16,7 +16,6 @@ on:
       - '**/*.json'
 
 env:
-  AZURE_WEBAPP_NAME: bookify
   NODE_VERSION: '20.x'
 
 jobs:

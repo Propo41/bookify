@@ -87,17 +87,17 @@ export class CalenderMockDb {
     this.users.push(
       {
         id: 'user001',
-        email: 'john.doe@bookify.com',
+        email: 'john.doe@quickmeet.com',
         name: 'John Doe',
       },
       {
         id: 'user002',
-        email: 'jane.smith@bookify.com',
+        email: 'jane.smith@quickmeet.com',
         name: 'Jane Smith',
       },
       {
         id: 'user003',
-        email: 'sam.lee@bookify.com',
+        email: 'sam.lee@quickmeet.com',
         name: 'Sam Lee',
       },
     );

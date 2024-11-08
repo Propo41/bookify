@@ -1,11 +1,11 @@
   <h1 align="center">
-    Bookify
+    QuickMeet
     <br />
     <br />
     <a href="">
-      <img src="https://github.com/user-attachments/assets/d5b40ed0-285b-4c70-88ed-a9706ef15dfb" alt="Bookify" width="30%">
-      <img src="https://github.com/user-attachments/assets/839cb957-e66a-4698-a973-501068befaa5" alt="Bookify" width="30%">
-      <img src="https://github.com/user-attachments/assets/a7d1906f-55a8-446a-90b7-e01ee2cf9cba" alt="Bookify" width="30%">
+      <img src="https://github.com/user-attachments/assets/d5b40ed0-285b-4c70-88ed-a9706ef15dfb" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/839cb957-e66a-4698-a973-501068befaa5" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/a7d1906f-55a8-446a-90b7-e01ee2cf9cba" alt="QuickMeet" width="30%">
     </a>
   </h1>
 </div>
@@ -18,7 +18,7 @@
   <a href="#license"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
 </p>
 
-Bookify enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
+QuickMeet enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
 
 ### Key Features:
 - **Quick Meeting Setup**: Book a room in seconds by selecting start time, seat requirements, and an optional floor preference.
@@ -28,7 +28,7 @@ Bookify enhances productivity by minimizing the time spent finding and securing 
 
 ### Who this is for?
 
-Bookify is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
+QuickMeet is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
 
 - Corporate Offices: Companies with various specialized meeting spaces that need to streamline room bookings for teams and departments.
 
@@ -37,29 +37,29 @@ Bookify is specifically tailored for organizations that utilize unique meeting r
 - Tech Companies: Businesses that rely on collaborative workspaces and need to efficiently manage the booking of cmeeting rooms equipped with specific tools and resources.
 
 
-### Bookify vs Google Calendar
+### QuickMeet vs Google Calendar
 
 #### 1. **Clunky Room Booking**:
 Google Calendar may offer room bookings, but finding a suitable room in a large office with specific requirements (like seat capacity or floor preference) can be a pain. You end up scrolling through a bunch of rooms after checking through several dropdowns.
 
-**Bookify** solves this by instantly booking the best available room based on your needs—no endless scrolling or guesswork!
+**QuickMeet** solves this by instantly booking the best available room based on your needs—no endless scrolling or guesswork!
 
 #### 2. **Overrunning Meetings? Google Calendar Isn't Built for That**:
 If your meeting is running late, extending it on Google Calendar isn't exactly smooth. You'll likely have to go through the hassle of updating the event or manually finding another room when time runs out.
 
-**Bookify** has got your back—when your meeting is overrunning, you can either extend the current room’s time (if it’s free) or quickly book a new one without breaking a sweat.
+**QuickMeet** has got your back—when your meeting is overrunning, you can either extend the current room’s time (if it’s free) or quickly book a new one without breaking a sweat.
 
 #### 3. **Floor-Specific Booking Is a Nightmare**:
 Need a room close to your team or on a specific floor? Google Calendar makes you hunt for room locations manually, wasting time in the process.
 
-**Bookify** makes floor-specific booking a breeze. Just input the floor you need, and voilà—a room on that floor is booked for you instantly.
+**QuickMeet** makes floor-specific booking a breeze. Just input the floor you need, and voilà—a room on that floor is booked for you instantly.
 
 #### 4. **High-Demand Periods Lead to Chaos**:
 During peak times, manually searching for a free room on Google Calendar is frustrating. Rooms fill up fast, and you're left scrambling to find an available one.
 
-**Bookify** shines here by quickly scanning room availability and securing the best available space, so you're never left without a meeting room, even during the busiest hours.
+**QuickMeet** shines here by quickly scanning room availability and securing the best available space, so you're never left without a meeting room, even during the busiest hours.
 
-#### TL;DR: Google Calendar may get the job done, but it's clunky, slow, and inefficient when it comes to room bookings. **Bookify** offers a faster, smarter solution tailored to modern office needs, making room scheduling hassle-free.
+#### TL;DR: Google Calendar may get the job done, but it's clunky, slow, and inefficient when it comes to room bookings. **QuickMeet** offers a faster, smarter solution tailored to modern office needs, making room scheduling hassle-free.
 
 
 ## Use cases
@@ -129,7 +129,7 @@ Verification requirements can be found [here](https://support.google.com/cloud/a
 
 ## Contributing
 
-Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Bookify.
+Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to QuickMeet.
 
 
 ## Reference
@@ -152,4 +152,4 @@ Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CO
 
 ## License
 
-Bookify is [MIT licensed](./LICENSE).
+QuickMeet is [MIT licensed](./LICENSE).

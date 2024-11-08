@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import colorSchemes from './primitives/colorSchemes';
+import colorSchemes from './primitives/color-schemes';
 import typography from './primitives/typography';
 import shape from './primitives/shape';
 import componentsOverride from './components';
@@ -17,7 +17,7 @@ export default function AppTheme({ children }: AppThemeProps) {
       shape,
       cssVariables: {
         colorSchemeSelector: 'data-mui-color-scheme',
-        cssVarPrefix: 'bookify',
+        cssVarPrefix: 'quickmeet',
       },
     });
   }, []);

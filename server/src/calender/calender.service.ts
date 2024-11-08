@@ -6,7 +6,7 @@ import appConfig from '../config/env/app.config';
 import { extractRoomByEmail, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
 import { ConferenceRoom } from '../auth/entities';
-import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@bookify/shared';
+import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@quickmeet/shared';
 import { createResponse } from '../helpers/payload.util';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
@@ -65,7 +65,7 @@ export class CalenderService {
     var event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || 'Quick Meeting',
       location: pickedRoom.name,
-      description: 'A quick meeting created by Bookify',
+      description: 'A quick meeting created by QuickMeet',
       start: {
         dateTime: startTime,
       },
@@ -386,7 +386,7 @@ export class CalenderService {
       ...event,
       summary: eventTitle?.trim() || 'Quick Meeting',
       location: pickedRoom.name,
-      description: 'A quick meeting created by Bookify',
+      description: 'A quick meeting created by QuickMeet',
       start: {
         dateTime: startTime,
       },

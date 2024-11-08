@@ -4,9 +4,9 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { Box, SxProps, Theme } from '@mui/material';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
-import { EventResponse } from '@bookify/shared';
-import { chromeBackground, isChromeExt } from '../helpers/utility';
-import { EventCard } from './EventCard';
+import { EventResponse } from '@quickmeet/shared';
+import { chromeBackground, isChromeExt } from '@helpers/utility';
+import EventCard from './EventCard';
 
 interface AlertDialogProps {
   handleNegativeClick: () => void;
@@ -74,7 +74,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
               borderRadius: 2,
             }}
           >
-            <EventCard event={event} hideMenu={true} handleEditClick={() => {}} onDelete={() => {}} />
+            <EventCard event={event} hideMenu={true} handleEditClick={() => { }} onDelete={() => { }} />
           </Box>
         )}
 
@@ -117,7 +117,7 @@ export default function AlertDialog({ event, open, handleNegativeClick, handlePo
             variant="text"
             disableElevation
             sx={[
-              (theme) => ({
+              (_) => ({
                 py: 1,
                 px: 3,
                 mt: 2,

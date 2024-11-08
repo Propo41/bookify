@@ -9,7 +9,7 @@ const loggerInstance: LoggerOptions = {
   level: 'info',
   format: combine(metadata(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' })),
   defaultMeta: {
-    service: 'BookifyApp',
+    service: 'QuickMeet',
   },
   transports: [
     new transports.Console({

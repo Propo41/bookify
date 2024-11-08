@@ -1,4 +1,4 @@
-import { IConferenceRoom } from '@bookify/shared';
+import { IConferenceRoom } from '@quickmeet/shared';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'ConferenceRooms' })
