@@ -16,7 +16,7 @@ import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
-import AdvancedOptionsDialog from '../AdvancedOptionsDialog';
+import AdvancedOptionsView from '../AdvancedOptionsView';
 
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
@@ -197,17 +197,17 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
     await setAvailableRooms();
   }
 
-  const handleAdvancedOptionsDialogOpen = () => {
+  const handleAdvancedOptionsViewOpen = () => {
     setAdvOptionsOpen(true);
   };
 
-  const handleAdvancedOptionsDialogClose = () => {
+  const handleAdvancedOptionsViewClose = () => {
     setAdvOptionsOpen(false);
   };
 
   if (advOptionsOpen) {
     return (
-      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
+      <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />
     );
   }
 
@@ -315,7 +315,7 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
           }}
-          onClick={handleAdvancedOptionsDialogOpen}
+          onClick={handleAdvancedOptionsViewOpen}
         >
           <Typography variant="subtitle1">Additional options</Typography>
           <Box

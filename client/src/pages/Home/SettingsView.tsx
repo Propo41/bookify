@@ -82,7 +82,7 @@ const SettingsButton = styled(Button)(({ theme: _ }) => ({
   },
 }));
 
-interface SettingsDialogProps {
+interface SettingsViewProps {
   handleClose: () => void;
   onSave: () => void;
   open: boolean;
@@ -395,7 +395,7 @@ const tabs = [
   },
 ];
 
-export default function SettingsDialog({ open, handleClose, onSave }: SettingsDialogProps) {
+export default function SettingsView({ open, handleClose, onSave }: SettingsViewProps) {
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
 

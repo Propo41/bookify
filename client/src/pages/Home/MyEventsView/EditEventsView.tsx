@@ -25,7 +25,7 @@ import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import Api from '@api/api';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
-import AdvancedOptionsDialog from '@pages/Home/AdvancedOptionsDialog';
+import AdvancedOptionsView from '@pages/Home/AdvancedOptionsView';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -52,7 +52,7 @@ const initFormData = (event: EventResponse) => {
   } as FormData;
 };
 
-interface EditDialogProps {
+interface EditEventsViewProps {
   open: boolean;
   handleClose: () => void;
   event: EventResponse;
@@ -61,7 +61,7 @@ interface EditDialogProps {
   currentRoom?: IConferenceRoom;
 }
 
-export default function EditDialog({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditDialogProps) {
+export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditEventsViewProps) {
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
@@ -173,11 +173,11 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
   }
 
-  const handleAdvancedOptionsDialogOpen = () => {
+  const handleAdvancedOptionsViewOpen = () => {
     setAdvOptionsOpen(true);
   };
 
-  const handleAdvancedOptionsDialogClose = () => {
+  const handleAdvancedOptionsViewClose = () => {
     setAdvOptionsOpen(false);
   };
 
@@ -189,7 +189,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
 
   if (advOptionsOpen) {
     return (
-      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
+      <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />
     );
   }
 
@@ -344,7 +344,7 @@ export default function EditDialog({ open, event, handleClose, currentRoom, onEd
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
               }}
-              onClick={handleAdvancedOptionsDialogOpen}
+              onClick={handleAdvancedOptionsViewOpen}
             >
               <Typography variant="subtitle1">Additional options</Typography>
               <Box
