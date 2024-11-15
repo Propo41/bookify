@@ -6,7 +6,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
@@ -271,7 +271,7 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
               value={formData.seats.toString()}
               onChange={handleInputChange}
               icon={
-                <PeopleRoundedIcon
+                <EventSeatRoundedIcon
                   sx={[
                     (theme) => ({
                       color: theme.palette.grey[50],

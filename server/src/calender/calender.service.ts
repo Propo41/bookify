@@ -150,7 +150,7 @@ export class CalenderService {
 
     if (eventId) {
       const event = await this.googleApiService.getCalenderEvent(client, eventId);
-      const roomEmail = (event.attendees || []).find((attendee) => attendee.email.endsWith('resource.calendar.google.com'));
+      const roomEmail = (event.attendees || []).find((attendee) => attendee.resource && attendee.responseStatus !== 'declined');
 
       if (roomEmail) {
         const currentStartTime = new Date(event.start.dateTime).getTime();
@@ -207,7 +207,7 @@ export class CalenderService {
     return true;
   }
 
-  async listRooms(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
+  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
     const rooms = await this.authService.getDirectoryResources(domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
@@ -221,7 +221,7 @@ export class CalenderService {
       let attendees: string[] = [];
       if (event.attendees) {
         for (const attendee of event.attendees) {
-          if (attendee.email !== room.email) {
+          if (!attendee.resource && attendee.responseStatus !== 'declined') {
             attendees.push(attendee.email);
           }
         }
@@ -256,6 +256,7 @@ export class CalenderService {
       const firstCreated = Math.min(...timestamps);
       return firstCreated === createdAtA ? 1 : -1;
     });
+
     return createResponse(sortedEvents);
   }
 

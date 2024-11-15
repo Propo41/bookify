@@ -15,13 +15,13 @@ export class CalenderController {
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Get('/rooms')
-  async listRooms(
+  async getEvents(
     @_OAuth2Client() client: OAuth2Client,
     @_User('domain') domain: string,
     @Query() listRoomsQueryDto: ListRoomsQueryDto,
   ): Promise<ApiResponse<EventResponse[]>> {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
-    return await this.calenderService.listRooms(client, domain, startTime, endTime, timeZone);
+    return await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
   }
 
   @UseGuards(AuthGuard)

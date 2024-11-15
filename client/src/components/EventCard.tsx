@@ -6,7 +6,7 @@ import { EventResponse } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
@@ -31,7 +31,7 @@ export const createChips = (event: EventResponse) => {
   if (event.seats) {
     chips.push({
       label: event.seats.toString(),
-      icon: <PeopleRoundedIcon fontSize="small" />,
+      icon: <EventSeatRoundedIcon fontSize="small" />,
     });
   }
 

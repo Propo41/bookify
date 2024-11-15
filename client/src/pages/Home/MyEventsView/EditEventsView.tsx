@@ -16,7 +16,7 @@ import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRound
 import { availableDurations, availableRoomCapacities } from '@pages/Home/shared';
 import { LoadingButton } from '@mui/lab';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -302,7 +302,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 value={formData.seats?.toString()}
                 onChange={handleInputChange}
                 icon={
-                  <PeopleRoundedIcon
+                  <EventSeatRoundedIcon
                     sx={[
                       (theme) => ({
                         color: theme.palette.grey[50],
