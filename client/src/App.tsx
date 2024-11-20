@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
 import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
-import { useColorScheme } from '@mui/material';
 
 // only used for the web version
 // for chrome extension, a different oauth flow is used using the chrome api
@@ -49,15 +48,8 @@ function OAuth() {
 }
 
 function App() {
-  const { mode, setMode } = useColorScheme();
   const api = new Api();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (mode) {
-      setMode('light');
-    }
-  }, []);
 
   useEffect(() => {
     api.validateSession().then((res) => {
@@ -70,9 +62,10 @@ function App() {
   return (
     <AppTheme>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sign-in" element={<Login />} />
-        <Route path="/oauthcallback" element={<OAuth />} />
+        <Route path={ROUTES.home} element={<Home />} />
+        <Route path={ROUTES.signIn} element={<Login />} />
+        {/* <Route path={ROUTES.settings} element={<Login />} /> */}
+        <Route path={ROUTES.oauth} element={<OAuth />} />
       </Routes>
       <Toaster
         position="top-center"

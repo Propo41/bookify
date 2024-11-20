@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
         '@pages': '/src/pages',
         '@theme': '/src/theme',
         '@config': '/src/config',
+        '@context': '/src/context',
       },
     },
     build: {
