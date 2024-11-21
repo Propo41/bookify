@@ -32,12 +32,14 @@ export class CalenderController {
     @_User('domain') domain: string,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
-    const { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
+    let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + Number(duration));
     const endTime = startDate.toISOString();
 
+    // todo: do this in the GetAvailableRoomsQueryDto class using transform but not working
+    floor = floor.trim() === '' ? undefined : floor;
     const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, timeZone, seats, floor, eventId);
     return createResponse(rooms);
   }

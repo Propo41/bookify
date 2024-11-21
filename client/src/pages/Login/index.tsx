@@ -1,5 +1,4 @@
-import { Box, Button, Stack, styled, Typography } from '@mui/material';
-import MuiCard from '@mui/material/Card';
+import { Box, Button, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { GoogleIcon } from '@components/CustomIcons';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -8,49 +7,10 @@ import { secrets } from '@config/secrets';
 import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
 import Api from '@api/api';
-import { chromeBackground, isChromeExt, renderError } from '@helpers/utility';
+import { isChromeExt, renderError } from '@helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();
-
-const Container = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  textAlign: 'center',
-  gap: theme.spacing(2),
-  ...chromeBackground,
-}));
-
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  textAlign: 'center',
-  width: '100%',
-  gap: theme.spacing(2),
-  maxHeight: '550px',
-  borderRadius: 20,
-  boxShadow: '0 8px 20px 0 rgba(0,0,0,0.1)',
-  background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)',
-  border: 'none',
-  zIndex: 1,
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    maxWidth: '390px',
-  },
-}));
-
-const RootContainer = styled(Stack)(({ theme: _ }) => ({
-  textAlign: 'center',
-  minHeight: '100vh',
-  justifyContent: 'center',
-  position: 'relative',
-  overflow: 'hidden',
-  ...chromeBackground,
-}));
 
 const Login = () => {
   const navigate = useNavigate();
@@ -88,10 +48,13 @@ const Login = () => {
     }
   }
 
-  const common = (
+  return (
     <Box
+      mx={2}
+      mt={1}
       sx={{
-        height: '100vh',
+        flexGrow: 1,
+        position: 'relative',
       }}
     >
       <Box mt={18} display={'flex'} flexDirection={'column'} zIndex={100}>
@@ -102,8 +65,8 @@ const Login = () => {
           {secrets.appSlogan}
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, height: isChromeExt ? 'auto' : '100vh' }}>
-        <Box sx={{ px: isChromeExt ? 0 : 10 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+        <Box sx={{ px: isChromeExt ? 3 : 10 }}>
           <Button
             type="submit"
             sx={[
@@ -130,27 +93,6 @@ const Login = () => {
         </Box>
       </Box>
     </Box>
-  );
-
-  // for web view
-  if (!isChromeExt) {
-    return (
-      <RootContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">{common}</Card>
-      </RootContainer>
-    );
-  }
-
-  // for chrome view
-  return (
-    <Container
-      sx={{
-        maxHeight: isChromeExt ? '600px' : '100vh',
-        px: isChromeExt ? 7 : 0,
-      }}
-    >
-      {common}
-    </Container>
   );
 };
 

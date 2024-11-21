@@ -21,11 +21,11 @@ import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { FormData } from '@helpers/types';
-import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import Api from '@api/api';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import AdvancedOptionsView from '@pages/Home/AdvancedOptionsView';
+import { usePreferences } from '@/context/PreferencesContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -70,10 +70,10 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
-  const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
+  const { preferences } = usePreferences()
 
   useEffect(() => {
     // abort pending requests on component unmount
@@ -104,11 +104,9 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
-
+    const { floor } = preferences;
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
-    const floor = (await cacheService.get('floor')) || undefined;
 
     setRoomLoading(true);
 
