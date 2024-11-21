@@ -54,17 +54,20 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.validateSession().then((res) => {
+    const validateSession = async () => {
+      const res = await api.validateSession()
       if (res?.redirect) {
         navigate(ROUTES.signIn);
       }
-    });
+    }
+
+    validateSession();
   }, []);
 
   return (
     <AppTheme>
       <Routes>
-        <Route element={<BaseLayout> <Outlet /> </BaseLayout>}>
+        <Route element={<BaseLayout><Outlet /></BaseLayout>}>
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.signIn} element={<Login />} />
           <Route path={ROUTES.oauth} element={<OAuth />} />

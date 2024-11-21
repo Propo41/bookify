@@ -39,7 +39,7 @@ export class CalenderController {
     const endTime = startDate.toISOString();
 
     // todo: do this in the GetAvailableRoomsQueryDto class using transform but not working
-    floor = floor.trim() === '' ? undefined : floor;
+    floor = floor?.trim() === '' ? undefined : floor;
     const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, timeZone, seats, floor, eventId);
     return createResponse(rooms);
   }

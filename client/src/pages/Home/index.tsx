@@ -6,7 +6,6 @@ import TopNavigationBar from './TopNavigationBar';
 import { ROUTES } from '@config/routes';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
-import { Action } from '@helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 
@@ -16,20 +15,21 @@ export default function Home() {
   const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
-    cacheService.get('access_token').then((token) => {
+    const validateSession = async () => {
+      const token = await cacheService.get('access_token');
       if (!token) {
         navigate(ROUTES.signIn);
         return;
       }
 
       setLoading(false);
-    });
+    }
+
+    validateSession();
   }, []);
 
-  const onAction = (action: Action) => {
-    if (action === Action.ROOM_BOOKED) {
-      setTabIndex(1);
-    }
+  const onRoomBooked = () => {
+    setTabIndex(1);
   };
 
   const handleTabChange = (newValue: number) => {
@@ -62,7 +62,7 @@ export default function Home() {
       </Box>
 
       {loading && <LinearProgress />}
-      {tabIndex === 0 && <BookRoomView onAction={onAction} />}
+      {tabIndex === 0 && <BookRoomView onRoomBooked={onRoomBooked} />}
       {tabIndex === 1 && <MyEventsView />}
     </Box>
   );

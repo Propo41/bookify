@@ -22,11 +22,14 @@ const Login = () => {
   }
 
   useEffect(() => {
-    cacheService.get('access_token').then((token) => {
+    const validateSession =async () => {
+      const token =  await cacheService.get('access_token');
       if (token) {
         navigate(ROUTES.home);
       }
-    });
+    }
+   
+    validateSession();
   }, []);
 
   async function onSignInClick(): Promise<void> {
