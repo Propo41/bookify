@@ -9,7 +9,7 @@ import { ROUTES } from '@config/routes';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
@@ -82,7 +82,7 @@ const SettingsButton = styled(Button)(({ theme: _ }) => ({
   },
 }));
 
-interface SettingsDialogProps {
+interface SettingsViewProps {
   handleClose: () => void;
   onSave: () => void;
   open: boolean;
@@ -238,7 +238,7 @@ const PreferenceView = ({ onSave }: PreferenceViewProps) => {
             options={roomCapacityOptions}
             onChange={handleInputChange}
             icon={
-              <PeopleRoundedIcon
+              <EventSeatRoundedIcon
                 sx={[
                   (theme) => ({
                     color: theme.palette.grey[50],
@@ -395,7 +395,7 @@ const tabs = [
   },
 ];
 
-export default function SettingsDialog({ open, handleClose, onSave }: SettingsDialogProps) {
+export default function SettingsView({ open, handleClose, onSave }: SettingsViewProps) {
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
 

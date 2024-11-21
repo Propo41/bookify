@@ -8,14 +8,14 @@ import { EventResponse } from '@quickmeet/shared';
 import { chromeBackground, isChromeExt } from '@helpers/utility';
 import EventCard from './EventCard';
 
-interface AlertDialogProps {
+interface DeleteConfirmationViewProps {
   handleNegativeClick: () => void;
   handlePositiveClick: () => void;
   open: boolean;
   event?: EventResponse;
 }
 
-export default function AlertDialog({ event, open, handleNegativeClick, handlePositiveClick }: AlertDialogProps) {
+export default function DeleteConfirmationView({ event, open, handleNegativeClick, handlePositiveClick }: DeleteConfirmationViewProps) {
   if (!open) return <></>;
 
   const background: SxProps<Theme> = isChromeExt ? { ...chromeBackground } : { background: '#F8F8F8' };

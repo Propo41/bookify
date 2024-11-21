@@ -6,8 +6,8 @@ import Api from '@api/api';
 import toast from 'react-hot-toast';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import EventCard from '@components/EventCard';
-import AlertDialog from '@components/AlertDialog';
-import EditDialog from './EditDialog';
+import DeleteConfirmationView from '@components/DeleteConfirmationView';
+import EditEventsView from './EditEventsView';
 import { FormData } from '@helpers/types';
 import { ROUTES } from '@config/routes';
 
@@ -16,9 +16,9 @@ export default function MyEventsView() {
   const [editLoading, setEditLoading] = useState(false);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const navigate = useNavigate();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteEventViewOpen, setDeleteEventViewOpen] = useState(false);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
-  const [editDialog, setEditDialog] = useState<EventResponse | null>(null);
+  const [editView, setEditView] = useState<EventResponse | null>(null);
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
 
   const api = new Api();
@@ -48,16 +48,16 @@ export default function MyEventsView() {
 
   const handleDeleteClick = (id: string) => {
     setDeleteEventId(id);
-    setDialogOpen(true);
+    setDeleteEventViewOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleDeleteEventClose = () => {
+    setDeleteEventViewOpen(false);
     setDeleteEventId(null);
   };
 
   const handleConfirmDelete = async () => {
-    setDialogOpen(false);
+    setDeleteEventViewOpen(false);
     setLoading(true);
 
     if (!deleteEventId) {
@@ -131,13 +131,13 @@ export default function MyEventsView() {
 
     setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === data.eventId ? { ...event, ...res.data } : event)));
     toast.success('Room has been updated');
-    setEditDialog(null);
+    setEditView(null);
     setEditLoading(false);
   };
 
   const handleEditClick = (eventId: string) => {
     const eventData = events.find((ev) => ev.eventId === eventId) || ({} as EventResponse);
-    setEditDialog(eventData);
+    setEditView(eventData);
     if (eventData.roomEmail) {
       setCurrentRoom({
         email: eventData.roomEmail,
@@ -148,8 +148,8 @@ export default function MyEventsView() {
     }
   };
 
-  const handleDialogClose = () => {
-    setEditDialog(null);
+  const handleEditEventViewClose = () => {
+    setEditView(null);
   };
 
   if (loading) {
@@ -163,17 +163,17 @@ export default function MyEventsView() {
     );
   }
 
-  if (dialogOpen) {
+  if (deleteEventViewOpen) {
     const event = events.find((e) => e.eventId === deleteEventId);
-    return <AlertDialog event={event} open={dialogOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleCloseDialog} />;
+    return <DeleteConfirmationView event={event} open={deleteEventViewOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleDeleteEventClose} />;
   }
 
-  if (editDialog) {
+  if (editView) {
     return (
-      <EditDialog
-        open={!!editDialog}
-        handleClose={handleDialogClose}
-        event={editDialog}
+      <EditEventsView
+        open={!!editView}
+        handleClose={handleEditEventViewClose}
+        event={editView}
         loading={editLoading}
         currentRoom={currentRoom}
         onEditConfirmed={onEditConfirmed}

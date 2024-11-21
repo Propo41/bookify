@@ -5,6 +5,7 @@ import {
   IsString,
   IsDateString,
   IsTimeZone,
+  Min,
 } from 'class-validator';
 
 export class GetAvailableRoomsQueryDto {
@@ -19,6 +20,8 @@ export class GetAvailableRoomsQueryDto {
   timeZone: string;
 
   @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(1, { message: 'Select min seat capacity' })
   seats: number;
 
   @IsOptional()

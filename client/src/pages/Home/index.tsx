@@ -9,7 +9,7 @@ import { ROUTES } from '@config/routes';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import SettingsDialog from './SettingsDialog';
+import SettingsView from './SettingsView';
 import { Action, chromeBackground, isChromeExt } from '@helpers/utility';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
@@ -77,7 +77,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
-  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [settingsViewOpen, setSettingsViewOpen] = useState(false);
 
   useEffect(() => {
     cacheService.get('access_token').then((token) => {
@@ -105,11 +105,11 @@ export default function Home() {
   };
 
   const onSettingClick = () => {
-    setSettingsDialogOpen(true);
+    setSettingsViewOpen(true);
   };
 
   const handleSettingsClose = () => {
-    setSettingsDialogOpen(false);
+    setSettingsViewOpen(false);
   };
 
   const common = (
@@ -161,8 +161,8 @@ export default function Home() {
 
   let innerComponent = common;
 
-  if (settingsDialogOpen) {
-    innerComponent = <SettingsDialog open={settingsDialogOpen} handleClose={handleSettingsClose} onSave={() => setRefresh(true)} />;
+  if (settingsViewOpen) {
+    innerComponent = <SettingsView open={settingsViewOpen} handleClose={handleSettingsClose} onSave={() => setRefresh(true)} />;
   }
   // web view
   if (!isChromeExt) {

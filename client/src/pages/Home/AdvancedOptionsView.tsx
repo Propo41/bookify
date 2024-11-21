@@ -9,14 +9,14 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { FormData } from '@helpers/types';
 import { chromeBackground, isChromeExt } from '@helpers/utility';
 
-interface AdvancedOptionsDialogProps {
+interface AdvancedOptionsViewProps {
   handleInputChange: (id: string, value: string | number | string[] | boolean) => void;
   handleClose: () => void;
   open: boolean;
   formData: FormData;
 }
 
-export default function AdvancedOptionsDialog({ handleInputChange, open, handleClose, formData }: AdvancedOptionsDialogProps) {
+export default function AdvancedOptionsView({ handleInputChange, open, handleClose, formData }: AdvancedOptionsViewProps) {
   if (!open) return <></>;
 
   console.log(formData);

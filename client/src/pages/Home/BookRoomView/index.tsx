@@ -6,7 +6,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
@@ -16,7 +16,7 @@ import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
-import AdvancedOptionsDialog from '../AdvancedOptionsDialog';
+import AdvancedOptionsView from '../AdvancedOptionsView';
 
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
@@ -197,17 +197,17 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
     await setAvailableRooms();
   }
 
-  const handleAdvancedOptionsDialogOpen = () => {
+  const handleAdvancedOptionsViewOpen = () => {
     setAdvOptionsOpen(true);
   };
 
-  const handleAdvancedOptionsDialogClose = () => {
+  const handleAdvancedOptionsViewClose = () => {
     setAdvOptionsOpen(false);
   };
 
   if (advOptionsOpen) {
     return (
-      <AdvancedOptionsDialog open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsDialogClose} />
+      <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />
     );
   }
 
@@ -271,7 +271,7 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
               value={formData.seats.toString()}
               onChange={handleInputChange}
               icon={
-                <PeopleRoundedIcon
+                <EventSeatRoundedIcon
                   sx={[
                     (theme) => ({
                       color: theme.palette.grey[50],
@@ -315,7 +315,7 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
           }}
-          onClick={handleAdvancedOptionsDialogOpen}
+          onClick={handleAdvancedOptionsViewOpen}
         >
           <Typography variant="subtitle1">Additional options</Typography>
           <Box
