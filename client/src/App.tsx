@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
@@ -8,6 +8,8 @@ import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
 import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
+import Settings from '@/pages/Settings';
+import BaseLayout from '@/pages/BaseLayout';
 
 // only used for the web version
 // for chrome extension, a different oauth flow is used using the chrome api
@@ -62,10 +64,12 @@ function App() {
   return (
     <AppTheme>
       <Routes>
-        <Route path={ROUTES.home} element={<Home />} />
-        <Route path={ROUTES.signIn} element={<Login />} />
-        {/* <Route path={ROUTES.settings} element={<Login />} /> */}
-        <Route path={ROUTES.oauth} element={<OAuth />} />
+        <Route element={<BaseLayout> <Outlet /> </BaseLayout>}>
+          <Route path={ROUTES.home} element={<Home />} />
+          <Route path={ROUTES.signIn} element={<Login />} />
+          <Route path={ROUTES.oauth} element={<OAuth />} />
+          <Route path={ROUTES.settings} element={<Settings />} />
+        </Route>
       </Routes>
       <Toaster
         position="top-center"

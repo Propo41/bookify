@@ -83,8 +83,6 @@ export default class Api {
       console.log(error);
     } finally {
       await this.cacheService.remove('access_token');
-      await this.cacheService.remove('floors');
-      await this.cacheService.remove('floor');
     }
   }
 

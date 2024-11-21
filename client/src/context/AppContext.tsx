@@ -17,7 +17,7 @@ interface PreferencesProviderProps {
   children: ReactNode;
 }
 
-const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
+const AppContext = createContext<PreferencesContextType | undefined>(undefined);
 
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
@@ -29,12 +29,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   useEffect(() => {
     const loadPreferences = async () => {
       const savedPreferences = await cacheService.get('preferences');
-      if (savedPreferences) {
-        const parsedPref = JSON.parse(savedPreferences);
-        if (parsedPref.duration !== preferences.duration && parsedPref.seats !== preferences.seats) {
-          setPreferences(parsedPref);
-        }
-      }
+      setPreferences(savedPreferences ? JSON.parse(savedPreferences) : preferences);
     };
 
     loadPreferences();
@@ -46,10 +41,10 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   }, [preferences]);
 
   return (
-    <PreferencesContext.Provider value={{ preferences, setPreferences }}>
+    <AppContext.Provider value={{ preferences, setPreferences }}>
       {children}
-    </PreferencesContext.Provider>
+    </AppContext.Provider>
   );
 };
 
-export const usePreferences = () => useContext(PreferencesContext)!;
+export const usePreferences = () => useContext(AppContext)!;

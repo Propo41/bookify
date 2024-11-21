@@ -1,4 +1,7 @@
-import { Box, styled, SxProps, Theme, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, IconButton, styled, SxProps, Theme, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/config/routes';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -51,10 +54,16 @@ interface TopNavigationBarProps {
 }
 
 const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarProps) => {
+  const navigate = useNavigate();
+
   const handleChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       handleTabChange(newValue);
     }
+  };
+
+  const onSettingClick = () => {
+    navigate(ROUTES.settings)
   };
 
   return (
@@ -79,7 +88,25 @@ const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarPro
           <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
             My Events
           </StyledToggleButton>
+
         </StyledToggleButtonGroup>
+      </Box>
+
+      <Box
+        sx={{
+          borderRadius: 100,
+          py: 1,
+          px: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+          mr: 2,
+        }}
+      >
+        <IconButton aria-label="settings" onClick={onSettingClick}>
+          <SettingsRoundedIcon />
+        </IconButton>
       </Box>
     </TopBar>
   );

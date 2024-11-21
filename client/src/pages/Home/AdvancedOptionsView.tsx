@@ -19,8 +19,6 @@ interface AdvancedOptionsViewProps {
 export default function AdvancedOptionsView({ handleInputChange, open, handleClose, formData }: AdvancedOptionsViewProps) {
   if (!open) return <></>;
 
-  console.log(formData);
-
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 100%)' };
 
   return (

@@ -11,12 +11,12 @@ import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
 import AdvancedOptionsView from '../AdvancedOptionsView';
+import { usePreferences } from '@/context/PreferencesContext';
 
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
@@ -24,16 +24,14 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
 };
 
 interface BookRoomViewProps {
-  refresh?: boolean;
-  setRefresh: (val: boolean) => void;
   onAction: (action: Action) => void;
 }
 
-export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoomViewProps) {
+export default function BookRoomView({ onAction }: BookRoomViewProps) {
   const [loading, setLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
 
-  const [firstRender, setFirstRender] = useState(false);
+  const [initialPageLoad, setInitialPageLoad] = useState(false);
 
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
@@ -44,28 +42,19 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
 
   const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
 
-  const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { preferences } = usePreferences();
 
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
-    duration: 30,
-    seats: 1,
+    duration: Number(preferences.duration),
+    seats: preferences.seats,
   });
 
   useEffect(() => {
-    if (refresh) {
-      setAvailableRooms().then(async () => {
-        await setPreferences();
-        setRefresh(false);
-      });
-    }
-  }, [refresh]);
-
-  useEffect(() => {
-    setPreferences();
-    setFirstRender(true);
+    initializeDropdowns();
+    setInitialPageLoad(true);
 
     // abort pending requests on component unmount
     return () => {
@@ -76,10 +65,10 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
   }, []);
 
   useEffect(() => {
-    if (firstRender) {
+    if (initialPageLoad && formData.startTime) {
       setAvailableRooms();
     }
-  }, [firstRender, formData.startTime, formData.duration, formData.seats]);
+  }, [initialPageLoad, formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
@@ -88,35 +77,35 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
     }));
   };
 
-  async function setPreferences() {
+  async function initializeDropdowns() {
     setTimeOptions(createDropdownOptions(availableStartTimeOptions));
     setDurationOptions(createDropdownOptions(availableDurations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
 
     const initializeFormData = async () => {
-      const duration = await cacheService.get('duration');
-      const seats = await cacheService.get('seats');
+      const { duration, seats } = preferences;
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
+      setFormData((p) => ({
+        ...p,
         startTime: availableStartTimeOptions[0],
-        seats: Number(seats || availableRoomCapacities[0]),
-        duration: parseInt(duration || availableDurations[0]),
+        seats: seats || Number(availableRoomCapacities[0]),
+        duration: duration || Number(availableDurations[0]),
       }));
     };
 
     initializeFormData().then(() => {
-      setFirstRender(true);
+      setInitialPageLoad(true);
     });
   }
 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
-    console.log('room fetch');
+    const { floor } = preferences;
+
+    console.log('room fetch', startTime, duration, seats, floor);
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-    const floor = (await cacheService.get('floor')) || undefined;
 
     setRoomLoading(true);
 
@@ -164,9 +153,7 @@ export default function BookRoomView({ onAction, refresh, setRefresh }: BookRoom
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
-    const floor = await cacheService.get('floor');
-    const preferredTitle = (await cacheService.get('title')) || undefined;
+    const { floor, title: preferredTitle } = preferences;
 
     const payload: BookRoomDto = {
       startTime: formattedStartTime,
