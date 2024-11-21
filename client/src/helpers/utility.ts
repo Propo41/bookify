@@ -6,6 +6,8 @@ import { CacheService, CacheServiceFactory } from './cache';
 import { secrets } from '@config/secrets';
 
 /**
+ * Returns an array of time strings formatted as HH:mm in 12 hrs format with 15mins interval
+ * ie: 10:00AM, 10:15AM, ....
  * @param start time in utc format
  */
 export function populateTimeOptions(start?: string) {
@@ -35,6 +37,11 @@ export function populateTimeOptions(start?: string) {
   return timeOptions;
 }
 
+/**
+ * Returns an array of duration strings formatted in mins with 15mins interval
+ * ie: 30, 45, etc
+ * @param start time in utc format
+ */
 export function populateDurationOptions(start: number, end: number) {
   let mins = start;
   const options = [];
@@ -172,7 +179,3 @@ export const chromeBackground = {
 
 export const isChromeExt = secrets.appEnvironment === 'chrome';
 // export const isChromeExt = true;
-
-export enum Action {
-  ROOM_BOOKED,
-}

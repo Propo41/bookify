@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Action, convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
+import { convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
@@ -24,10 +24,10 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
 };
 
 interface BookRoomViewProps {
-  onAction: (action: Action) => void;
+  onRoomBooked: () => void;
 }
 
-export default function BookRoomView({ onAction }: BookRoomViewProps) {
+export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const [loading, setLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
 
@@ -180,7 +180,7 @@ export default function BookRoomView({ onAction }: BookRoomViewProps) {
     toast.success(`${roomName} has been booked!`);
 
     setAvailableRoomOptions([]);
-    onAction(Action.ROOM_BOOKED);
+    onRoomBooked();
     await setAvailableRooms();
   }
 
