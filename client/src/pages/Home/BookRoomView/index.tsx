@@ -3,7 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { convertToRFC3339, createDropdownOptions, getTimeZoneString, isChromeExt, renderError } from '@helpers/utility';
+import {
+  convertToRFC3339,
+  createDropdownOptions,
+  getTimeZoneString,
+  isChromeExt,
+  populateDurationOptions,
+  populateRoomCapacity,
+  populateTimeOptions,
+  renderError,
+} from '@helpers/utility';
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
@@ -14,10 +23,9 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
-import { availableDurations, availableRoomCapacities, availableStartTimeOptions } from '../shared';
 import AdvancedOptionsView from '../AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
-
+import { useAppState } from '@/context/AppContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -28,29 +36,33 @@ interface BookRoomViewProps {
 }
 
 export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
+  // Context or global state
+  const { preferences } = usePreferences();
+  const { appState } = useAppState();
+
+  // loading states
   const [loading, setLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
-
   const [initialPageLoad, setInitialPageLoad] = useState(false);
+  const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
+  // dropdown options
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
-
-  const navigate = useNavigate();
-  const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
-
   const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
 
-  const api = new Api();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const { preferences } = usePreferences();
-
+  // form data
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
     duration: Number(preferences.duration),
     seats: preferences.seats,
   });
+
+  // Utilities and hooks
+  const navigate = useNavigate();
+  const api = new Api();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     initializeDropdowns();
@@ -78,18 +90,22 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   };
 
   async function initializeDropdowns() {
-    setTimeOptions(createDropdownOptions(availableStartTimeOptions));
-    setDurationOptions(createDropdownOptions(availableDurations, 'time'));
-    setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
+    const capacities = populateRoomCapacity(appState.maxSeatCap);
+    const durations = populateDurationOptions();
+    const timeOptions = populateTimeOptions();
+
+    setTimeOptions(createDropdownOptions(timeOptions));
+    setDurationOptions(createDropdownOptions(durations, 'time'));
+    setRoomCapacityOptions(createDropdownOptions(capacities));
 
     const initializeFormData = async () => {
       const { duration, seats } = preferences;
 
       setFormData((p) => ({
         ...p,
-        startTime: availableStartTimeOptions[0],
-        seats: seats || Number(availableRoomCapacities[0]),
-        duration: duration || Number(availableDurations[0]),
+        startTime: timeOptions[0],
+        seats: seats || Number(capacities[0]),
+        duration: duration || Number(durations[0]),
       }));
     };
 
@@ -193,9 +209,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   };
 
   if (advOptionsOpen) {
-    return (
-      <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />
-    );
+    return <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />;
   }
 
   return (

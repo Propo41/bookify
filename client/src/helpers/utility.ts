@@ -42,7 +42,7 @@ export function populateTimeOptions(start?: string) {
  * ie: 30, 45, etc
  * @param start time in utc format
  */
-export function populateDurationOptions(start: number, end: number) {
+export function populateDurationOptions(start: number = 30, end: number = 3 * 60) {
   let mins = start;
   const options = [];
 
@@ -54,12 +54,11 @@ export function populateDurationOptions(start: number, end: number) {
   return options;
 }
 
-// TODO: fetch from database
-export function populateRoomCapacity() {
+export function populateRoomCapacity(max: number) {
   const options = [];
   let capacity = 1;
 
-  while (capacity < 15) {
+  while (capacity < max) {
     options.push(capacity.toString());
     capacity += 1;
   }
@@ -137,7 +136,7 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
       await cacheService.remove('access_token');
       navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
-      toast.error("Input missing fields")
+      toast.error('Input missing fields');
     } else if (redirect) {
       navigate(ROUTES.signIn);
     } else {

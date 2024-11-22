@@ -9,11 +9,12 @@ import {
   createDropdownOptions,
   getTimeZoneString,
   isChromeExt,
+  populateDurationOptions,
+  populateRoomCapacity,
   populateTimeOptions,
   renderError,
 } from '@helpers/utility';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
-import { availableDurations, availableRoomCapacities } from '@pages/Home/shared';
 import { LoadingButton } from '@mui/lab';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
@@ -26,6 +27,7 @@ import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import AdvancedOptionsView from '@pages/Home/AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useAppState } from '@/context/AppContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -62,18 +64,27 @@ interface EditEventsViewProps {
 }
 
 export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditEventsViewProps) {
+  // Context or global state
+  const { preferences } = usePreferences();
+  const { appState } = useAppState();
+
+  // Dropdown options state
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
   const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
+
+  // Loading and advanced options state
   const [roomLoading, setRoomLoading] = useState(false);
   const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
+
+  // Form data state
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
+  // Utilities and hooks
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
-  const { preferences } = usePreferences()
 
   useEffect(() => {
     // abort pending requests on component unmount
@@ -164,11 +175,14 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     const eventTime = new Date(event.start!);
     const currentTime = new Date(new Date().toUTCString());
 
+    const capacities = populateRoomCapacity(appState.maxSeatCap);
+    const durations = populateDurationOptions();
+
     const minTime = eventTime < currentTime ? eventTime : currentTime;
 
     setTimeOptions(createDropdownOptions(populateTimeOptions(minTime.toISOString())));
-    setDurationOptions(createDropdownOptions(availableDurations, 'time'));
-    setRoomCapacityOptions(createDropdownOptions(availableRoomCapacities));
+    setDurationOptions(createDropdownOptions(durations, 'time'));
+    setRoomCapacityOptions(createDropdownOptions(capacities));
   }
 
   const handleAdvancedOptionsViewOpen = () => {
@@ -186,9 +200,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   if (!open) return <></>;
 
   if (advOptionsOpen) {
-    return (
-      <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />
-    );
+    return <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />;
   }
 
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)' };

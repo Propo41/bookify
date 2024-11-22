@@ -1,50 +1,46 @@
+import Api from '@/api/api';
 import { CacheService, CacheServiceFactory } from '@/helpers/cache';
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Preferences {
-  duration: number;
-  seats: number;
-  title?: string;
-  floor?: string;
+interface AppProviderStates {
+  maxSeatCap: number;
 }
 
-interface PreferencesContextType {
-  preferences: Preferences;
-  setPreferences: React.Dispatch<React.SetStateAction<Preferences>>;
+interface AppContextType {
+  appState: AppProviderStates;
 }
 
-interface PreferencesProviderProps {
+interface AppProviderProps {
   children: ReactNode;
 }
 
-const AppContext = createContext<PreferencesContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
+export const AppProvider = ({ children }: AppProviderProps) => {
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
-  const [preferences, setPreferences] = useState<Preferences>({
-    duration: 30,
-    seats: 1
+  const [appState, setAppState] = useState<AppProviderStates>({
+    maxSeatCap: 0,
   });
+  const api = new Api();
 
   useEffect(() => {
-    const loadPreferences = async () => {
-      const savedPreferences = await cacheService.get('preferences');
-      setPreferences(savedPreferences ? JSON.parse(savedPreferences) : preferences);
+    const loadMaxSeats = async () => {
+      let maxSeats: string | null = await cacheService.get('max_seat_capacity');
+      if (!maxSeats) {
+        const res = await api.getMaxSeatCount();
+        if (res?.data) {
+          maxSeats = String(res.data);
+          await cacheService.save('max_seat_capacity', maxSeats);
+        }
+      }
+
+      setAppState({ maxSeatCap: Number(maxSeats) || 0 });
     };
 
-    loadPreferences();
+    loadMaxSeats();
   }, []);
 
-
-  useEffect(() => {
-    cacheService.save('preferences', JSON.stringify(preferences));
-  }, [preferences]);
-
-  return (
-    <AppContext.Provider value={{ preferences, setPreferences }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ appState }}>{children}</AppContext.Provider>;
 };
 
-export const usePreferences = () => useContext(AppContext)!;
+export const useAppState = () => useContext(AppContext)!;

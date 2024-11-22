@@ -4,8 +4,16 @@ import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client, _User } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
-// prettier-ignore
-import { ApiResponse, BookRoomDto, ListRoomsQueryDto, GetAvailableRoomsQueryDto, DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@quickmeet/shared';
+import {
+  ApiResponse,
+  BookRoomDto,
+  ListRoomsQueryDto,
+  GetAvailableRoomsQueryDto,
+  DeleteResponse,
+  EventResponse,
+  EventUpdateResponse,
+  IConferenceRoom,
+} from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 
 @Controller()
@@ -35,11 +43,9 @@ export class CalenderController {
     let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + Number(duration));
-    const endTime = startDate.toISOString();
+    startDate.setMinutes(startDate.getMinutes() + duration);
 
-    // todo: do this in the GetAvailableRoomsQueryDto class using transform but not working
-    floor = floor?.trim() === '' ? undefined : floor;
+    const endTime = startDate.toISOString();
     const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, timeZone, seats, floor, eventId);
     return createResponse(rooms);
   }
@@ -62,7 +68,7 @@ export class CalenderController {
 
     // end time
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + Number(duration));
+    startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
     const event = await this.calenderService.createEvent(client, domain, startTime, endTime, createConference, title, attendees, room);
@@ -82,7 +88,7 @@ export class CalenderController {
 
     // end time
     const startDate = new Date(startTime);
-    startDate.setMinutes(startDate.getMinutes() + Number(duration));
+    startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
     return await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
