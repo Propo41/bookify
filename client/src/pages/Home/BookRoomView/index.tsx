@@ -188,6 +188,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setLoading(false);
 
     if (status !== 'success') {
+      await setAvailableRooms();
       return renderError(res, navigate);
     }
 

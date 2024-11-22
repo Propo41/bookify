@@ -142,8 +142,6 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
     } else {
       message && toast.error(message);
     }
-
-    return;
   }
 };
 
