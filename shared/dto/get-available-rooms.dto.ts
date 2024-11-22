@@ -25,6 +25,7 @@ export class GetAvailableRoomsQueryDto {
   seats: number;
 
   @IsOptional()
+  @Transform(({ value }) => (value?.trim() === '' ? undefined : value))
   @IsString()
   floor?: string;
 

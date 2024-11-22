@@ -14,7 +14,7 @@ async function bootstrap() {
     }),
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = app.get(ConfigService);
