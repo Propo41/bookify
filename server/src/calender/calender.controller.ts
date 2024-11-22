@@ -71,7 +71,7 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, createConference, title, attendees, room);
+    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, createConference, title, attendees);
     return event;
   }
 

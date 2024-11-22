@@ -23,10 +23,10 @@ export class CalenderService {
     domain: string,
     startTime: string,
     endTime: string,
+    room: string,
     createConference?: boolean,
     eventTitle?: string,
     attendees?: string[],
-    room?: string, //todo: this is a required field. change BookRoomDto
   ): Promise<ApiResponse<EventResponse>> {
     const rooms = await this.authService.getDirectoryResources(domain);
 
@@ -55,14 +55,17 @@ export class CalenderService {
       };
     }
 
-    // room.seat should be as closer to user's preferred minSeat value
     const pickedRoom = extractRoomByEmail(rooms, room);
-
     if (!pickedRoom) {
       throw new NotFoundException('Incorrect room picked!');
     }
 
-    var event: calendar_v3.Schema$Event = {
+    const isAvailable = await this.isRoomAvailable(client, startTime, endTime, pickedRoom.email);
+    if (!isAvailable) {
+      throw new ConflictException('Room has already been booked.');
+    }
+
+    const event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || 'Quick Meeting',
       location: pickedRoom.name,
       description: 'A quick meeting created by QuickMeet',
@@ -383,7 +386,7 @@ export class CalenderService {
       };
     }
 
-    var updatedEvent: calendar_v3.Schema$Event = {
+    const updatedEvent: calendar_v3.Schema$Event = {
       ...event,
       summary: eventTitle?.trim() || 'Quick Meeting',
       location: pickedRoom.name,
